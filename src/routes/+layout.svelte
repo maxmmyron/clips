@@ -19,7 +19,7 @@
 </script>
 
 <main class="w-full h-[100dvh] bg-neutral-950 grid grid-cols-1 grid-rows-[1fr,minmax(30vh,512px)]">
-  <div class="w-full h-full grid grid-cols-1 2xl:grid-cols-[minmax(384px,20vw),1fr] grid-rows-1 relative">
+  <div class="grid grid-cols-1 2xl:grid-cols-[minmax(384px,20vw),1fr] grid-rows-1 relative">
     <div class="border-2 border-neutral-800 absolute 2xl:relative flex flex-col transition {isMediaPoolVisible ? 'h-1/2' : ''}">
       <input type="file" accept="video/*" class="text-white border-2 border-neutral-800 px-3 py-1" bind:files />
       <div class="w-full border-2 border-neutral-800 flex-1">
@@ -29,9 +29,9 @@
         {isMediaPoolVisible ? "hide" : "show"} media pool
       </button>
     </div>
-    <div class="w-full h-full flex flex-col gap-6 justify-center items-center border-2 border-neutral-800">
+    <div class="flex flex-col gap-6 justify-center items-center border-2 border-neutral-800">
       <p class="text-white">video</p>
-      <video class="aspect-video max-w-fit h-1/2 border-2 border-neutral-600" bind:this={video}>
+      <video class="aspect-video max-w-7xl max-h-1/2 border-2 border-neutral-600" bind:this={video}>
         {#if files}
           <source src={URL.createObjectURL(files[0])} type={files[0].type} />
         {/if}
@@ -44,7 +44,7 @@
       </div>
     </div>
   </div>
-  <div class="w-full h-full grid grid-cols-1 2xl:grid-cols-[minmax(384px,20vw),1fr] grid-rows-1">
+  <div class="w-full h-full grid grid-cols-[minmax(256px,20vw),1fr] grid-rows-1">
     <div class="border-2 border-neutral-800">
       <p class="text-white">timeline</p>
     </div>
