@@ -4,7 +4,7 @@
   let isPlaying = false;
   let video: HTMLVideoElement | null = null;
 
-  let files: FileList | null = null;
+  let files: FileList;
 
   $: if (video && isPlaying) video.play();
   $: if (video && !isPlaying) video.pause();
@@ -46,8 +46,19 @@
   }}
 >
   <div class="row-start-1 col-start-1">
-    <input type="file" accept="video/*" class="text-white" bind:files />
-    <p class="text-white">media pool</p>
+    <div class="p-2 h-full overflow-scroll">
+      <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white" multiple bind:files />
+      <p class="text-white">media pool</p>
+      {#if files}
+        {#each files as file}
+          <p class="text-white">{file.name}</p>
+          <video>
+            <source src={URL.createObjectURL(file)} type={file.type} />
+            <track kind="captions" />
+          </video>
+        {/each}
+      {/if}
+    </div>
   </div>
 
   <div class="row-start-1 col-start-3 flex flex-col justify-center items-center gap-8 p-8">
