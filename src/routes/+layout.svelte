@@ -1,20 +1,7 @@
 <script lang="ts">
+  import MediaPool from "$lib/components/MediaPool.svelte";
+  import Player from "$lib/components/Player.svelte";
   import "../app.css";
-
-  let isPlaying = false;
-  let video: HTMLVideoElement | null = null;
-
-  let files: FileList | null = null;
-
-  $: if (video && isPlaying) video.play();
-  $: if (video && !isPlaying) video.pause();
-
-  const setVideoTime = (time: number) => {
-    if (!video) throw new Error("Video element not found");
-
-    video.pause();
-    video.currentTime = time === -1 ? video.duration : time;
-  };
 
   const handleResize = (e: MouseEvent) => {
     if (!isResizing || !resizeMode) return;
@@ -46,23 +33,11 @@
   }}
 >
   <div class="row-start-1 col-start-1">
-    <input type="file" accept="video/*" class="text-white" bind:files />
-    <p class="text-white">media pool</p>
+    <MediaPool />
   </div>
 
   <div class="row-start-1 col-start-3 flex flex-col justify-center items-center gap-8 p-8">
-    <p class="text-white">video</p>
-    <video class="aspect-video max-h-[75%] border-2 border-neutral-800 bg-gradient-to-br from-neutral-900 to-neutral-950" bind:this={video}>
-      {#if files}
-        <source src={URL.createObjectURL(files[0])} type={files[0].type} />
-      {/if}
-      <track kind="captions" />
-    </video>
-    <div class="w-100 flex justify-center gap-4">
-      <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setVideoTime(0)}>beginning</button>
-      <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => (isPlaying = !isPlaying)}>{isPlaying ? "pause" : "play"}</button>
-      <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setVideoTime(-1)}>end</button>
-    </div>
+    <Player />
   </div>
 
   <div class="row-start-3 col-start-1">
@@ -77,7 +52,7 @@
     <div class="w-24 h-0.5 bg-neutral-700 rounded-full" />
   </div>
   <div class="relative row-start-2 col-span-full bg-neutral-800 flex justify-center items-center overflow-visible">
-    <div class="absolute w-full h-5 cursor-row-resize" on:mousedown={(e) => (resizeMode = "row")} />
+    <div class="absolute w-full mh-5 cursor-row-resize" on:mousedown={(e) => (resizeMode = "row")} />
   </div>
 
   <div class="col-start-2 row-start-1 flex justify-center items-center z-10 pointer-events-none">
