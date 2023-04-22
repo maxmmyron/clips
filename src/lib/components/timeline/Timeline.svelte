@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { timeline } from "$lib/stores";
   import TimelineElement from "./TimelineElement.svelte";
 
