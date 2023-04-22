@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { media } from "../stores";
+  import { media } from "$lib/stores";
 
   let isPlaying = false;
   let isViewingPreview = false;

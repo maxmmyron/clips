@@ -1,6 +1,6 @@
 <script lang="ts">
   import MediaPoolElement from "./MediaPoolElement.svelte";
-  import { media, timeline } from "../stores";
+  import { media, timeline } from "$lib/stores";
 
   let files: FileList | null = null;
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { media } from "../stores";
+  import { media } from "$lib/stores";
 
   export let src: string;
   export let idx: number;
