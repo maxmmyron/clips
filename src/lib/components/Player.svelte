@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mediaStore } from "../stores";
+  import { media } from "../stores";
 
   let isPlaying = false;
   let isViewingPreview = false;
@@ -18,7 +18,7 @@
     video.currentTime = time === -1 ? video.duration : time;
   };
 
-  $: previewSrc = $mediaStore.media[$mediaStore.previewIndex || 0]?.src || "";
+  $: previewSrc = $media.files[$media.previewIndex || 0]?.src || "";
   // probably the hackiest possible solution to the "pause player when switching media" problem
   $: previewSrc, video && (isPlaying = false);
   $: previewSrc, previewSrc !== "" && (isViewingPreview = true);
@@ -31,9 +31,9 @@
   <button
     class="text-white border-2 border-neutral-800 px-3 py-1"
     class:bg-neutral-400={isViewingPreview}
-    class:opacity-75={$mediaStore.previewIndex === null}
+    class:opacity-75={$media.previewIndex === null}
     on:click={() => (isViewingPreview = true)}
-    disabled={$mediaStore.previewIndex === null}>preview</button
+    disabled={$media.previewIndex === null}>preview</button
   >
 </div>
 

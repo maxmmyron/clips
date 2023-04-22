@@ -1,11 +1,14 @@
 import { writable } from "svelte/store";
 
-export const mediaStore = writable({
+export const media = writable({
   isAnySelected: false,
   previewIndex: null,
-  media: [],
+  files: [],
 } as {
   isAnySelected: boolean;
   previewIndex: number | null;
-  media: MediaPoolElement[]
+  files: MediaPoolElement[]
 });
+
+export const timeline = writable<TimelineElement[]>([]);
+

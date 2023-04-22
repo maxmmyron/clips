@@ -1,31 +1,34 @@
 <script lang="ts">
   import MediaPoolElement from "./MediaPoolElement.svelte";
-  import { mediaStore } from "../stores";
+  import { media, timeline } from "../stores";
 
   let files: FileList | null = null;
 
-  $: files !== null && ($mediaStore.media = Array.from(files).map((file) => ({ src: URL.createObjectURL(file), isSelected: false })));
+  $: files !== null && ($media.files = Array.from(files).map((file) => ({ src: URL.createObjectURL(file), isSelected: false })));
 
   const removeSelectedElements = () => {
-    $mediaStore.media = $mediaStore.media.filter((media) => !media.isSelected);
+    $media.files = $media.files.filter((file) => !file.isSelected);
+  };
+
+  // TODO: temporary; implement drag-n-drop system so we aren't passing props across components
+  const addToTimeline = () => {
+    $timeline = $media.files.filter((file) => file.isSelected).map((file) => ({ src: file.src, startOffset: 0, endOffset: 0 }));
   };
 </script>
 
 <div class="relative p-2 h-full overflow-scroll">
-  <div class="flex justify-between">
+  <div class="flex justify-between gap-2">
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple bind:files />
-    <button
-      class="text-white w-8 h-8 bg-neutral-700"
-      class:opacity-50={!$mediaStore.isAnySelected}
-      on:click={removeSelectedElements}
-      disabled={!$mediaStore.isAnySelected}>🗑️</button
+    <button class="w-8 h-8 bg-neutral-700" class:opacity-50={!$media.isAnySelected} on:click={removeSelectedElements} disabled={!$media.isAnySelected}
+      >🗑️</button
     >
+    <button class="w-8 h-8 bg-neutral-700" class:opacity-50={!$media.isAnySelected} disabled={!$media.isAnySelected} on:click={addToTimeline}>🎞️</button>
   </div>
   <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500">media pool</p>
   {#if files}
     <div class="relative z-10">
-      {#key $mediaStore.media.length}
-        {#each $mediaStore.media as file, idx}
+      {#key $media.files.length}
+        {#each $media.files as file, idx}
           <MediaPoolElement src={file.src} {idx} />
         {/each}
       {/key}
