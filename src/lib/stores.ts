@@ -7,8 +7,8 @@ export const media = writable({
 } as {
   isAnySelected: boolean;
   previewIndex: number | null;
-  files: MediaPoolElement[]
+  files: Omit<Media, "startOffset" | "endOffset">[];
 });
 
-export const timeline = writable<TimelineElement[]>([]);
+export const timeline = writable<Omit<Media, "isSelected">[]>([]);
 

@@ -1,10 +1,7 @@
-type MediaPoolElement = {
-  isSelected: boolean;
+interface Media {
   src: string;
-}
-
-type TimelineElement = {
-  src: string;
+  duration: number;
   startOffset: number;
   endOffset: number;
+  isSelected: boolean;
 }
