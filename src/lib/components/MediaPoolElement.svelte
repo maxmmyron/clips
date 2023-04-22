@@ -20,9 +20,9 @@
   };
 </script>
 
-<button on:click={handleClick} class="outline-2 outline-red-200" class:outline={$mediaStore.media[idx].isSelected}>
+<button on:click={handleClick} class="relative outline-2 outline-yellow-300" class:outline={$mediaStore.media[idx].isSelected}>
   {#if $mediaStore.isAnySelected}
-    <input type="checkbox" checked={$mediaStore.media[idx].isSelected} />
+    <input type="checkbox" class="absolute top-2 left-2 shadow-md pointer-events-none" checked={$mediaStore.media[idx].isSelected} tabindex="-1" />
   {/if}
   <video>
     <source {src} type="video/mp4" />
