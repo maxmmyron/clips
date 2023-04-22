@@ -7,7 +7,7 @@ export const media = writable({
 } as {
   isAnySelected: boolean;
   previewIndex: number | null;
-  files: Omit<Media, "startOffset" | "endOffset">[];
+  files: Pick<Media, "src" | "isSelected">[];
 });
 
 export const timeline = writable<Omit<Media, "isSelected">[]>([]);

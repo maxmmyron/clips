@@ -9,11 +9,6 @@
   const removeSelectedElements = () => {
     $media.files = $media.files.filter((file) => !file.isSelected);
   };
-
-  // TODO: temporary; implement drag-n-drop system so we aren't passing props across components
-  const addToTimeline = () => {
-    $timeline = $media.files.filter((file) => file.isSelected).map((file) => ({ src: file.src, startOffset: 0, endOffset: 0 }));
-  };
 </script>
 
 <div class="relative p-2 h-full overflow-scroll">
@@ -22,7 +17,6 @@
     <button class="w-8 h-8 bg-neutral-700" class:opacity-50={!$media.isAnySelected} on:click={removeSelectedElements} disabled={!$media.isAnySelected}
       >🗑️</button
     >
-    <button class="w-8 h-8 bg-neutral-700" class:opacity-50={!$media.isAnySelected} disabled={!$media.isAnySelected} on:click={addToTimeline}>🎞️</button>
   </div>
   <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500">media pool</p>
   {#if files}
