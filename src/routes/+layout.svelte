@@ -1,20 +1,7 @@
 <script lang="ts">
   import MediaPool from "$lib/components/MediaPool.svelte";
-  import { mediaStore } from "$lib/stores";
+  import Player from "$lib/components/Player.svelte";
   import "../app.css";
-
-  let isPlaying = false;
-  let video: HTMLVideoElement | null = null;
-
-  $: if (video && isPlaying) video.play();
-  $: if (video && !isPlaying) video.pause();
-
-  const setVideoTime = (time: number) => {
-    if (!video) throw new Error("Video element not found");
-
-    isPlaying = false;
-    video.currentTime = time === -1 ? video.duration : time;
-  };
 
   const handleResize = (e: MouseEvent) => {
     if (!isResizing || !resizeMode) return;
@@ -27,10 +14,6 @@
       columnWidth = `${e.clientX}px`;
     }
   };
-
-  $: mediaSrc = $mediaStore.media[$mediaStore.previewIndex || 0]?.src || "";
-  // probably the hackiest possible solution to the "pause player when switching media" problem
-  $: mediaSrc, video && (isPlaying = false);
 
   let columnWidth = "384px";
   let rowWidth = "384px";
@@ -54,15 +37,7 @@
   </div>
 
   <div class="row-start-1 col-start-3 flex flex-col justify-center items-center gap-8 p-8">
-    <p class="text-white">video</p>
-    <video class="aspect-video max-h-[75%] border-2 border-neutral-800 bg-gradient-to-br from-neutral-900 to-neutral-950" bind:this={video} src={mediaSrc}>
-      <track kind="captions" />
-    </video>
-    <div class="w-100 flex justify-center gap-4">
-      <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setVideoTime(0)}>beginning</button>
-      <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => (isPlaying = !isPlaying)}>{isPlaying ? "pause" : "play"}</button>
-      <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setVideoTime(-1)}>end</button>
-    </div>
+    <Player />
   </div>
 
   <div class="row-start-3 col-start-1">
