@@ -24,12 +24,11 @@
   <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500">media pool</p>
   {#if files}
     <div class="relative z-10">
-      {#each $mediaStore.media as file, idx}
-        <MediaPoolElement src={file.src} {idx} />
-      {/each}
-      {#each $mediaStore.media as file}
-        <p>{file.isSelected}</p>
-      {/each}
+      {#key $mediaStore.media.length}
+        {#each $mediaStore.media as file, idx}
+          <MediaPoolElement src={file.src} {idx} />
+        {/each}
+      {/key}
     </div>
   {/if}
 </div>
