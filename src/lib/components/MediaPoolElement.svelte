@@ -4,12 +4,6 @@
   export let src: string;
   export let idx: number;
 
-  let isAnyMediaElementSelected = false;
-
-  mediaStore.subscribe((store) => {
-    isAnyMediaElementSelected = store.media.some((media) => media.isSelected);
-  });
-
   const handleClick = (e: MouseEvent) => {
     if (e.detail === 2) {
       mediaStore.update((store) => {
@@ -19,6 +13,7 @@
     } else {
       mediaStore.update((store) => {
         store.media[idx].isSelected = !store.media[idx].isSelected;
+        store.isAnySelected = store.media.some((media) => media.isSelected);
         return store;
       });
     }
@@ -26,7 +21,7 @@
 </script>
 
 <button on:click={handleClick} class="outline-2 outline-red-200" class:outline={$mediaStore.media[idx].isSelected}>
-  {#if isAnyMediaElementSelected}
+  {#if $mediaStore.isAnySelected}
     <input type="checkbox" checked={$mediaStore.media[idx].isSelected} />
   {/if}
   <video>

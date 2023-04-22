@@ -2,12 +2,7 @@
   import MediaPoolElement from "./MediaPoolElement.svelte";
   import { mediaStore } from "../stores";
 
-  let isAnyMediaElementSelected = false;
   let files: FileList;
-
-  mediaStore.subscribe((store) => {
-    isAnyMediaElementSelected = store.media.some((media) => media.isSelected);
-  });
 
   $: mediaStore.update((store) => {
     if (!files) return store;
@@ -25,9 +20,9 @@
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple bind:files />
     <button
       class="text-white w-8 h-8 bg-neutral-700"
-      class:opacity-50={!isAnyMediaElementSelected}
+      class:opacity-50={!$mediaStore.isAnySelected}
       on:click={removeSelectedElements}
-      disabled={!isAnyMediaElementSelected}>🗑️</button
+      disabled={!$mediaStore.isAnySelected}>🗑️</button
     >
   </div>
   <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500">media pool</p>
