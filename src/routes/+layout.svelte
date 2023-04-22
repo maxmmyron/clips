@@ -1,4 +1,5 @@
 <script lang="ts">
+  import MediaPool from "$lib/components/MediaPool.svelte";
   import "../app.css";
 
   let isPlaying = false;
@@ -46,19 +47,7 @@
   }}
 >
   <div class="row-start-1 col-start-1">
-    <div class="p-2 h-full overflow-scroll">
-      <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white" multiple bind:files />
-      <p class="text-white">media pool</p>
-      {#if files}
-        {#each files as file}
-          <p class="text-white">{file.name}</p>
-          <video>
-            <source src={URL.createObjectURL(file)} type={file.type} />
-            <track kind="captions" />
-          </video>
-        {/each}
-      {/if}
-    </div>
+    <MediaPool />
   </div>
 
   <div class="row-start-1 col-start-3 flex flex-col justify-center items-center gap-8 p-8">
