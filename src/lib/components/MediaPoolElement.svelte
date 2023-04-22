@@ -5,17 +5,10 @@
   export let idx: number;
 
   const handleClick = (e: MouseEvent) => {
-    if (e.detail === 2) {
-      mediaStore.update((store) => {
-        store.previewIndex = idx;
-        return store;
-      });
-    } else {
-      mediaStore.update((store) => {
-        store.media[idx].isSelected = !store.media[idx].isSelected;
-        store.isAnySelected = store.media.some((media) => media.isSelected);
-        return store;
-      });
+    if (e.detail === 2) $mediaStore.previewIndex = idx;
+    else {
+      $mediaStore.media[idx].isSelected = !$mediaStore.media[idx].isSelected;
+      $mediaStore.isAnySelected = $mediaStore.media.some((media) => media.isSelected);
     }
   };
 </script>

@@ -2,13 +2,9 @@
   import MediaPoolElement from "./MediaPoolElement.svelte";
   import { mediaStore } from "../stores";
 
-  let files: FileList;
+  let files: FileList | null = null;
 
-  $: mediaStore.update((store) => {
-    if (!files) return store;
-    store.media = Array.from(files).map((file) => ({ src: URL.createObjectURL(file), isSelected: false }));
-    return store;
-  });
+  $: files !== null && ($mediaStore.media = Array.from(files).map((file) => ({ src: URL.createObjectURL(file), isSelected: false })));
 
   const removeSelectedElements = () => {
     $mediaStore.media = $mediaStore.media.filter((media) => !media.isSelected);
