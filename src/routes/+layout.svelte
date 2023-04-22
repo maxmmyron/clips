@@ -1,11 +1,10 @@
 <script lang="ts">
   import MediaPool from "$lib/components/MediaPool.svelte";
+  import { mediaStore } from "$lib/stores";
   import "../app.css";
 
   let isPlaying = false;
   let video: HTMLVideoElement | null = null;
-
-  let files: FileList;
 
   $: if (video && isPlaying) video.play();
   $: if (video && !isPlaying) video.pause();
@@ -13,7 +12,7 @@
   const setVideoTime = (time: number) => {
     if (!video) throw new Error("Video element not found");
 
-    video.pause();
+    isPlaying = false;
     video.currentTime = time === -1 ? video.duration : time;
   };
 
@@ -28,6 +27,10 @@
       columnWidth = `${e.clientX}px`;
     }
   };
+
+  $: mediaSrc = $mediaStore.media[$mediaStore.previewIndex || 0]?.src || "";
+  // probably the hackiest possible solution to the "pause player when switching media" problem
+  $: mediaSrc, video && (isPlaying = false);
 
   let columnWidth = "384px";
   let rowWidth = "384px";
@@ -52,10 +55,7 @@
 
   <div class="row-start-1 col-start-3 flex flex-col justify-center items-center gap-8 p-8">
     <p class="text-white">video</p>
-    <video class="aspect-video max-h-[75%] border-2 border-neutral-800 bg-gradient-to-br from-neutral-900 to-neutral-950" bind:this={video}>
-      {#if files}
-        <source src={URL.createObjectURL(files[0])} type={files[0].type} />
-      {/if}
+    <video class="aspect-video max-h-[75%] border-2 border-neutral-800 bg-gradient-to-br from-neutral-900 to-neutral-950" bind:this={video} src={mediaSrc}>
       <track kind="captions" />
     </video>
     <div class="w-100 flex justify-center gap-4">
@@ -77,7 +77,7 @@
     <div class="w-24 h-0.5 bg-neutral-700 rounded-full" />
   </div>
   <div class="relative row-start-2 col-span-full bg-neutral-800 flex justify-center items-center overflow-visible">
-    <div class="absolute w-full h-5 cursor-row-resize" on:mousedown={(e) => (resizeMode = "row")} />
+    <div class="absolute w-full mh-5 cursor-row-resize" on:mousedown={(e) => (resizeMode = "row")} />
   </div>
 
   <div class="col-start-2 row-start-1 flex justify-center items-center z-10 pointer-events-none">
