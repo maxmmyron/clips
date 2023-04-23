@@ -27,7 +27,7 @@
   class:dragging={isDragging}
   class:outline={isSelected}
   draggable="true"
-  on:click={() => ($timeline.selectedIndex = idx)}
+  on:click|capture|stopPropagation={() => ($timeline.selectedIndex = idx)}
   on:dragstart={() => (isDragging = true)}
   on:dragend={() => (isDragging = false)}
 >
