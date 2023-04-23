@@ -1,6 +1,7 @@
 <script lang="ts">
-  import MediaPool from "$lib/components/MediaPool.svelte";
+  import MediaPool from "$lib/components/mediaPool/MediaPool.svelte";
   import Player from "$lib/components/Player.svelte";
+  import Timeline from "$lib/components/timeline/Timeline.svelte";
   import "../app.css";
 
   const handleResize = (e: MouseEvent) => {
@@ -45,7 +46,7 @@
   </div>
 
   <div class="row-start-3 col-start-3">
-    <p class="text-white">scrubber</p>
+    <Timeline />
   </div>
 
   <div class="row-start-2 col-start-3 flex justify-center items-center z-10 pointer-events-none">

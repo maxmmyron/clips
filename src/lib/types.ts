@@ -1,4 +1,7 @@
-type MediaPoolElement = {
-  isSelected: boolean;
+interface Media {
   src: string;
+  duration: number;
+  startOffset: number;
+  endOffset: number;
+  isSelected: boolean;
 }
