@@ -1,6 +1,6 @@
 <script lang="ts">
   import MediaPoolElement from "./MediaPoolElement.svelte";
-  import { media } from "$lib/stores";
+  import { media, timeline } from "$lib/stores";
 
   let files: FileList | null = null;
 
@@ -9,6 +9,12 @@
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
+    const timelinesContainsFiles = $timeline.clips.some((clip) => $media.selected.includes($media.files.findIndex((file) => file.src === clip.src)));
+    const timelineConfirm = `Deleting these files will remove their references from the timeline. Are you sure?`;
+
+    if (timelinesContainsFiles && confirm(timelineConfirm) === false) return;
+
+    $timeline.clips = $timeline.clips.filter((clip) => !$media.selected.includes($media.files.findIndex((file) => file.src === clip.src)));
     $media.files = $media.files.filter((_, idx) => !$media.selected.includes(idx));
     $media.selected = [];
   };
