@@ -1,6 +1,5 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
-  import Layout from "../../../routes/+layout.svelte";
   import TimelineElement from "./TimelineElement.svelte";
 
   let zoomScale = 5;
@@ -36,7 +35,17 @@
       { el: null as Element | null, offset: Number.NEGATIVE_INFINITY }
     ).el;
   };
+
+  const handleKey = (e: KeyboardEvent) => {
+    if (e.key !== "Delete") return;
+    if (!$timeline.selected.length) return;
+
+    $timeline.clips = $timeline.clips.filter((_, i) => !$timeline.selected.includes(i));
+    $timeline.selected = [];
+  };
 </script>
+
+<svelte:window on:keydown={handleKey} on:click={() => ($timeline.selected = [])} />
 
 <div class="w-full h-full overflow-x-auto flex relative" on:dragover={handleDragover}>
   <div class="w-2/5 h-full bg-neutral-900 border-r-2 border-r-neutral-700 flex-shrink-0" />

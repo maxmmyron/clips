@@ -5,21 +5,16 @@
   export let zoomScale: number;
   export let idx: number;
 
-  $: isSelected = $timeline.selectedIndex === idx;
+  $: isSelected = $timeline.selected.includes(idx);
 
   let isDragging = false;
   $: width = (options.duration - options.startOffset - options.endOffset) * zoomScale;
 
-  const handleKey = (e: KeyboardEvent) => {
-    if (e.key !== "Delete") return;
-    if (!isSelected) return;
-
-    $timeline.clips = $timeline.clips.filter((_, i) => i !== idx);
-    $timeline.selectedIndex = -1;
+  const handleClick = (e: MouseEvent) => {
+    if (e.shiftKey) $timeline.selected = [...$timeline.selected, idx];
+    else $timeline.selected = isSelected ? [] : [idx];
   };
 </script>
-
-<svelte:window on:keydown={handleKey} on:click={() => ($timeline.selectedIndex = -1)} />
 
 <button
   style="width: {width}px"
@@ -27,7 +22,7 @@
   class:dragging={isDragging}
   class:outline={isSelected}
   draggable="true"
-  on:click|capture|stopPropagation={() => ($timeline.selectedIndex = idx)}
+  on:click|capture|stopPropagation={handleClick}
   on:dragstart={() => (isDragging = true)}
   on:dragend={() => (isDragging = false)}
 >
