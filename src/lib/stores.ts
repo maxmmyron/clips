@@ -1,20 +1,18 @@
 import { writable } from "svelte/store";
 
 export const media = writable({
-  isAnySelected: false,
-  previewIndex: null,
+  selected: [],
   files: [],
 } as {
-  isAnySelected: boolean;
-  previewIndex: number | null;
+  selected: number[];
   files: Pick<Media, "src" | "isSelected">[];
 });
 
 export const timeline = writable({
-  selectedIndex: null,
+  selected: [],
   clips: [],
 } as {
-  selectedIndex: number | null;
-  clips: Omit<Media, "isSelected" > []
+  selected: number[];
+  clips: Omit<Media, "isSelected" > [];
 });
 
