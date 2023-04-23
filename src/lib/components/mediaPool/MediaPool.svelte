@@ -8,7 +8,9 @@
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
-    $media.files = $media.files.filter((file) => !file.isSelected);
+
+    $media.files = $media.files.filter((_, idx) => !$media.selected.includes(idx));
+    $media.selected = [];
   };
 </script>
 

@@ -9,18 +9,12 @@
   $: isSelected = $media.selected.includes(idx);
 
   const handleClick = (e: MouseEvent) => {
-    console.log("click");
     if (e.detail === 2) $media.previewSource = src;
-    else {
-      if (e.shiftKey) $media.selected = [...$media.selected, idx];
-      else $media.selected = [idx];
-    }
+    else if (e.shiftKey) $media.selected = [...$media.selected, idx];
+    else $media.selected = [idx];
   };
 
-  const addToTimeline = () => {
-    console.log("timeline");
-    $timeline.clips = [...$timeline.clips, { duration, src, startOffset: 0, endOffset: 0 }];
-  };
+  const addToTimeline = () => ($timeline.clips = [...$timeline.clips, { duration, src, startOffset: 0, endOffset: 0 }]);
 </script>
 
 <button on:click|stopPropagation={handleClick} class="relative outline-2 outline-blue-600" class:outline={isSelected}>

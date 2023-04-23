@@ -38,7 +38,6 @@
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
-    if (!$timeline.selected.length) return;
 
     $timeline.clips = $timeline.clips.filter((_, i) => !$timeline.selected.includes(i));
     $timeline.selected = [];
