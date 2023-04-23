@@ -6,6 +6,8 @@
 
   let duration: number = 0;
 
+  $: isSelected = $media.files[idx].isSelected;
+
   const handleClick = (e: MouseEvent) => {
     if (e.detail === 2) $media.previewIndex = idx;
     else {
@@ -14,20 +16,12 @@
     }
   };
 
-  const addToTimeline = () => {
-    timeline.update((timeline) => {
-      timeline.push({
-        duration,
-        src,
-        startOffset: 0,
-        endOffset: 0,
-      });
-      return timeline;
-    });
-  };
+  const addToTimeline = () => ($timeline.clips = [...$timeline.clips, { duration, src, startOffset: 0, endOffset: 0 }]);
 </script>
 
-<button on:click={handleClick} class="relative outline-2 outline-yellow-300" class:outline={$media.files[idx].isSelected}>
+<svelte:window on:click={() => ($media.isAnySelected = false)} />
+
+<button on:click={handleClick} class="relative outline-2 outline-blue-600" class:outline={$media.files[idx].isSelected}>
   {#if $media.isAnySelected}
     <input type="checkbox" class="absolute top-2 left-2 shadow-md pointer-events-none" checked={$media.files[idx].isSelected} tabindex="-1" />
   {/if}

@@ -10,5 +10,11 @@ export const media = writable({
   files: Pick<Media, "src" | "isSelected">[];
 });
 
-export const timeline = writable<Omit<Media, "isSelected">[]>([]);
+export const timeline = writable({
+  selectedIndex: null,
+  clips: [],
+} as {
+  selectedIndex: number | null;
+  clips: Omit<Media, "isSelected" > []
+});
 
