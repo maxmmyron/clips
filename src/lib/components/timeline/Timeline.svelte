@@ -9,7 +9,9 @@
   const handleDragover = (e: DragEvent) => {
     e.preventDefault();
     const afterElement = getDragAfterElement(e.clientX);
-    const draggable = document.querySelector(".dragging") as HTMLElement;
+    const draggable = timelineContainer.querySelector(".dragging") as HTMLElement;
+
+    if (!draggable) return;
 
     if (afterElement == null) {
       timelineContainer.appendChild(draggable);
