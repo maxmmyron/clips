@@ -2,13 +2,13 @@
   import { timeline } from "$lib/stores";
 
   export let options: Omit<Media, "isSelected">;
-  export let zoomScale;
+  export let zoomScale: number;
   export let idx: number;
 
   $: isSelected = $timeline.selectedIndex === idx;
 
   let isDragging = false;
-  let width = (options.duration - options.startOffset - options.endOffset) * zoomScale;
+  $: width = (options.duration - options.startOffset - options.endOffset) * zoomScale;
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;

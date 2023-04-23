@@ -38,11 +38,12 @@
   };
 </script>
 
-<div class="w-full h-full overflow-x-auto flex" on:dragover={handleDragover}>
+<div class="w-full h-full overflow-x-auto flex relative" on:dragover={handleDragover}>
   <div class="w-2/5 h-full bg-neutral-900 border-r-2 border-r-neutral-700 flex-shrink-0" />
   <div class="flex items-center" bind:this={timelineContainer}>
     {#each $timeline.clips as options, idx}
       <TimelineElement {options} {zoomScale} {idx} />
     {/each}
   </div>
+  <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
 </div>
