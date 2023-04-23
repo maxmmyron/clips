@@ -12,7 +12,7 @@
 
   const handleClick = (e: MouseEvent) => {
     if (e.shiftKey) $timeline.selected = [...$timeline.selected, idx];
-    else $timeline.selected = isSelected ? [] : [idx];
+    else $timeline.selected = [idx];
   };
 </script>
 

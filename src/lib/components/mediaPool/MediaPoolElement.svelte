@@ -6,27 +6,26 @@
 
   let duration: number = 0;
 
-  $: isSelected = $media.files[idx].isSelected;
+  $: isSelected = $media.selected.includes(idx);
 
   const handleClick = (e: MouseEvent) => {
-    if (e.detail === 2) $media.previewIndex = idx;
+    console.log("click");
+    if (e.detail === 2) $media.previewSource = src;
     else {
-      $media.files[idx].isSelected = !$media.files[idx].isSelected;
-      $media.isAnySelected = $media.files.some((file) => file.isSelected);
+      if (e.shiftKey) $media.selected = [...$media.selected, idx];
+      else $media.selected = [idx];
     }
   };
 
-  const addToTimeline = () => ($timeline.clips = [...$timeline.clips, { duration, src, startOffset: 0, endOffset: 0 }]);
+  const addToTimeline = () => {
+    console.log("timeline");
+    $timeline.clips = [...$timeline.clips, { duration, src, startOffset: 0, endOffset: 0 }];
+  };
 </script>
 
-<svelte:window on:click={() => ($media.isAnySelected = false)} />
-
-<button on:click={handleClick} class="relative outline-2 outline-blue-600" class:outline={$media.files[idx].isSelected}>
-  {#if $media.isAnySelected}
-    <input type="checkbox" class="absolute top-2 left-2 shadow-md pointer-events-none" checked={$media.files[idx].isSelected} tabindex="-1" />
-  {/if}
-  {#if $media.files[idx].isSelected}
-    <button class="absolute top-2 left-8 w-5 h-5 bg-neutral-700" on:click={addToTimeline}>🎞️</button>
+<button on:click|stopPropagation={handleClick} class="relative outline-2 outline-blue-600" class:outline={isSelected}>
+  {#if isSelected}
+    <button class="absolute top-2 left-8 w-5 h-5 bg-neutral-700" on:click|capture|stopPropagation={addToTimeline}>🎞️</button>
   {/if}
   <video bind:duration>
     <source {src} type="video/mp4" />

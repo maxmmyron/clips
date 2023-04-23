@@ -6,17 +6,17 @@
 
   $: files !== null && ($media.files = Array.from(files).map((file) => ({ src: URL.createObjectURL(file), isSelected: false })));
 
-  const removeSelectedElements = () => {
+  const handleKey = (e: KeyboardEvent) => {
+    if (e.key !== "Delete") return;
     $media.files = $media.files.filter((file) => !file.isSelected);
   };
 </script>
 
+<svelte:window on:keydown={handleKey} on:click={() => ($media.selected = [])} />
+
 <div class="relative p-2 h-full overflow-scroll">
   <div class="flex justify-between gap-2">
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple bind:files />
-    <button class="w-8 h-8 bg-neutral-700" class:opacity-50={!$media.isAnySelected} on:click={removeSelectedElements} disabled={!$media.isAnySelected}
-      >🗑️</button
-    >
   </div>
   <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500">media pool</p>
   {#if files}
