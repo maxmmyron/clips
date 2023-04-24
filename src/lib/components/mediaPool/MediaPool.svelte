@@ -22,13 +22,13 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($media.selected = [])} />
 
-<div class="relative p-2 h-full overflow-scroll">
+<div class="relative pt-4 px-4 h-full overflow-scroll">
   <div class="flex justify-between gap-2">
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple bind:files />
   </div>
   <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500">media pool</p>
   {#if files}
-    <div class="relative z-10">
+    <div class="w-full flex flex-wrap gap-3">
       {#key $media.files.length}
         {#each $media.files as file, idx}
           <MediaPoolElement src={file.src} {idx} />
