@@ -42,5 +42,5 @@
 </button>
 
 {#if $studio.dragData?.src === src && $mousePos != initialDragPosition}
-  <div class="z-10 absolute w-6 h-6 rounded-md bg-blue-400 transition-none" style="top: {$mousePos.y}px; left: {$mousePos.x}px" />
+  <div class="z-10 absolute w-6 h-6 rounded-md bg-blue-400 transition-none pointer-events-none" style="top: {$mousePos.y}px; left: {$mousePos.x}px" />
 {/if}
