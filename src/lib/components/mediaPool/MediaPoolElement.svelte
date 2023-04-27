@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { media, timeline, studio } from "$lib/stores";
+  import { media, studio } from "$lib/stores";
 
   export let src: string;
   export let idx: number;
@@ -26,8 +26,6 @@
     $studio.mouse.set({ x: mediaEl.getBoundingClientRect().x, y: mediaEl.getBoundingClientRect().y }, { hard: true });
     $studio.dragData = { duration, src };
   };
-
-  const addToTimeline = () => ($timeline.clips = [...$timeline.clips, { duration, src, startOffset: 0, endOffset: 0 }]);
 </script>
 
 <button
@@ -37,7 +35,6 @@
   class:outline={isSelected}
   on:mousedown={handleDragStart}
 >
-  {#if isSelected}<button class="absolute top-3 left-3" on:click|capture|stopPropagation={addToTimeline}>⬆️</button>{/if}
   <video class="w-full h-full object-contain" bind:duration>
     <source {src} type="video/mp4" />
     <track kind="captions" />
