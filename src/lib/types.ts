@@ -1,3 +1,5 @@
+enum DropLocation { PLAYER, TIMELINE };
+
 interface Media {
   src: string;
   duration: number;
