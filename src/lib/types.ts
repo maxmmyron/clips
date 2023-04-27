@@ -5,3 +5,9 @@ interface Media {
   endOffset: number;
   isSelected: boolean;
 }
+
+type MediaPoolFile = {
+  src: string;
+  name: string;
+  isSelected: boolean;
+}

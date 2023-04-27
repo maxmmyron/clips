@@ -13,7 +13,7 @@ export const media = writable({
 } as {
   previewSource: string;
   selected: number[];
-  files: Pick<Media, "src" | "isSelected">[];
+  files: MediaPoolFile[];
 });
 
 export const timeline = writable({
