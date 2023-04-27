@@ -28,14 +28,9 @@
 
       canvasEl.toBlob((blob) => {
         if (!blob) return console.error("Could not create thumbnail");
-        const url = URL.createObjectURL(blob);
-        $timeline.thumbnails.set(src, url);
-        thumbnail = url;
+        thumbnail = URL.createObjectURL(blob);
+        $timeline.thumbnails.set(src, thumbnail);
       });
-
-      console.log(canvasEl.width, canvasEl.height);
-
-      console.log("created thumbnail");
     });
   });
 </script>
