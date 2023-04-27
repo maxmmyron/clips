@@ -1,6 +1,6 @@
 <script lang="ts">
   import { timeline, studio } from "$lib/stores";
-  import TimelineVideoElement from "./TimelineVideoElement.svelte";
+  import TimelineElement from "./TimelineElement.svelte";
 
   let zoomScale = 5;
   let timelineContainer: HTMLElement;
@@ -49,7 +49,7 @@
   <div class="w-2/5 h-full bg-neutral-900 border-r-2 border-r-neutral-700 flex-shrink-0" />
   <div class="w-full flex items-center" bind:this={timelineContainer} on:mouseup={handleDrop}>
     {#each $timeline.clips as options, idx}
-      <TimelineVideoElement {options} {zoomScale} {idx} />
+      <TimelineElement {options} {zoomScale} {idx} />
     {/each}
   </div>
   <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
