@@ -7,7 +7,21 @@
 
   const handleDragover = (e: DragEvent) => {
     e.preventDefault();
-    const afterElement = getDragAfterElement(e.clientX);
+
+    // gets the next element to insert the dragged element after
+    const afterElement = [...timelineContainer.querySelectorAll(".draggable:not(.dragging)")].reduce(
+      (accumulator, currChild) => {
+        const childBounds = currChild.getBoundingClientRect();
+        const offset = e.clientX - childBounds.left - childBounds.width / 2;
+        if (offset < 0 && offset > accumulator.offset) {
+          return { offset, el: currChild };
+        } else {
+          return { offset: accumulator.offset, el: accumulator.el };
+        }
+      },
+      { el: null as Element | null, offset: Number.NEGATIVE_INFINITY }
+    ).el;
+
     const draggable = timelineContainer.querySelector(".dragging") as HTMLElement;
 
     if (!draggable) return;
@@ -17,23 +31,6 @@
     } else {
       timelineContainer.insertBefore(draggable, afterElement);
     }
-  };
-
-  const getDragAfterElement = (x: number) => {
-    const draggableElements = [...timelineContainer.querySelectorAll(".draggable:not(.dragging)")];
-
-    return draggableElements.reduce(
-      (accumulator, currChild) => {
-        const childBounds = currChild.getBoundingClientRect();
-        const offset = x - childBounds.left - childBounds.width / 2;
-        if (offset < 0 && offset > accumulator.offset) {
-          return { offset, el: currChild };
-        } else {
-          return { offset: accumulator.offset, el: accumulator.el };
-        }
-      },
-      { el: null as Element | null, offset: Number.NEGATIVE_INFINITY }
-    ).el;
   };
 
   const handleDrop = () => $studio.dragData && ($timeline.clips = [...$timeline.clips, { ...$studio.dragData, startOffset: 0, endOffset: 0 }]);
