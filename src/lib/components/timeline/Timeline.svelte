@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
+  import { timeline, studio } from "$lib/stores";
   import TimelineElement from "./TimelineElement.svelte";
 
   let zoomScale = 5;
@@ -36,6 +36,8 @@
     ).el;
   };
 
+  const handleDrop = () => $studio.dragData && ($timeline.clips = [...$timeline.clips, { ...$studio.dragData, startOffset: 0, endOffset: 0 }]);
+
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
@@ -48,7 +50,7 @@
 
 <div class="w-full h-full overflow-x-auto flex relative" on:dragover={handleDragover}>
   <div class="w-2/5 h-full bg-neutral-900 border-r-2 border-r-neutral-700 flex-shrink-0" />
-  <div class="flex items-center" bind:this={timelineContainer}>
+  <div class="w-full flex items-center" bind:this={timelineContainer} on:mouseup={handleDrop}>
     {#each $timeline.clips as options, idx}
       <TimelineElement {options} {zoomScale} {idx} />
     {/each}

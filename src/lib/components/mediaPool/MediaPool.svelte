@@ -2,11 +2,9 @@
   import MediaPoolElement from "./MediaPoolElement.svelte";
   import { media, timeline } from "$lib/stores";
 
-  let isDragover: boolean = false;
   let uploadedFiles: File[] = [];
 
   const handleDrop = (e: DragEvent) => {
-    isDragover = false;
     if (!e.dataTransfer) return;
 
     if (e.dataTransfer.items)
@@ -38,16 +36,10 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($media.selected = [])} />
 
-<div
-  class="relative pt-4 px-4 h-full overflow-scroll"
-  on:dragover|preventDefault={() => (isDragover = true)}
-  on:dragexit={() => (isDragover = false)}
-  on:drop|preventDefault={handleDrop}
->
+<div class="pt-4 px-4 h-full overflow-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between gap-2">
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
-  <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500" class:text-white={isDragover}>media pool</p>
   <div class="w-full flex flex-wrap gap-3">
     {#key $media.files.length}
       {#each $media.files as file, idx}

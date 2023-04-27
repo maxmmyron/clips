@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { media } from "$lib/stores";
+  import { media, studio } from "$lib/stores";
 
   let isPlaying = false;
   let isViewingPreview = false;
-
   let video: HTMLVideoElement | null = null;
 
   $: video && (isPlaying ? video?.play() : video?.pause());
 
-  const handleDrop = (e: DragEvent) => {
-    $media.previewSource = e.dataTransfer?.getData("text/plain") ?? "";
+  const handleDrop = (e: MouseEvent) => {
+    if ($studio.dragData) $media.previewSource = $studio.dragData.src;
   };
 
   /**
@@ -41,13 +40,7 @@
   >
 </div>
 
-<video
-  class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800"
-  bind:this={video}
-  src={isViewingPreview ? previewSrc : ""}
-  on:dragover|preventDefault
-  on:drop|preventDefault={handleDrop}
->
+<video class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800" bind:this={video} src={isViewingPreview ? previewSrc : ""} on:mouseup={handleDrop}>
   <track kind="captions" />
 </video>
 
