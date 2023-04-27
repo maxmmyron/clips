@@ -14,6 +14,20 @@
     else $media.selected = [idx];
   };
 
+  const handleDrag = (e: DragEvent) => {
+    e.dataTransfer?.setData("text/plain", src);
+    e.dataTransfer?.setDragImage(new Image(), 0, 0);
+
+    // TODO: add custom drag element
+  };
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log("dropped", e.dataTransfer?.getData("text/plain"));
+  };
+
   const addToTimeline = () => ($timeline.clips = [...$timeline.clips, { duration, src, startOffset: 0, endOffset: 0 }]);
 </script>
 
@@ -21,6 +35,9 @@
   on:click|stopPropagation={handleClick}
   class="relative outline-2 outline-blue-600 aspect-video w-48 bg-black rounded-md overflow-clip"
   class:outline={isSelected}
+  on:dragstart={handleDrag}
+  on:dragend={handleDrop}
+  draggable="true"
 >
   {#if isSelected}<button class="absolute top-3 left-3" on:click|capture|stopPropagation={addToTimeline}>⬆️</button>{/if}
   <video class="w-full h-full object-contain" bind:duration>
