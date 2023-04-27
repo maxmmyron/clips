@@ -24,8 +24,10 @@ export const media = writable({
 export const timeline = writable({
   selected: [],
   clips: [],
+  thumbnails: new Map(),
 } as {
   selected: number[];
   clips: Omit<Media, "isSelected" > [];
+  thumbnails: Map<string, string>;
 });
 
