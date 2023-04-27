@@ -8,6 +8,10 @@
 
   $: video && (isPlaying ? video?.play() : video?.pause());
 
+  const handleDrop = (e: DragEvent) => {
+    $media.previewSource = e.dataTransfer?.getData("text/plain") ?? "";
+  };
+
   /**
    * Sets video and time and pauses playback.
    */
@@ -37,15 +41,15 @@
   >
 </div>
 
-{#if isViewingPreview}
-  <video class="max-h-[50%] border-2 border-neutral-800" bind:this={video} src={previewSrc}>
-    <track kind="captions" />
-  </video>
-{:else}
-  <video class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800 bg-gradient-to-br from-neutral-900 to-neutral-950" bind:this={video}>
-    <track kind="captions" />
-  </video>
-{/if}
+<video
+  class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800"
+  bind:this={video}
+  src={isViewingPreview ? previewSrc : ""}
+  on:dragover|preventDefault
+  on:drop|preventDefault={handleDrop}
+>
+  <track kind="captions" />
+</video>
 
 <p class="text-white">{video?.currentTime}</p>
 
