@@ -1,6 +1,5 @@
 <script lang="ts">
   export let options: Omit<Media, "isSelected">;
-  export let zoomScale: number;
 
   let audioContext = new AudioContext();
 

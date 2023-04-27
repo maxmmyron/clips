@@ -4,7 +4,6 @@
   import LoadIcon from "../LoadIcon.svelte";
 
   export let src: string;
-  export let zoomScale: number;
 
   let thumbnail: string | null = null;
 

@@ -29,6 +29,6 @@
   on:dragstart={() => (isDragging = true)}
   on:dragend={() => (isDragging = false)}
 >
-  <TimelineVideoComponent src={options.src} {zoomScale} />
-  <TimelineAudioComponent {options} {zoomScale} />
+  <TimelineVideoComponent src={options.src} />
+  <TimelineAudioComponent {options} />
 </div>
