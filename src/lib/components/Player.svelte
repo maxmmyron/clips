@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { media } from "$lib/stores";
+  import { media, studio } from "$lib/stores";
 
   let isPlaying = false;
   let isViewingPreview = false;
-
   let video: HTMLVideoElement | null = null;
 
   $: video && (isPlaying ? video?.play() : video?.pause());
+
+  const handleDrop = (e: MouseEvent) => {
+    if ($studio.dragData) $media.previewSource = $studio.dragData.src;
+  };
 
   /**
    * Sets video and time and pauses playback.
@@ -37,15 +40,9 @@
   >
 </div>
 
-{#if isViewingPreview}
-  <video class="max-h-[50%] border-2 border-neutral-800" bind:this={video} src={previewSrc}>
-    <track kind="captions" />
-  </video>
-{:else}
-  <video class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800 bg-gradient-to-br from-neutral-900 to-neutral-950" bind:this={video}>
-    <track kind="captions" />
-  </video>
-{/if}
+<video class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800" bind:this={video} src={isViewingPreview ? previewSrc : ""} on:mouseup={handleDrop}>
+  <track kind="captions" />
+</video>
 
 <p class="text-white">{video?.currentTime}</p>
 

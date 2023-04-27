@@ -18,7 +18,15 @@
     else if ($studio.resizeMode === "timelineCol") timelineColumnWidth = `${e.clientX}px`;
     else if ($studio.resizeMode === "row") timelineHeight = `calc(100vh - ${e.clientY}px)`;
   };
+
+  const handleDrop = () => {
+    if (!$studio.dragData) return;
+
+    $studio.dragData = null;
+  };
 </script>
+
+<svelte:window on:mousemove={(e) => $studio.dragData && $studio.mouse.set({ x: e.clientX, y: e.clientY })} on:mouseup={handleDrop} />
 
 <main
   style="--row-width: minmax(256px, {timelineHeight});"

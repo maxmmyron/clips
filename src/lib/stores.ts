@@ -1,9 +1,14 @@
+import {spring, type Spring} from "svelte/motion";
 import { writable } from "svelte/store";
 
 export const studio = writable({
   resizeMode: null,
+  dragData: null,
+  mouse: spring({x:0, y:0}),
 } as {
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
+  dragData: MediaDragData | null;
+  mouse: Spring<{x:number,y:number}>;
 });
 
 export const media = writable({
@@ -13,7 +18,7 @@ export const media = writable({
 } as {
   previewSource: string;
   selected: number[];
-  files: Pick<Media, "src" | "isSelected">[];
+  files: MediaPoolFile[];
 });
 
 export const timeline = writable({
