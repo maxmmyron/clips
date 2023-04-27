@@ -8,6 +8,11 @@ interface Media {
   isSelected: boolean;
 }
 
+type MediaDragData = {
+  src: string,
+  duration: number,
+}
+
 type MediaPoolFile = {
   src: string;
   name: string;
