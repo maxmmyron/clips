@@ -35,7 +35,7 @@
   });
 </script>
 
-<button class="h-24 bg-neutral-700 border-2 border-neutral-600 rounded-lg overflow-clip">
+<div class="h-24 bg-neutral-700 border-2 border-neutral-600 rounded-lg overflow-clip">
   {#if thumbnail}
     <div class="w-full h-full bg-repeat-x" style="background-image: url({thumbnail}); background-size: auto 100%;" />
   {:else}
@@ -43,4 +43,4 @@
       <LoadIcon />
     </div>
   {/if}
-</button>
+</div>
