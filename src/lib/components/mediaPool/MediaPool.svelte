@@ -2,16 +2,25 @@
   import MediaPoolElement from "./MediaPoolElement.svelte";
   import { media, timeline } from "$lib/stores";
 
+  let isDragover: boolean = false;
+  let uploadedFiles: File[] = [];
+
+  const handleDrop = (e: DragEvent) => {
+    isDragover = false;
+    if (!e.dataTransfer) return;
+
+    if (e.dataTransfer.items)
+      uploadedFiles = [...e.dataTransfer.items].filter((itm) => itm.kind === "file" && itm.type.startsWith("video/")).map((itm) => itm.getAsFile() as File);
+    else uploadedFiles = [...e.dataTransfer.files].filter((file) => file.type.startsWith("video/"));
+  };
+
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
     if (!(e.target as HTMLInputElement).files) return;
-    const files: FileList = (e.target as HTMLInputElement).files as FileList;
-    $media.files = [
-      ...$media.files,
-      ...Array.from(files)
-        .filter((file) => $media.files.every((f) => f.name !== file.name))
-        .map((file) => ({ src: URL.createObjectURL(file), isSelected: false, name: file.name })),
-    ];
+    uploadedFiles = [...((e.target as HTMLInputElement).files as FileList)].filter((file) => file.type.startsWith("video/"));
   };
+
+  const createMediaPoolFile = (file: File) => ({ src: URL.createObjectURL(file), isSelected: false, name: file.name });
+  $: $media.files = [...$media.files, ...uploadedFiles.filter((file) => $media.files.every((f) => f.name !== file.name)).map((f) => createMediaPoolFile(f))];
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
@@ -29,11 +38,16 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($media.selected = [])} />
 
-<div class="relative pt-4 px-4 h-full overflow-scroll">
+<div
+  class="relative pt-4 px-4 h-full overflow-scroll"
+  on:dragover|preventDefault={() => (isDragover = true)}
+  on:dragexit={() => (isDragover = false)}
+  on:drop|preventDefault={handleDrop}
+>
   <div class="flex justify-between gap-2">
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
-  <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500">media pool</p>
+  <p class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-500" class:text-white={isDragover}>media pool</p>
   <div class="w-full flex flex-wrap gap-3">
     {#key $media.files.length}
       {#each $media.files as file, idx}
