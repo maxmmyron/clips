@@ -1,6 +1,8 @@
 <script lang="ts">
   import MediaPoolElement from "./MediaPoolElement.svelte";
-  import { media, timeline } from "$lib/stores";
+  import { mediaPool, timeline } from "$lib/stores";
+  import { loadAudioBufferSourceNode, loadMediaDuration, loadThumbnails } from "$lib/mediaLoader";
+  import MediaPreviewProvider from "../MediaPreviewProvider.svelte";
 
   let uploadedFiles: File[] = [];
 
@@ -17,33 +19,48 @@
     uploadedFiles = [...((e.target as HTMLInputElement).files as FileList)].filter((file) => file.type.startsWith("video/"));
   };
 
-  const createMediaPoolFile = (file: File) => ({ src: URL.createObjectURL(file), isSelected: false, name: file.name });
-  $: $media.files = [...$media.files, ...uploadedFiles.filter((file) => $media.files.every((f) => f.name !== file.name)).map((f) => createMediaPoolFile(f))];
+  const loadMediaMetadata = (file: File) => {
+    const src = URL.createObjectURL(file);
+
+    return {
+      src,
+      name: file.name,
+      duration: loadMediaDuration(src),
+      thumbnails: loadThumbnails(src),
+      audioBufferSourceNode: loadAudioBufferSourceNode(src),
+    } as StudioMediaMetadata;
+  };
+
+  $: $mediaPool.media.concat(uploadedFiles.filter((file) => !$mediaPool.media.some((itm) => itm.name === file.name)).map((file) => loadMediaMetadata(file)));
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
-    const timelinesContainsFiles = $timeline.clips.some((clip) => $media.selected.includes($media.files.findIndex((file) => file.src === clip.src)));
+    // check if selected files are in timeline; show confirmation if so
+    const isSelectedMediaInTimeline = $timeline.clips.some((clip) => $mediaPool.selected.includes(clip));
     const timelineConfirm = `Deleting these files will remove their references from the timeline. Are you sure?`;
 
-    if (timelinesContainsFiles && confirm(timelineConfirm) === false) return;
+    if (isSelectedMediaInTimeline && confirm(timelineConfirm) === false) return;
 
-    $timeline.clips = $timeline.clips.filter((clip) => !$media.selected.includes($media.files.findIndex((file) => file.src === clip.src)));
-    $media.files = $media.files.filter((_, idx) => !$media.selected.includes(idx));
-    $media.selected = [];
+    // delete files from timeline and media pool, clear selection arr
+    $timeline.clips = $timeline.clips.filter((clip) => !$mediaPool.selected.includes(clip));
+    $mediaPool.media = $mediaPool.media.filter((file) => !$mediaPool.selected.includes(file));
+    $mediaPool.selected = [];
   };
 </script>
 
-<svelte:window on:keydown={handleKey} on:click={() => ($media.selected = [])} />
+<svelte:window on:keydown={handleKey} on:click={() => ($mediaPool.selected = [])} />
 
 <div class="pt-4 px-4 h-full overflow-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between gap-2">
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
   <div class="w-full flex flex-wrap gap-3">
-    {#key $media.files.length}
-      {#each $media.files as file, idx}
-        <MediaPoolElement src={file.src} {idx} />
+    {#key $mediaPool.media.length}
+      {#each $mediaPool.media as metadata}
+        <MediaPreviewProvider {metadata} store={mediaPool}>
+          <MediaVideoPreview {metadata} />
+        </MediaPreviewProvider>
       {/each}
     {/key}
   </div>
