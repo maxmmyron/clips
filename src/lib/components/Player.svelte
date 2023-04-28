@@ -5,11 +5,11 @@
   let isViewingPreview = false;
   let video: HTMLVideoElement | null = null;
 
-  $: video && (isPlaying ? video?.play() : video?.pause());
-
   const handleDrop = (e: MouseEvent) => {
     if ($studio.dragData) $mediaPool.previewSrc = $studio.dragData;
   };
+
+  $: isPlaying, video && (isPlaying ? video.play() : video.pause());
 
   /**
    * Sets video and time and pauses playback.
@@ -22,8 +22,7 @@
   };
 
   $: previewSrc = $mediaPool.previewSrc;
-  // probably the hackiest possible solution to the "pause player when switching media" problem
-  $: previewSrc, video && (isPlaying = false);
+  $: video?.src, (isPlaying = false);
   $: previewSrc, previewSrc !== null && (isViewingPreview = true);
 </script>
 
