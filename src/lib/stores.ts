@@ -15,11 +15,15 @@ export const studio = writable({
     originType: null,
     originPosition: null,
     dragEvent: null,
+    ghost: {
+      position: spring({x: 0, y: 0}),
+      size: spring({width: 0, height: 0}),
+    }
   },
   /**
-   * The current mouse position, represented as a spring.
+   * The current mouse position
    */
-  mouse: spring({x:0, y:0}),
+  mouse: {x: 0, y: 0},
 } as {
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
   dragData: {
@@ -27,8 +31,13 @@ export const studio = writable({
     originType: "mediaPool" | "timeline" | null;
     originPosition: {x:number, y:number} | null;
     dragEvent: "dragstart" | "drag" | "dragend" | null;
+    currentDragRegion: "player" | "timeline" | null;
+    ghost: {
+      position: Spring<{x:number, y:number}>
+      size: Spring<{width:number, height:number}>
+    }
   }
-  mouse: Spring<{x:number,y:number}>;
+  mouse: {x: number, y: number}
 });
 
 export const mediaPool: WritableMediaPool = writable({
@@ -59,4 +68,3 @@ export const timeline: WritableTimeline = writable({
   zoomScale: 5,
   dragIndex: -1,
 });
-
