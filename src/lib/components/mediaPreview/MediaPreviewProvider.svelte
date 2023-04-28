@@ -4,10 +4,14 @@
   export let metadata: StudioMediaMetadata;
   export let store: WritableMediaPool | WritableTimeline;
 
-  $: isTimelineElement = store === timeline;
+  let duration = -1;
+  metadata.duration.then((dur) => (duration = dur));
 
   let width = "12rem";
-  metadata.duration.then((dur) => (width = isTimelineElement ? (dur - metadata.startTime - metadata.endTime) * $timeline.zoomScale + "px" : "12rem"));
+
+  $: isTimelineElement = store === timeline;
+
+  $: duration !== -1 && (width = isTimelineElement ? (duration - metadata.startTime - metadata.endTime) * $timeline.zoomScale + "px" : "12rem");
 
   let mediaPreview: HTMLButtonElement, initialMousePos: { x: number; y: number };
 
