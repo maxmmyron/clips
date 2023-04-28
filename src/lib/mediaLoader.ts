@@ -1,5 +1,17 @@
 // FIXME: these all resolve to nothing
 
+export const loadMediaMetadata = (file: File) => {
+  const src = URL.createObjectURL(file);
+
+  return {
+    src,
+    name: file.name,
+    duration: loadMediaDuration(src),
+    thumbnails: loadThumbnails(src),
+    audioData: loadAudioBufferSourceNode(src),
+  } as StudioMediaMetadata;
+};
+
 export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
   const video = document.createElement("video");
   video.src = src;

@@ -1,37 +1,29 @@
 <script lang="ts">
   import { mediaPool, timeline } from "$lib/stores";
-  import { loadAudioBufferSourceNode, loadMediaDuration, loadThumbnails } from "$lib/mediaLoader";
+  import { loadMediaMetadata } from "$lib/mediaLoader";
   import MediaPreviewProvider from "./mediaPreview/MediaPreviewProvider.svelte";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
-
-  let uploadedFiles: File[] = [];
 
   const handleDrop = (e: DragEvent) => {
     if (!e.dataTransfer) return;
 
     if (e.dataTransfer.items)
-      uploadedFiles = [...e.dataTransfer.items].filter((itm) => itm.kind === "file" && itm.type.startsWith("video/")).map((itm) => itm.getAsFile() as File);
-    else uploadedFiles = [...e.dataTransfer.files].filter((file) => file.type.startsWith("video/"));
+      updateMediaPool([...e.dataTransfer.items].filter((itm) => itm.kind === "file" && itm.type.startsWith("video/")).map((itm) => itm.getAsFile() as File));
+    else updateMediaPool([...e.dataTransfer.files].filter((file) => file.type.startsWith("video/")));
   };
 
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
     if (!(e.target as HTMLInputElement).files) return;
-    uploadedFiles = [...((e.target as HTMLInputElement).files as FileList)].filter((file) => file.type.startsWith("video/"));
+    updateMediaPool([...((e.target as HTMLInputElement).files as FileList)].filter((file) => file.type.startsWith("video/")));
   };
 
-  const loadMediaMetadata = (file: File) => {
-    const src = URL.createObjectURL(file);
+  const updateMediaPool = (uploadedFiles: File[]) => {
+    const media = uploadedFiles
+      .map((file) => loadMediaMetadata(file))
+      .filter((file) => !$mediaPool.media.some((existingFile) => existingFile.name === file.name));
 
-    return {
-      src,
-      name: file.name,
-      duration: loadMediaDuration(src),
-      thumbnails: loadThumbnails(src),
-      audioData: loadAudioBufferSourceNode(src),
-    } as StudioMediaMetadata;
+    $mediaPool.media = [...$mediaPool.media, ...media];
   };
-
-  $: $mediaPool.media.concat(uploadedFiles.filter((file) => !$mediaPool.media.some((itm) => itm.name === file.name)).map((file) => loadMediaMetadata(file)));
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
@@ -56,6 +48,7 @@
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
   <div class="w-full flex flex-wrap gap-3">
+    {console.log("creating new:" + $mediaPool.media)}
     {#key $mediaPool.media.length}
       {#each $mediaPool.media as metadata}
         <MediaPreviewProvider {metadata} store={mediaPool}>
