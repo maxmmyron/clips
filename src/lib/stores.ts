@@ -12,7 +12,9 @@ export const studio = writable({
    */
   dragData: {
     media: null,
-    origin: null,
+    originType: null,
+    originPosition: null,
+    dragEvent: null,
   },
   /**
    * The current mouse position, represented as a spring.
@@ -21,8 +23,10 @@ export const studio = writable({
 } as {
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
   dragData: {
-    media: StudioMediaMetadata | null
-    origin: "mediaPool" | "timeline" | null;
+    media: StudioMediaMetadata | null;
+    originType: "mediaPool" | "timeline" | null;
+    originPosition: {x:number, y:number} | null;
+    dragEvent: "dragstart" | "drag" | "dragend" | null;
   }
   mouse: Spring<{x:number,y:number}>;
 });
