@@ -1,9 +1,13 @@
 <script lang="ts">
   import { timeline, studio } from "$lib/stores";
-  import TimelineElement from "./TimelineElement.svelte";
+  import MediaPreviewProvider from "../MediaPreviewProvider.svelte";
+  import MediaVideoPreview from "../MediaVideoPreview.svelte";
+  import MediaAudioPreview from "../MediaAudioPreview.svelte";
 
   let zoomScale = 5;
   let timelineContainer: HTMLElement;
+
+  $: $timeline.zoomScale = zoomScale;
 
   const handleDragover = (e: DragEvent) => {
     e.preventDefault();
@@ -33,12 +37,12 @@
     }
   };
 
-  const handleDrop = () => $studio.dragData && ($timeline.clips = [...$timeline.clips, { ...$studio.dragData, startOffset: 0, endOffset: 0 }]);
+  const handleDrop = () => $studio.dragData && ($timeline.clips = [...$timeline.clips, { ...$studio.dragData, startTime: 0, endTime: 0 }]);
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
-    $timeline.clips = $timeline.clips.filter((_, i) => !$timeline.selected.includes(i));
+    $timeline.clips = $timeline.clips.filter((clip) => !$timeline.selected.includes(clip));
     $timeline.selected = [];
   };
 </script>
@@ -48,8 +52,11 @@
 <div class="w-full h-full overflow-x-auto flex relative" on:dragover={handleDragover}>
   <div class="w-2/5 h-full bg-neutral-900 border-r-2 border-r-neutral-700 flex-shrink-0" />
   <div class="w-full flex items-center" bind:this={timelineContainer} on:mouseup={handleDrop}>
-    {#each $timeline.clips as options, idx}
-      <TimelineElement {options} {zoomScale} {idx} />
+    {#each $timeline.clips as metadata, idx}
+      <MediaPreviewProvider {metadata} store={timeline}>
+        <MediaVideoPreview {metadata} />
+        <MediaAudioPreview {metadata} />
+      </MediaPreviewProvider>
     {/each}
   </div>
   <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
