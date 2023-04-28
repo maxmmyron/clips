@@ -2,6 +2,7 @@
   import { mediaPool, timeline } from "$lib/stores";
   import { loadAudioBufferSourceNode, loadMediaDuration, loadThumbnails } from "$lib/mediaLoader";
   import MediaPreviewProvider from "../MediaPreviewProvider.svelte";
+  import MediaVideoPreview from "../MediaVideoPreview.svelte";
 
   let uploadedFiles: File[] = [];
 
@@ -26,7 +27,7 @@
       name: file.name,
       duration: loadMediaDuration(src),
       thumbnails: loadThumbnails(src),
-      audioBufferSourceNode: loadAudioBufferSourceNode(src),
+      audioData: loadAudioBufferSourceNode(src),
     } as StudioMediaMetadata;
   };
 

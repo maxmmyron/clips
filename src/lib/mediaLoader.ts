@@ -38,13 +38,16 @@ export const loadThumbnails = async (src: string) => {
   return thumbnails;
 };
 
-export const loadAudioBufferSourceNode = async (src: string) => new Promise<AudioBufferSourceNode>((resolve, reject) => {
+export const loadAudioBufferSourceNode = async (src: string) => new Promise<Float32Array>((resolve, reject) => {
   const audioContext = new AudioContext();
   fetch(src).then(res => res.arrayBuffer().then(buffer => audioContext.decodeAudioData(buffer, (buffer: AudioBuffer) => {
     const source = audioContext.createBufferSource();
     source.buffer = buffer;
     source.connect(audioContext.destination);
 
-    resolve(source);
+    const dataArray = new Float32Array(buffer.length);
+    buffer.copyFromChannel(dataArray, 0);
+
+    resolve(dataArray);
   })));
 });

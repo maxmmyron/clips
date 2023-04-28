@@ -46,5 +46,6 @@ export const timeline: WritableTimeline = writable({
    * An array of loaded clips. Carries a variety of information that can be used to display clip details and preview clips.
    */
   clips: [],
+  zoomScale: 5,
 });
 
