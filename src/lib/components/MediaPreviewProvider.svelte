@@ -32,7 +32,7 @@
   class:outline={isSelected}
   on:mousedown={handleDragStart}
 >
-  <slot {metadata} />
+  <slot />
 </button>
 
 {#if $studio.dragData === metadata && $mousePos != initialMousePos}
