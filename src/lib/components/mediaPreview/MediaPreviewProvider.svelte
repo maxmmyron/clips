@@ -34,7 +34,7 @@
   bind:this={mediaPreview}
   style="width: {width};"
   on:click|stopPropagation={handleClick}
-  class="relative outline-2 outline-blue-600 w-48 bg-black rounded-md overflow-clip {isTimelineElement ? 'h-48' : 'aspect-video'}"
+  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip {isTimelineElement ? 'h-48' : 'aspect-video'}"
   class:outline={isSelected}
   on:mousedown={handleDragStart}
 >
