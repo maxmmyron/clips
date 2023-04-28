@@ -21,7 +21,7 @@ export const studio = writable({
   mouse: Spring<{x:number,y:number}>;
 });
 
-export const mediaPool = writable({
+export const mediaPool: WritableMediaPool = writable({
   /**
    * The current preview media. Used to determine what media to display on the preview video element.
    * If null, no preview is being shown.
@@ -35,13 +35,9 @@ export const mediaPool = writable({
    * An array of loaded media. Carries a variety of information that can be used to display media details and preview media.
    */
   media: [],
-} as {
-  previewSrc: StudioMediaMetadata | null;
-  selected: number[];
-  media: StudioMediaMetadata[];
 });
 
-export const timeline = writable({
+export const timeline: WritableTimeline = writable({
   /**
    * An array of currently selected clip indexes. Used to determine what clips to display as selected in the timeline.
    */
@@ -50,8 +46,5 @@ export const timeline = writable({
    * An array of loaded clips. Carries a variety of information that can be used to display clip details and preview clips.
    */
   clips: [],
-} as {
-  selected: number[];
-  clips: StudioTimelineMetadata[];
 });
 

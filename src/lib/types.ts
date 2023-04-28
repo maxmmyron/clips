@@ -21,17 +21,23 @@ interface StudioMediaMetadata {
    * The audio buffer source node. Used to play the audio and generate a timeline waveform preview.
    */
   audioBufferSourceNode: Promise<AudioBufferSourceNode>;
-}
-
-interface startTimeMetadata {
   /**
-   * The start time of the clip in seconds.
+   * The start time of the clip in seconds. This goes unused in the media pool, and is used to clip media in the timeline.
    */
   startTime: number;
   /**
-   * The end time of the clip in seconds.
+   * The end time of the clip in seconds. This goes unused in the media pool, and is used to clip media in the timeline.
    */
   endTime: number;
 }
 
-type StudioTimelineMetadata = StudioMediaMetadata & startTimeMetadata;
+type WritableMediaPool = import("svelte/store").Writable<{
+  previewSrc: StudioMediaMetadata | null;
+  selected: StudioMediaMetadata[];
+  media: StudioMediaMetadata[];
+}>;
+
+type WritableTimeline = import("svelte/store").Writable<{
+  selected: StudioMediaMetadata[];
+  clips: StudioMediaMetadata[];
+}>;
