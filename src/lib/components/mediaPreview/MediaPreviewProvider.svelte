@@ -21,7 +21,12 @@
   };
 
   const handleDragStart = (e: MouseEvent) => {
-    $studio.dragData = metadata;
+    $studio.dragData = {
+      media: metadata,
+      origin: isTimelineElement ? "timeline" : "mediaPool",
+    };
+
+    isTimelineElement && ($timeline.dragIndex = $timeline.clips.indexOf(metadata));
 
     initialMousePos = { x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y };
 
@@ -41,6 +46,6 @@
   <slot />
 </button>
 
-{#if $studio.dragData === metadata && $mousePos != initialMousePos}
+{#if $studio.dragData.media === metadata && $mousePos != initialMousePos}
   <div class="z-10 absolute w-6 h-6 rounded-md bg-blue-400 transition-none pointer-events-none" style="top: {$mousePos.y}px; left: {$mousePos.x}px" />
 {/if}

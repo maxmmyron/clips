@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
 
   export let metadata: StudioMediaMetadata;
+  export let isTimelineElement: boolean = false;
 
   let canvas: HTMLCanvasElement;
 
@@ -47,6 +48,6 @@
   });
 </script>
 
-<div class="w-full h-full flex justify-center items-center rounded-md overflow-clip">
-  <canvas class="w-full h-full" bind:this={canvas} on:load={() => console.log("aded")} />
+<div class="w-full {isTimelineElement ? 'h-1/2' : 'h-full'} flex justify-center items-center rounded-md overflow-clip">
+  <canvas class="w-full h-full" bind:this={canvas} />
 </div>

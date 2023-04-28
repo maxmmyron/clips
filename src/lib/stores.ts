@@ -10,14 +10,20 @@ export const studio = writable({
    * The drag data. used to determine what media is being dragged, and how to transform it on the screen given certain drag actions.
    * If null, no dragging is occurring.
    */
-  dragData: null,
+  dragData: {
+    media: null,
+    origin: null,
+  },
   /**
    * The current mouse position, represented as a spring.
    */
   mouse: spring({x:0, y:0}),
 } as {
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
-  dragData: StudioMediaMetadata | null;
+  dragData: {
+    media: StudioMediaMetadata | null
+    origin: "mediaPool" | "timeline" | null;
+  }
   mouse: Spring<{x:number,y:number}>;
 });
 
@@ -47,5 +53,6 @@ export const timeline: WritableTimeline = writable({
    */
   clips: [],
   zoomScale: 5,
+  dragIndex: -1,
 });
 

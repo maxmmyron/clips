@@ -41,4 +41,5 @@ type WritableTimeline = import("svelte/store").Writable<{
   selected: StudioMediaMetadata[];
   clips: StudioMediaMetadata[];
   zoomScale: number;
+  dragIndex: number;
 }>;

@@ -7,7 +7,7 @@
   let currentTime = 0;
 
   const handleDrop = (e: MouseEvent) => {
-    if ($studio.dragData) $mediaPool.previewSrc = $studio.dragData;
+    if ($studio.dragData) $mediaPool.previewSrc = $studio.dragData.media;
   };
 
   $: isPlaying, video && (isPlaying ? video.play() : video.pause());

@@ -22,7 +22,10 @@
   const handleDrop = () => {
     if (!$studio.dragData) return;
 
-    $studio.dragData = null;
+    $studio.dragData = {
+      media: null,
+      origin: null,
+    };
   };
 </script>
 
