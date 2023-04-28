@@ -1,16 +1,20 @@
-export const loadMediaDuration = async (src: string) => {
+// FIXME: these all resolve to nothing
+
+export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
   const video = document.createElement("video");
   video.src = src;
   video.preload = "metadata";
-  await video.load();
-  return video.duration;
-};
+  video.load();
+  video.addEventListener("loadedmetadata", () => {
+    resolve(video.duration);
+  });
+});
 
 /**
  * Parses a media source and returns a series of thumbnails to use as a preview.
  * TODO: implement zoomScale as factor in determining how many thumbnails to generate.
  */
-export const loadThumbnails = async (src: string) => {
+export const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, reject) => {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -19,24 +23,33 @@ export const loadThumbnails = async (src: string) => {
   const video = document.createElement("video");
   video.src = src;
 
-  const thumbnails = [];
+  let thumbnails: string[] = [];
 
-  await video.load();
+  video.load();
 
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  video.addEventListener("loadeddata", () => {
+    const aspectRatio = video.videoWidth / video.videoHeight;
+    canvas.width = 480;
+    canvas.height = 480 / aspectRatio;
 
-  if(!context) throw new ReferenceError("Could not get canvas context.");
+    if (!context) {
+      reject("Could not create canvas context");
+      return;
+    }
 
-  // one thumbnail every 5 seconds
-  for (let i = 0; i < duration / 5; i++) {
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // one thumbnail every 5 seconds
+    for (let i = 0; i < duration; i+=5) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    thumbnails.push(canvas.toDataURL());
-  }
+      thumbnails.push(canvas.toDataURL("image/jpeg", 0.85));
+      video.currentTime += 5;
+    }
 
-  return thumbnails;
-};
+    resolve(thumbnails);
+  });
+
+
+});
 
 export const loadAudioBufferSourceNode = async (src: string) => new Promise<Float32Array>((resolve, reject) => {
   const audioContext = new AudioContext();
