@@ -11,8 +11,10 @@
 
   $: $timeline.zoomScale = zoomScale;
 
-  const handleDragover = (e: MouseEvent) => {
-    // gets the next element to insert the dragged element after
+  const handleDrag = (e: MouseEvent) => {
+    if ($studio.dragData.dragEvent !== "drag" || $studio.dragData.currentDragRegion !== "timeline") return;
+
+    // get the element to place our element before
     const afterElement = [...timelineContainer.querySelectorAll(".draggable:not(.dragging)")].reduce(
       (accumulator, currChild) => {
         const childBounds = currChild.getBoundingClientRect();
@@ -26,17 +28,30 @@
       { el: null as Element | null, offset: Number.NEGATIVE_INFINITY }
     ).el;
 
+    // get nearest spot to position ghost
+    let dropXPosition = -1;
     if (afterElement == null) {
       dropIndex = -1;
+      if (timelineContainer.children.length > 0)
+        dropXPosition = timelineContainer.children[timelineContainer.children.length - 1].getBoundingClientRect().right;
+      else dropXPosition = timelineContainer.getBoundingClientRect().left;
     } else {
-      dropIndex = [...timelineContainer.querySelectorAll(".draggable")].indexOf(afterElement);
+      dropIndex = [...timelineContainer.querySelectorAll(".draggable:not(.dragging)")].indexOf(afterElement);
+      dropXPosition = afterElement.getBoundingClientRect().left;
     }
+
+    // update ghost position and size
+    $studio.dragData.ghost.position.set({
+      x: dropXPosition,
+      y: timelineContainer.getBoundingClientRect().top,
+    });
+    $studio.dragData.ghost.size.set({ width: 8, height: timelineContainer.getBoundingClientRect().height });
   };
 
-  const handleDrop = () => {
-    if (!$studio.dragData.origin || $studio.dragData.origin === "timeline") {
-      const dragEl = timelineContainer.querySelector(".dragging") as HTMLElement;
-      console.log(dragEl);
+  const handleDragEnd = () => {
+    if ($studio.dragData.originType === "timeline") {
+      const dragEl = timelineContainer.querySelector(".dragging");
+      if (!dragEl) return;
       timelineContainer.removeChild(dragEl);
       if (dropIndex === -1) {
         timelineContainer.appendChild(dragEl);
@@ -46,7 +61,6 @@
       return;
     }
     $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { ...$studio.dragData.media, startTime: 0, endTime: 0 }]);
-    $timeline.dragIndex = -1;
   };
 
   const handleKey = (e: KeyboardEvent) => {
@@ -59,17 +73,30 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($timeline.selected = [])} />
 
-<div class="w-full h-full overflow-x-auto flex" on:mousemove={handleDragover}>
+<div class="relative w-full h-full overflow-x-auto flex items-center" on:mousemove={handleDrag}>
   <div class="w-2/5 h-full bg-neutral-900 border-r-2 border-r-neutral-700 flex-shrink-0" />
-  <div class="w-full flex items-center" bind:this={timelineContainer} on:mouseup={handleDrop}>
-    {#each $timeline.clips as metadata, idx}
-      <div class="draggable" class:dragging={idx === $timeline.dragIndex} class:w-0={idx === $timeline.dragIndex}>
-        <MediaPreviewProvider {metadata} store={timeline}>
-          <MediaVideoPreview {metadata} isTimelineElement={true} />
-          <MediaAudioPreview {metadata} isTimelineElement={true} />
-        </MediaPreviewProvider>
-      </div>
-    {/each}
+  <div
+    class="w-full h-full flex items-center"
+    on:mouseup={handleDragEnd}
+    on:mouseenter={() => ($studio.dragData.currentDragRegion = "timeline")}
+    on:mouseleave={() => ($studio.dragData.currentDragRegion = null)}
+  >
+    <div class="flex h-fit min-h-[50%]" bind:this={timelineContainer}>
+      {#key $timeline.clips.length}
+        {#each $timeline.clips as metadata, idx}
+          <div
+            class="draggable overflow-clip"
+            class:dragging={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
+            class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
+          >
+            <MediaPreviewProvider {metadata} store={timeline}>
+              <MediaVideoPreview {metadata} isTimelineElement={true} />
+              <MediaAudioPreview {metadata} isTimelineElement={true} />
+            </MediaPreviewProvider>
+          </div>
+        {/each}
+      {/key}
+    </div>
   </div>
   <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
 </div>

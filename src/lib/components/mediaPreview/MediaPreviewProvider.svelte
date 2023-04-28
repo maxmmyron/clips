@@ -13,10 +13,9 @@
 
   $: duration !== -1 && (width = isTimelineElement ? (duration - metadata.startTime - metadata.endTime) * $timeline.zoomScale + "px" : "12rem");
 
-  let mediaPreview: HTMLButtonElement, initialMousePos: { x: number; y: number };
+  let mediaPreview: HTMLButtonElement;
 
   $: isSelected = $store.selected.includes(metadata);
-  $: mousePos = $studio.mouse;
 
   const handleClick = (e: MouseEvent) => {
     if (e.detail == 2) $mediaPool.previewSrc = metadata;
@@ -26,16 +25,18 @@
 
   const handleDragStart = (e: MouseEvent) => {
     $studio.dragData = {
+      ...$studio.dragData,
       media: metadata,
-      origin: isTimelineElement ? "timeline" : "mediaPool",
+      originType: isTimelineElement ? "timeline" : "mediaPool",
+      originPosition: { x: e.clientX, y: e.clientY },
+      dragEvent: "dragstart",
+      currentDragRegion: isTimelineElement ? "timeline" : null,
     };
 
+    $studio.dragData.ghost.position.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
+    $studio.dragData.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
+
     isTimelineElement && ($timeline.dragIndex = $timeline.clips.indexOf(metadata));
-
-    initialMousePos = { x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y };
-
-    // snap ghost pos to element pos
-    $studio.mouse.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
   };
 </script>
 
@@ -49,7 +50,3 @@
 >
   <slot />
 </button>
-
-{#if $studio.dragData.media === metadata && $mousePos != initialMousePos}
-  <div class="z-10 absolute w-6 h-6 rounded-md bg-blue-400 transition-none pointer-events-none" style="top: {$mousePos.y}px; left: {$mousePos.x}px" />
-{/if}
