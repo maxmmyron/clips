@@ -1,8 +1,13 @@
 <script lang="ts">
-  import { mediaPool, studio } from "$lib/stores";
+  import { mediaPool, studio, timeline } from "$lib/stores";
 
   export let metadata: StudioMediaMetadata;
   export let store: WritableMediaPool | WritableTimeline;
+
+  $: isTimelineElement = store === timeline;
+
+  let width = "12rem";
+  metadata.duration.then((dur) => (width = isTimelineElement ? (dur - metadata.startTime - metadata.endTime) * $timeline.zoomScale + "px" : "12rem"));
 
   let mediaPreview: HTMLButtonElement, initialMousePos: { x: number; y: number };
 
@@ -27,8 +32,9 @@
 
 <button
   bind:this={mediaPreview}
+  style="width: {width};"
   on:click|stopPropagation={handleClick}
-  class="relative outline-2 outline-blue-600 w-48 bg-black rounded-md overflow-clip"
+  class="relative outline-2 outline-blue-600 w-48 bg-black rounded-md overflow-clip {isTimelineElement ? 'h-48' : 'aspect-video'}"
   class:outline={isSelected}
   on:mousedown={handleDragStart}
 >

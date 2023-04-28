@@ -1,8 +1,8 @@
 <script lang="ts">
   import { mediaPool, timeline } from "$lib/stores";
   import { loadAudioBufferSourceNode, loadMediaDuration, loadThumbnails } from "$lib/mediaLoader";
-  import MediaPreviewProvider from "../MediaPreviewProvider.svelte";
-  import MediaVideoPreview from "../MediaVideoPreview.svelte";
+  import MediaPreviewProvider from "./mediaPreview/MediaPreviewProvider.svelte";
+  import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
 
   let uploadedFiles: File[] = [];
 

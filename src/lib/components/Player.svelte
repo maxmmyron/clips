@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { media, studio } from "$lib/stores";
+  import { mediaPool, studio } from "$lib/stores";
 
   let isPlaying = false;
   let isViewingPreview = false;
@@ -8,7 +8,7 @@
   $: video && (isPlaying ? video?.play() : video?.pause());
 
   const handleDrop = (e: MouseEvent) => {
-    if ($studio.dragData) $media.previewSource = $studio.dragData.src;
+    if ($studio.dragData) $mediaPool.previewSrc = $studio.dragData;
   };
 
   /**
@@ -21,10 +21,10 @@
     video.currentTime = time === -1 ? video.duration : time;
   };
 
-  $: previewSrc = $media.previewSource;
+  $: previewSrc = $mediaPool.previewSrc;
   // probably the hackiest possible solution to the "pause player when switching media" problem
   $: previewSrc, video && (isPlaying = false);
-  $: previewSrc, previewSrc !== "" && (isViewingPreview = true);
+  $: previewSrc, previewSrc !== null && (isViewingPreview = true);
 </script>
 
 <div>
@@ -40,7 +40,12 @@
   >
 </div>
 
-<video class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800" bind:this={video} src={isViewingPreview ? previewSrc : ""} on:mouseup={handleDrop}>
+<video
+  class="aspect-video w-100 max-h-[50%] border-2 border-neutral-800"
+  bind:this={video}
+  src={isViewingPreview ? previewSrc?.src : ""}
+  on:mouseup={handleDrop}
+>
   <track kind="captions" />
 </video>
 

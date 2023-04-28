@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LoadIcon from "./LoadIcon.svelte";
+  import LoadIcon from "../util/LoadIcon.svelte";
 
   export let metadata: StudioMediaMetadata;
 </script>

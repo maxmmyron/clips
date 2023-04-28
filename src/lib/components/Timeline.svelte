@@ -1,8 +1,8 @@
 <script lang="ts">
   import { timeline, studio } from "$lib/stores";
-  import MediaPreviewProvider from "../MediaPreviewProvider.svelte";
-  import MediaVideoPreview from "../MediaVideoPreview.svelte";
-  import MediaAudioPreview from "../MediaAudioPreview.svelte";
+  import MediaPreviewProvider from "./mediaPreview/MediaPreviewProvider.svelte";
+  import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
+  import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
 
   let zoomScale = 5;
   let timelineContainer: HTMLElement;
