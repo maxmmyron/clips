@@ -1,5 +1,4 @@
 <script lang="ts">
-  import MediaPoolElement from "./MediaPoolElement.svelte";
   import { mediaPool, timeline } from "$lib/stores";
   import { loadAudioBufferSourceNode, loadMediaDuration, loadThumbnails } from "$lib/mediaLoader";
   import MediaPreviewProvider from "../MediaPreviewProvider.svelte";
