@@ -48,7 +48,6 @@
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
   <div class="w-full flex flex-wrap gap-3">
-    {console.log("creating new:" + $mediaPool.media)}
     {#key $mediaPool.media.length}
       {#each $mediaPool.media as metadata}
         <MediaPreviewProvider {metadata} store={mediaPool}>
