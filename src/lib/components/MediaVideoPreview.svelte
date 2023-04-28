@@ -1,0 +1,15 @@
+<script lang="ts">
+  import LoadIcon from "./LoadIcon.svelte";
+
+  export let metadata: StudioMediaMetadata;
+</script>
+
+<div class="w-full h-full flex justify-center items-center">
+  {#await metadata.thumbnails}
+    <LoadIcon />
+  {:then thumbnails}
+    {#each thumbnails as thumbnail}
+      <div class="w-full h-full" style="background-image:url({thumbnail}); background-size: auto 100%;" />
+    {/each}
+  {/await}
+</div>
