@@ -1,15 +1,19 @@
 <script lang="ts">
-  import MediaPool from "$lib/components/mediaPool/MediaPool.svelte";
+  import MediaPool from "$lib/components/MediaPool.svelte";
   import Player from "$lib/components/Player.svelte";
-  import ResizeStalk from "$lib/components/ResizeStalk.svelte";
-  import Timeline from "$lib/components/timeline/Timeline.svelte";
-  import { studio } from "$lib/stores";
+  import ResizeStalk from "$lib/components/util/ResizeStalk.svelte";
+  import Timeline from "$lib/components/Timeline.svelte";
+  import { studio, timeline } from "$lib/stores";
   import "../app.css";
+  import { spring } from "svelte/motion";
 
   let isResizing = false;
   let mediaColumnWidth = "40vw";
   let timelineColumnWidth = "10vw";
   let timelineHeight = "384px";
+
+  $: ghostPos = $studio.dragData.ghost.position;
+  $: ghostSize = $studio.dragData.ghost.size;
 
   const handleResize = (e: MouseEvent) => {
     if (!isResizing || !$studio.resizeMode) return;
@@ -19,14 +23,47 @@
     else if ($studio.resizeMode === "row") timelineHeight = `calc(100vh - ${e.clientY}px)`;
   };
 
-  const handleDrop = () => {
-    if (!$studio.dragData) return;
+  const handleDrag = (e: MouseEvent) => {
+    $studio.mouse = { x: e.clientX, y: e.clientY };
 
-    $studio.dragData = null;
+    if (!$studio.dragData.originPosition) return;
+
+    if ($studio.dragData.dragEvent === "dragstart") {
+      const dist = {
+        x: e.clientX - $studio.dragData.originPosition.x,
+        y: e.clientY - $studio.dragData.originPosition.y,
+      };
+
+      if (Math.abs(dist.x) < 30 && Math.abs(dist.y) < 30) return;
+      $studio.dragData.dragEvent = "drag";
+    }
+
+    if ($studio.dragData.currentDragRegion !== null) return;
+
+    ghostPos.set({ x: $studio.mouse.x, y: $studio.mouse.y });
+    ghostSize.set({ width: 32, height: 32 });
+  };
+
+  const handleDrop = () => {
+    if (!$studio.dragData.media) return;
+
+    $studio.dragData = {
+      media: null,
+      originType: null,
+      originPosition: null,
+      dragEvent: null,
+      currentDragRegion: null,
+      ghost: {
+        position: spring({ x: 0, y: 0 }),
+        size: spring({ width: 0, height: 0 }),
+      },
+    };
+
+    $timeline.dragIndex = -1;
   };
 </script>
 
-<svelte:window on:mousemove={(e) => $studio.dragData && $studio.mouse.set({ x: e.clientX, y: e.clientY })} on:mouseup={handleDrop} />
+<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} />
 
 <main
   style="--row-width: minmax(256px, {timelineHeight});"
@@ -59,3 +96,10 @@
     <Timeline />
   </section>
 </main>
+
+{#if $studio.dragData.media && $studio.dragData.dragEvent !== "dragstart"}
+  <div
+    class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
+    style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"
+  />
+{/if}
