@@ -6,6 +6,13 @@
   let video: HTMLVideoElement | null = null;
   let currentTime = 0;
 
+  const handleDrag = () => {
+    if (!$studio.dragData || $studio.dragData.dragEvent !== "drag" || !video) return;
+
+    $studio.dragData.ghost.position.set({ x: video.getBoundingClientRect().x, y: video.getBoundingClientRect().y });
+    $studio.dragData.ghost.size.set({ width: video.getBoundingClientRect().width, height: video.getBoundingClientRect().height });
+  };
+
   const handleDrop = (e: MouseEvent) => {
     if ($studio.dragData) $mediaPool.previewSrc = $studio.dragData.media;
   };
@@ -46,6 +53,9 @@
   src={isViewingPreview ? previewSrc?.src : ""}
   bind:currentTime
   on:mouseup={handleDrop}
+  on:mousemove={handleDrag}
+  on:mouseenter={() => ($studio.dragData.currentDragRegion = "player")}
+  on:mouseleave={() => ($studio.dragData.currentDragRegion = null)}
 >
   <track kind="captions" />
 </video>
