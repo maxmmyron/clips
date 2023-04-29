@@ -99,7 +99,7 @@
 
 {#if $studio.dragData.media && $studio.dragData.dragEvent !== "dragstart"}
   <div
-    class="z-10 absolute w-6 h-6 rounded-md bg-blue-400 transition-none pointer-events-none"
+    class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
     style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"
   />
 {/if}
