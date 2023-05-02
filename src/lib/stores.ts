@@ -66,8 +66,5 @@ export const timeline: WritableTimeline = writable({
 
 export const player: WritablePlayer = writable({
   playerState: "editor",
-  isPlaying: false,
-  mediaDuration: 0,
-  currentTime: 0,
   sourceMetadata: null,
 });

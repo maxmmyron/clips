@@ -45,12 +45,8 @@ type WritableTimeline = import("svelte/store").Writable<{
 
 type WritablePlayer = import("svelte/store").Writable<{
   playerState: "editor" | "preview";
-  isPlaying: boolean;
-  currentTime: number;
   sourceMetadata: StudioMediaMetadata | null;
 }>;
-
-
 
 declare interface Window {
   mediaPool: StudioMediaMetadata[];
