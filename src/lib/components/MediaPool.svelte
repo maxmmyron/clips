@@ -21,10 +21,8 @@
   };
 
   const updateMediaPool = (uploadedFiles: File[]) => {
-    const media = uploadedFiles
-      .map((file) => loadMediaMetadata(file))
-      .filter((file) => !$mediaPool.media.some((existingFile) => existingFile.name === file.name));
-
+    let media = uploadedFiles.map((file) => loadMediaMetadata(file)).filter((file) => file !== null) as StudioMediaMetadata[];
+    media = media.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.name === file.name));
     $mediaPool.media = [...$mediaPool.media, ...media];
   };
 
