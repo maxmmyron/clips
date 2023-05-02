@@ -65,7 +65,7 @@
         </MediaPreviewProvider>
       {/each}
     {/key}
-    <div class="absolute bottom-12 right-44">
+    <div class="absolute bottom-12 right-16">
       {#each mows as mow (mow)}
         <p class="absolute top-1/4 -left-4 text-neutral-400 animate-notification [animation-fill-mode:both]" style="font-family:'Comic Sans MS';">mow</p>
       {/each}
