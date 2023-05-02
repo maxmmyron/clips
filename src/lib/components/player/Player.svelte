@@ -13,7 +13,7 @@
   };
 
   const handleDrop = (e: MouseEvent) => {
-    if (!$studio.dragData) return;
+    if (!$studio.dragData.media) return;
     $player.sourceMetadata = $studio.dragData.media;
     $player.playerState = "preview";
   };
