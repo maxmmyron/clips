@@ -46,7 +46,7 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($mediaPool.selected = [])} />
 
-<div class="pt-4 px-4 h-full overflow-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
+<div class="relative pt-4 px-4 h-full overflow-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between gap-2">
     <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
@@ -58,5 +58,14 @@
         </MediaPreviewProvider>
       {/each}
     {/key}
+    <div class="absolute bottom-8 right-8 flex flex-col">
+      <pre class="text-neutral-400 leading-tight font-serif">
+
+        ╱|、
+      (˚ˎ 。7
+       |、˜〵
+       じしˍ,)ノ
+    </pre>
+    </div>
   </div>
 </div>
