@@ -42,6 +42,13 @@
     $mediaPool.media = $mediaPool.media.filter((file) => !$mediaPool.selected.includes(file));
     $mediaPool.selected = [];
   };
+
+  let mows: number[] = [];
+
+  const handleMow = () => {
+    mows = [...mows, Date.now()];
+    let id = setTimeout(() => mows.shift() && clearTimeout(id), 1000);
+  };
 </script>
 
 <svelte:window on:keydown={handleKey} on:click={() => ($mediaPool.selected = [])} />
@@ -58,14 +65,18 @@
         </MediaPreviewProvider>
       {/each}
     {/key}
-    <div class="absolute bottom-8 right-8 flex flex-col">
-      <pre class="text-neutral-400 leading-tight font-serif">
-
+    <div class="absolute bottom-12 right-44">
+      {#each mows as mow (mow)}
+        <p class="absolute top-1/4 -left-4 text-neutral-400 animate-notification [animation-fill-mode:both]" style="font-family:'Comic Sans MS';">mow</p>
+      {/each}
+      <button class="cursor-grab active:cursor-grabbing" on:click={handleMow}>
+        <pre class="group text-neutral-400 leading-tight font-serif">
         ╱|、
       (˚ˎ 。7
        |、˜〵
-       じしˍ,)ノ
+       じしˍ,)<span class="absolute origin-bottom-left group-hover:animate-wiggle">ノ</span>
     </pre>
+      </button>
     </div>
   </div>
 </div>
