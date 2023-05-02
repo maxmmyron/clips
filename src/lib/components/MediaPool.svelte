@@ -1,8 +1,11 @@
 <script lang="ts">
+  import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
   import { loadMediaMetadata } from "$lib/mediaLoader";
   import MediaPreviewProvider from "./mediaPreview/MediaPreviewProvider.svelte";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
+
+  $: browser && (window.mediaPool = $mediaPool.media);
 
   const handleDrop = (e: DragEvent) => {
     if (!e.dataTransfer) return;
