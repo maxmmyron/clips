@@ -32,7 +32,6 @@ interface StudioMediaMetadata {
 }
 
 type WritableMediaPool = import("svelte/store").Writable<{
-  previewSrc: StudioMediaMetadata | null;
   selected: StudioMediaMetadata[];
   media: StudioMediaMetadata[];
 }>;
@@ -43,6 +42,14 @@ type WritableTimeline = import("svelte/store").Writable<{
   zoomScale: number;
   dragIndex: number;
 }>;
+
+type WritablePlayer = import("svelte/store").Writable<{
+  playerState: "editor" | "preview";
+  isPlaying: boolean;
+  currentTime: number;
+  sourceMetadata: StudioMediaMetadata | null;
+}>;
+
 
 
 declare interface Window {

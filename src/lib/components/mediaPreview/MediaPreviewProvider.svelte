@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mediaPool, studio, timeline } from "$lib/stores";
+  import { mediaPool, player, studio, timeline } from "$lib/stores";
 
   export let metadata: StudioMediaMetadata;
   export let store: WritableMediaPool | WritableTimeline;
@@ -18,7 +18,7 @@
   $: isSelected = $store.selected.includes(metadata);
 
   const handleClick = (e: MouseEvent) => {
-    if (e.detail == 2) $mediaPool.previewSrc = metadata;
+    if (e.detail == 2) $player.sourceMetadata = metadata;
     else if (e.shiftKey) $store.selected = [...$store.selected, metadata];
     else $store.selected = [metadata];
   };

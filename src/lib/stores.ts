@@ -42,11 +42,6 @@ export const studio = writable({
 
 export const mediaPool: WritableMediaPool = writable({
   /**
-   * The current preview media. Used to determine what media to display on the preview video element.
-   * If null, no preview is being shown.
-   */
-  previewSrc: null,
-  /**
    * An array of currently selected media indexes. Used to determine what media to display as selected in the media pool.
    */
   selected: [],
@@ -67,4 +62,12 @@ export const timeline: WritableTimeline = writable({
   clips: [],
   zoomScale: 5,
   dragIndex: -1,
+});
+
+export const player: WritablePlayer = writable({
+  playerState: "editor",
+  isPlaying: false,
+  mediaDuration: 0,
+  currentTime: 0,
+  sourceMetadata: null,
 });
