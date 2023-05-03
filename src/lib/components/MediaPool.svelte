@@ -2,8 +2,8 @@
   import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
   import { loadMediaMetadata } from "$lib/mediaLoader";
-  import MediaPreviewProvider from "./mediaPreview/MediaPreviewProvider.svelte";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
+  import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
 
   $: browser && (window.mediaPool = $mediaPool.media);
 
@@ -21,9 +21,15 @@
   };
 
   const updateMediaPool = (uploadedFiles: File[]) => {
-    let media = uploadedFiles.map((file) => loadMediaMetadata(file)).filter((file) => file !== null) as StudioMediaMetadata[];
-    media = media.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.name === file.name));
-    $mediaPool.media = [...$mediaPool.media, ...media];
+    // filter out files that are already in media pool
+    uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.name === file.name));
+
+    uploadedFiles.forEach((file) => {
+      loadMediaMetadata(file).then((metadata) => {
+        if (metadata === null) return;
+        $mediaPool.media = [...$mediaPool.media, metadata];
+      });
+    });
   };
 
   const handleKey = (e: KeyboardEvent) => {
@@ -58,9 +64,9 @@
   <div class="w-full flex flex-wrap gap-3">
     {#key $mediaPool.media.length}
       {#each $mediaPool.media as metadata}
-        <MediaPreviewProvider {metadata} store={mediaPool}>
+        <MediaPoolPreview {metadata}>
           <MediaVideoPreview {metadata} />
-        </MediaPreviewProvider>
+        </MediaPoolPreview>
       {/each}
     {/key}
     <div class="absolute bottom-12 right-16">
