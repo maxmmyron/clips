@@ -1,4 +1,4 @@
-export const loadMediaMetadata = (file: File) => {
+export const loadMediaMetadata = async (file: File) => {
   const src = URL.createObjectURL(file);
 
   if(file.type === "video/quicktime") {
@@ -7,14 +7,13 @@ export const loadMediaMetadata = (file: File) => {
     return null;
   }
 
-
   return {
     src,
     name: file.name,
-    duration: loadMediaDuration(src),
-    thumbnails: loadThumbnails(src),
-    audioData: loadAudioBufferSourceNode(src),
-  } as StudioMediaMetadata;
+    duration: await loadMediaDuration(src),
+    thumbnails: await loadThumbnails(src),
+    audioData: await loadAudioBufferSourceNode(src),
+  } as UploadedMedia;
 };
 
 export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
