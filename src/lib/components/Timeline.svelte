@@ -1,8 +1,9 @@
 <script lang="ts">
   import { timeline, studio } from "$lib/stores";
-  import MediaPreviewProvider from "./mediaPreview/MediaPreviewProvider.svelte";
+  import { v4 as uuidv4 } from "uuid";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
+  import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
 
   let zoomScale = 5;
   let timelineContainer: HTMLElement;
@@ -49,18 +50,21 @@
   };
 
   const handleDragEnd = () => {
+    if ($studio.dragData.dragEvent === "dragstart") return;
     if ($studio.dragData.originType === "timeline") {
-      const dragEl = timelineContainer.querySelector(".dragging");
-      if (!dragEl) return;
-      timelineContainer.removeChild(dragEl);
-      if (dropIndex === -1) {
-        timelineContainer.appendChild(dragEl);
-      } else {
-        timelineContainer.insertBefore(dragEl, timelineContainer.children[dropIndex]);
-      }
+      if ($timeline.dragIndex === -1) return;
+
+      const media = $timeline.clips.splice($timeline.dragIndex, 1)[0];
+
+      console.log(`move from ${$timeline.dragIndex} to ${dropIndex}`);
+
+      if (dropIndex === -1) $timeline.clips.push(media);
+      else $timeline.clips.splice(dropIndex, 0, media);
       return;
     }
-    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { ...$studio.dragData.media, startTime: 0, endTime: 0 }]);
+    // handle dragging new media into timeline
+    let uuid = uuidv4();
+    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { uuid: uuid, ...$studio.dragData.media, startTime: 0, endTime: 0 }]);
   };
 
   const handleKey = (e: KeyboardEvent) => {
@@ -82,20 +86,18 @@
     on:mouseleave={() => ($studio.dragData.currentDragRegion = null)}
   >
     <div class="flex h-fit min-h-[50%]" bind:this={timelineContainer}>
-      {#key $timeline.clips.length}
-        {#each $timeline.clips as metadata, idx}
-          <div
-            class="draggable overflow-clip"
-            class:dragging={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
-            class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
-          >
-            <MediaPreviewProvider {metadata} store={timeline}>
-              <MediaVideoPreview {metadata} isTimelineElement={true} />
-              <MediaAudioPreview {metadata} isTimelineElement={true} />
-            </MediaPreviewProvider>
-          </div>
-        {/each}
-      {/key}
+      {#each $timeline.clips as metadata, idx (metadata.uuid)}
+        <div
+          class="draggable overflow-clip"
+          class:dragging={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
+          class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
+        >
+          <TimelinePreview {metadata}>
+            <MediaVideoPreview metadata={{ name: metadata.name, thumbnails: metadata.thumbnails }} isTimelineElement={true} />
+            <MediaAudioPreview audioData={metadata.audioData} />
+          </TimelinePreview>
+        </div>
+      {/each}
     </div>
   </div>
   <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
