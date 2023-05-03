@@ -14,7 +14,7 @@
 
   const handleDrop = (e: MouseEvent) => {
     if (!$studio.dragData.media) return;
-    $player.sourceMetadata = $studio.dragData.media;
+    $player.source = $studio.dragData.media.src;
     $player.playerState = "preview";
   };
 </script>
@@ -29,8 +29,8 @@
     class="text-white border-2 border-neutral-800 px-3 py-1"
     class:bg-neutral-600={$player.playerState === "preview"}
     on:click={() => ($player.playerState = "preview")}
-    class:opacity-75={!$player.sourceMetadata}
-    disabled={!$player.sourceMetadata}>preview</button
+    class:opacity-75={!$player.source}
+    disabled={!$player.source}>preview</button
   >
 </div>
 
@@ -42,7 +42,7 @@
   on:mouseenter={() => ($studio.dragData.currentDragRegion = "player")}
   on:mouseleave={() => ($studio.dragData.currentDragRegion = null)}
 >
-  {#key $player.sourceMetadata}
+  {#key $player.source}
     {#if $player.playerState === "editor"}
       <EditorPlayer />
     {:else}

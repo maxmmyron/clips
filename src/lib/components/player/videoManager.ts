@@ -1,5 +1,5 @@
 
-export const generateTimelineAudioData = async (clips: StudioMediaMetadata[]) => {
+export const generateTimelineAudioData = async (clips: TimelineMedia[]) => {
   // get all audio data and filter out any that failed to load
   let data = await Promise.allSettled(clips
     .map((clip) => clip.audioData))
