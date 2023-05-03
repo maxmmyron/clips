@@ -63,8 +63,7 @@
       return;
     }
     // handle dragging new media into timeline
-    let uuid = uuidv4();
-    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { uuid: uuid, ...$studio.dragData.media, startTime: 0, endTime: 0 }]);
+    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { uuid: uuidv4(), ...$studio.dragData.media, startTime: 0, endTime: 0 }]);
   };
 
   const handleKey = (e: KeyboardEvent) => {
