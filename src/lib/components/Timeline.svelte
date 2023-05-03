@@ -56,8 +56,6 @@
 
       const media = $timeline.clips.splice($timeline.dragIndex, 1)[0];
 
-      console.log(`move from ${$timeline.dragIndex} to ${dropIndex}`);
-
       if (dropIndex === -1) $timeline.clips.push(media);
       else $timeline.clips.splice(dropIndex, 0, media);
       return;

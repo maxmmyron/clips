@@ -16,7 +16,6 @@
   };
 
   const handleDragStart = (e: MouseEvent) => {
-    console.log("dragstart");
     $studio.dragData = {
       ...$studio.dragData,
       media: metadata,
