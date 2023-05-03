@@ -2,28 +2,34 @@
   import { timeline } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
 
+  export let width = 640;
+  export let height = 480;
+
   let currentTime = 0;
-  let currentSrc: string | null = null;
   let isPaused = true;
   let video: HTMLVideoElement;
-
-  $: currentSrc = $timeline.clips[0]?.src;
 
   $: if (video) isPaused, isPaused ? video.pause() : video.play();
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
-    if (!currentSrc) {
-      console.warn("No source to render");
-      return;
-    }
     if (!video) {
       console.warn("No video to render");
       return;
     }
 
-    context.drawImage(video, 0, 0);
+    const mediaPosition = {
+      x: Math.max(0, (width - video.videoWidth) / 2),
+      y: Math.max(0, (height - video.videoHeight) / 2),
+    };
+
+    const maxSize = {
+      width: Math.min(video.videoWidth, width),
+      height: Math.min(video.videoHeight, height),
+    };
+
+    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, mediaPosition.x, mediaPosition.y, maxSize.width, maxSize.height);
   };
 
   function setPlayerTime(time: number): any {
@@ -32,19 +38,19 @@
   }
 </script>
 
-<video class="hidden" muted bind:this={video} src={currentSrc} bind:currentTime>
+<video class="hidden" muted bind:this={video} src={$timeline.clips[0]?.src} bind:currentTime>
   <track kind="captions" />
 </video>
 
-{#if $timeline.clips.length}
-  <Canvas class="w-full h-full">
-    <Layer {render} />
-  </Canvas>
-{:else}
-  <div class="w-full h-full flex justify-center items-center">
+<div class="w-full h-full flex justify-center items-center">
+  {#if $timeline.clips.length}
+    <Canvas {width} {height}>
+      <Layer {render} />
+    </Canvas>
+  {:else}
     <p class="text-neutral-400 font-mono">no clips in timeline （＞人＜；）</p>
-  </div>
-{/if}
+  {/if}
+</div>
 
 <p class="w-full text-white text-right">{currentTime.toPrecision(2)}</p>
 

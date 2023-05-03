@@ -35,7 +35,7 @@
 </div>
 
 <div
-  class="aspect-video w-full max-h-[50%] border-2 border-neutral-800"
+  class="aspect-video w-full"
   bind:this={videoContainer}
   on:mouseup={handleDrop}
   on:mousemove={handleDrag}
@@ -44,7 +44,7 @@
 >
   {#key $player.source}
     {#if $player.playerState === "editor"}
-      <EditorPlayer />
+      <EditorPlayer width={videoContainer?.clientWidth || 640} height={videoContainer?.clientHeight || 480} />
     {:else}
       <PreviewPlayer />
     {/if}
