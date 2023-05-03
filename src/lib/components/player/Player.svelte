@@ -42,9 +42,11 @@
   on:mouseenter={() => ($studio.dragData.currentDragRegion = "player")}
   on:mouseleave={() => ($studio.dragData.currentDragRegion = null)}
 >
-  {#if $player.playerState === "editor"}
-    <EditorPlayer />
-  {:else if $player.playerState === "preview"}
-    <PreviewPlayer />
-  {/if}
+  {#key $player.sourceMetadata}
+    {#if $player.playerState === "editor"}
+      <EditorPlayer />
+    {:else}
+      <PreviewPlayer />
+    {/if}
+  {/key}
 </div>
