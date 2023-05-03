@@ -28,6 +28,8 @@
 
     $studio.dragData.ghost.position.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
     $studio.dragData.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
+
+    $timeline.dragIndex = $timeline.clips.indexOf(metadata);
   };
 </script>
 
@@ -35,7 +37,7 @@
   bind:this={mediaPreview}
   style="width: {width};"
   on:click|capture|stopPropagation={handleClick}
-  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip 'h-48'"
+  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48"
   class:outline={isSelected}
   on:mousedown={handleDragStart}
 >
