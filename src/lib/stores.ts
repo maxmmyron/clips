@@ -1,11 +1,10 @@
 import {spring, type Spring} from "svelte/motion";
 import { writable } from "svelte/store";
 
+
 export const studio = writable({
-  /**
-   * The current resize direction. Used to determine cursor stile and resize logic. If null, no resizing will occur.
-   */
   resizeMode: null,
+
   /**
    * The drag data. used to determine what media is being dragged, and how to transform it on the screen given certain drag actions.
    * If null, no dragging is occurring.
@@ -20,14 +19,11 @@ export const studio = writable({
       size: spring({width: 0, height: 0}),
     }
   },
-  /**
-   * The current mouse position
-   */
   mouse: {x: 0, y: 0},
 } as {
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
   dragData: {
-    media: StudioMediaMetadata | null;
+    media: UploadedMedia | null;
     originType: "mediaPool" | "timeline" | null;
     originPosition: {x:number, y:number} | null;
     dragEvent: "dragstart" | "drag" | "dragend" | null;
@@ -66,5 +62,5 @@ export const timeline: WritableTimeline = writable({
 
 export const player: WritablePlayer = writable({
   playerState: "editor",
-  sourceMetadata: null,
+  source: null,
 });
