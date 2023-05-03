@@ -1,53 +1,45 @@
 enum DropLocation { PLAYER, TIMELINE };
 
-interface StudioMediaMetadata {
-  /**
-   * The media source URL.
-   */
+interface PreviewMedia {
   src: string;
-  /**
-   * The name of the file. Used as an identifier for the media, and as the display name in the media pool.
-   */
+}
+
+interface UploadedMedia {
+  src: string;
   name: string;
-  /**
-   * The media duration in seconds. Used to determine the length of the clip in the timeline.
-   */
-  duration: Promise<number>;
-  /**
-   *  A series of base64 encoded images to use as thumbnails.
-   */
-  thumbnails: Promise<string[]>;
-  /**
-   * The audio buffer source node. Used to play the audio and generate a timeline waveform preview.
-   */
-  audioData: Promise<Float32Array>;
-  /**
-   * The start time of the clip in seconds. This goes unused in the media pool, and is used to clip media in the timeline.
-   */
+  duration: number;
+  thumbnails: string[];
+  audioData: Float32Array;
+}
+
+interface TimelineMedia {
+  uuid: string;
+  src: string;
+  name: string;
+  duration: number;
+  thumbnails: string[];
+  audioData: Float32Array;
   startTime: number;
-  /**
-   * The end time of the clip in seconds. This goes unused in the media pool, and is used to clip media in the timeline.
-   */
   endTime: number;
 }
 
 type WritableMediaPool = import("svelte/store").Writable<{
-  selected: StudioMediaMetadata[];
-  media: StudioMediaMetadata[];
+  selected: UploadedMedia[];
+  media: UploadedMedia[];
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
-  selected: StudioMediaMetadata[];
-  clips: StudioMediaMetadata[];
+  selected: TimelineMedia[];
+  clips: TimelineMedia[];
   zoomScale: number;
   dragIndex: number;
 }>;
 
 type WritablePlayer = import("svelte/store").Writable<{
   playerState: "editor" | "preview";
-  sourceMetadata: StudioMediaMetadata | null;
+  source: string | null;
 }>;
 
 declare interface Window {
-  mediaPool: StudioMediaMetadata[];
+  mediaPool: UploadedMedia[];
 }
