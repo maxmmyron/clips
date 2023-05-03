@@ -19,17 +19,17 @@
       return;
     }
 
+    const mediaSize = {
+      width: video.videoWidth * Math.min(width / video.videoWidth, height / video.videoHeight),
+      height: video.videoHeight * Math.min(width / video.videoWidth, height / video.videoHeight),
+    };
+
     const mediaPosition = {
-      x: Math.max(0, (width - video.videoWidth) / 2),
-      y: Math.max(0, (height - video.videoHeight) / 2),
+      x: Math.max(0, (width - mediaSize.width) / 2),
+      y: Math.max(0, (height - mediaSize.height) / 2),
     };
 
-    const maxSize = {
-      width: Math.min(video.videoWidth, width),
-      height: Math.min(video.videoHeight, height),
-    };
-
-    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, mediaPosition.x, mediaPosition.y, maxSize.width, maxSize.height);
+    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, mediaPosition.x, mediaPosition.y, mediaSize.width, mediaSize.height);
   };
 
   function setPlayerTime(time: number): any {
