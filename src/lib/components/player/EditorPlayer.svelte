@@ -1,62 +1,45 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
-  import { onMount } from "svelte";
+  import { Canvas, Layer, t, type Render } from "svelte-canvas";
 
-  let canvasPlayer: HTMLCanvasElement;
   let currentTime = 0;
+  let currentSrc: string | null = null;
   let isPaused = true;
+  let video: HTMLVideoElement;
 
-  onMount(() => console.log("mounting"));
+  $: currentSrc = $timeline.clips[0]?.src;
 
-  $: $timeline.clips, createFrame();
+  $: if (video) isPaused, isPaused ? video.pause() : video.play();
 
-  // TODO: replace
-  const createFrame = () => {
-    console.log("creating frame");
-    if (!canvasPlayer) {
-      console.log("no canvas");
+  let render: Render;
+  $: render = ({ context, width, height }) => {
+    $t;
+    if (!currentSrc) {
+      console.warn("No source to render");
       return;
     }
-    if (!$timeline.clips.length) {
-      console.log("no clips");
+    if (!video) {
+      console.warn("No video to render");
       return;
     }
 
-    const ctx = canvasPlayer.getContext("2d");
-    if (!ctx) {
-      console.log("no context");
-      return;
-    }
-    const clip = $timeline.clips[0];
-
-    console.log(clip);
-
-    const video = document.createElement("video");
-    video.src = clip.src;
-    video.currentTime = 2;
-
-    video.addEventListener("loadeddata", () => {
-      console.log("loaded data");
-      ctx.fillStyle = "red";
-      ctx.fillRect(0, 0, canvasPlayer.width, canvasPlayer.height);
-      video.play();
-      ctx.drawImage(video, 0, 0);
-    });
-
-    // console.log(video, video.src, video.currentTime);
-
-    // ctx.fillStyle = "red";
-    // ctx.fillRect(0, 0, canvasPlayer.width, canvasPlayer.height);
-    ctx.drawImage(video, 0, 0, 100, 100);
+    context.drawImage(video, 0, 0);
   };
 
-  function setPlayerTime(arg0: number): any {
-    throw new Error("Function not implemented.");
+  function setPlayerTime(time: number): any {
+    isPaused = true;
+    currentTime = time === -1 ? video.duration : time;
   }
 </script>
 
+<video class="hidden" muted bind:this={video} src={currentSrc} bind:currentTime>
+  <track kind="captions" />
+</video>
+
 {#if $timeline.clips.length}
-  <canvas class="w-full h-full" bind:this={canvasPlayer} />
+  <Canvas class="w-full h-full">
+    <Layer {render} />
+  </Canvas>
 {:else}
   <div class="w-full h-full flex justify-center items-center">
     <p class="text-neutral-400 font-mono">no clips in timeline （＞人＜；）</p>
