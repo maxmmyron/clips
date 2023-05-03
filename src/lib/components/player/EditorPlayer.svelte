@@ -5,13 +5,24 @@
   export let width = 640;
   export let height = 480;
 
+  let currentSrcIndex = 0;
+  let accumulatedTime = 0;
   let currentTime = 0;
   let isPaused = true;
   let video: HTMLVideoElement;
+  let render: Render;
 
   $: if (video) isPaused, isPaused ? video.pause() : video.play();
 
-  let render: Render;
+  const handleEnded = () => {
+    accumulatedTime += video.duration;
+    if (currentSrcIndex === $timeline.clips.length - 1) {
+      isPaused = true;
+      return;
+    }
+    currentSrcIndex = currentSrcIndex + 1;
+  };
+
   $: render = ({ context, width, height }) => {
     $t;
     if (!video) {
@@ -32,13 +43,28 @@
     context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, mediaPosition.x, mediaPosition.y, mediaSize.width, mediaSize.height);
   };
 
-  function setPlayerTime(time: number): any {
+  function setPlayerTime(front: boolean = true): any {
     isPaused = true;
-    currentTime = time === -1 ? video.duration : time;
+    if (front) {
+      currentSrcIndex = 0;
+      accumulatedTime = 0;
+    } else {
+      currentSrcIndex = $timeline.clips.length - 1;
+      accumulatedTime = $timeline.clips.reduce((acc, cur) => acc + cur.duration, 0) - video.duration;
+      currentTime = video.duration;
+    }
   }
 </script>
 
-<video class="hidden" muted bind:this={video} src={$timeline.clips[0]?.src} bind:currentTime>
+<video
+  class="hidden"
+  muted
+  bind:this={video}
+  src={$timeline.clips[currentSrcIndex]?.src}
+  on:ended={handleEnded}
+  on:canplay={() => !isPaused && video.play()}
+  bind:currentTime
+>
   <track kind="captions" />
 </video>
 
@@ -52,10 +78,10 @@
   {/if}
 </div>
 
-<p class="w-full text-white text-right">{currentTime.toPrecision(2)}</p>
+<p class="w-full text-white text-right">{(accumulatedTime + currentTime).toPrecision(2)}</p>
 
 <div class="w-full flex justify-center gap-4">
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(0)}>⏪</button>
+  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(true)}>⏪</button>
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => (isPaused = !isPaused)}>{isPaused ? "▶️" : "⏸️"}</button>
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(-1)}>⏩</button>
+  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(false)}>⏩</button>
 </div>
