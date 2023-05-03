@@ -18,7 +18,7 @@
   };
 </script>
 
-<video class="w-full h-full" bind:this={video} src={$player.sourceMetadata?.src} bind:currentTime>
+<video class="w-full h-full" bind:this={video} src={$player.source} bind:currentTime>
   <track kind="captions" />
 </video>
 
