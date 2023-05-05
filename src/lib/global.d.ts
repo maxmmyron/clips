@@ -4,17 +4,12 @@ interface PreviewMedia {
   src: string;
 }
 
-interface MediaAudioData {
-  buffer: Float32Array;
-  sampleRate: number;
-}
-
 interface UploadedMedia {
   src: string;
   name: string;
   duration: number;
   thumbnails: string[];
-  audioData: MediaAudioData;
+  audioData: AudioBufferSourceNode;
 }
 
 interface TimelineMedia {
@@ -23,7 +18,7 @@ interface TimelineMedia {
   name: string;
   duration: number;
   thumbnails: string[];
-  audioData: MediaAudioData;
+  audioData: AudioBufferSourceNode;
   startTime: number;
   endTime: number;
 }

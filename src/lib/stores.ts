@@ -4,6 +4,7 @@ import { writable } from "svelte/store";
 
 export const studio = writable({
   resizeMode: null,
+  audioContext: null,
 
   /**
    * The drag data. used to determine what media is being dragged, and how to transform it on the screen given certain drag actions.
@@ -22,6 +23,7 @@ export const studio = writable({
   mouse: {x: 0, y: 0},
 } as {
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
+  audioContext: AudioContext | null;
   dragData: {
     media: UploadedMedia | null;
     originType: "mediaPool" | "timeline" | null;
