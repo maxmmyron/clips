@@ -8,39 +8,44 @@
     height = 480;
 
   let isPaused = true;
-  let srcAIndex = 0,
-    srcBIndex = 1;
+  let bufferAIndex = 0,
+    bufferBIndex = 1;
 
-  let trackA: HTMLVideoElement, trackB: HTMLVideoElement;
+  let videoA: HTMLVideoElement, videoB: HTMLVideoElement, audioA: HTMLAudioElement, audioB: HTMLAudioElement;
   let preview: HTMLVideoElement;
   let audioContext: AudioContext;
 
   onMount(() => {
-    preview = trackA;
+    preview = videoA;
     audioContext = new AudioContext();
   });
 
   $: if (preview) isPaused ? preview.pause() : preview.play(); //check removal of isPaused,
   $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
-  $: srcA = $timeline.clips[srcAIndex]?.src;
-  $: srcB = $timeline.clips[srcBIndex]?.src;
+
+  // TODO: expand src with video & audio srcs
+  $: videoSrcA = $timeline.clips[bufferAIndex]?.src.video;
+  $: videoSrcB = $timeline.clips[bufferBIndex]?.src.video;
+  $: audioSrcA = $timeline.clips[bufferAIndex]?.src.audio;
+  $: audioSrcB = $timeline.clips[bufferBIndex]?.src.audio;
+
   $: currentTime = preview?.currentTime || 0;
-  $: accumulatedTime = $timeline.clips.slice(0, Math.max(srcAIndex, srcBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
-  $: $timeline.clips && audioContext && regenerateEditorAudio(audioContext);
+  $: accumulatedTime = $timeline.clips.slice(0, Math.max(bufferAIndex, bufferBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
+  //$: $timeline.clips && audioContext && regenerateEditorAudio(audioContext);
 
   const handleEnded = () => {
-    if ((preview === trackA ? srcAIndex : srcBIndex) === $timeline.clips.length - 1) {
+    if ((preview === videoA ? bufferAIndex : bufferBIndex) === $timeline.clips.length - 1) {
       audioContext && audioContext.suspend();
       isPaused = true;
       return;
     }
 
-    if (preview === trackA) {
-      preview = trackB;
-      srcAIndex = srcBIndex + 1;
+    if (preview === videoA) {
+      preview = videoB;
+      bufferAIndex = bufferBIndex + 1;
     } else {
-      preview = trackA;
-      srcBIndex = srcAIndex + 1;
+      preview = videoB;
+      bufferBIndex = bufferAIndex + 1;
     }
   };
 
@@ -65,25 +70,28 @@
   function setPlayerTime(front: boolean = true): any {
     isPaused = true;
     if (front) {
-      (srcAIndex = 0), (srcBIndex = 1);
+      (bufferAIndex = 0), (bufferBIndex = 1);
       currentTime = 0;
     } else {
       // TODO: kinda shitty code; probably should directly set src attribute of preview. Works for now but consider refactoring
       preview.src = $timeline.clips[$timeline.clips.length - 1].src;
       currentTime = preview.duration;
-      if (preview === trackA) {
-        srcAIndex = $timeline.clips.length - 1;
-        srcBIndex = $timeline.clips.length;
+      if (preview === videoA) {
+        bufferAIndex = $timeline.clips.length - 1;
+        bufferBIndex = $timeline.clips.length;
       } else {
-        srcAIndex = $timeline.clips.length;
-        srcBIndex = $timeline.clips.length - 1;
+        bufferAIndex = $timeline.clips.length;
+        bufferBIndex = $timeline.clips.length - 1;
       }
     }
   }
 </script>
 
-<video class="hidden" muted src={srcA} bind:this={trackA} on:ended={handleEnded} />
-<video class="hidden" muted src={srcB} bind:this={trackB} on:ended={handleEnded} />
+<video class="hidden" muted src={videoSrcA} bind:this={videoA} on:ended={handleEnded} />
+<video class="hidden" muted src={videoSrcB} bind:this={videoB} on:ended={handleEnded} />
+
+<audio class="hidden" src={audioSrcA} bind:this={audioA} />
+<audio class="hidden" src={audioSrcB} bind:this={audioB} />
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
