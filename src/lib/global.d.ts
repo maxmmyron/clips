@@ -9,7 +9,7 @@ interface UploadedMedia {
   name: string;
   duration: number;
   thumbnails: string[];
-  audioData: AudioBufferSourceNode;
+  buffer: AudioBuffer;
 }
 
 interface TimelineMedia {
@@ -18,7 +18,7 @@ interface TimelineMedia {
   name: string;
   duration: number;
   thumbnails: string[];
-  audioData: AudioBufferSourceNode;
+  buffer: AudioBuffer;
   startTime: number;
   endTime: number;
 }

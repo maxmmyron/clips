@@ -1,16 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  export let audioData: AudioBufferSourceNode;
+  export let buffer: Float32Array | null = null;
 
   let canvas: HTMLCanvasElement;
 
   onMount(() => {
-    if (!audioData || !audioData.buffer) return console.error("No audio data");
-    let audioBuffer: Float32Array = new Float32Array(audioData.buffer.length);
-    audioData.buffer?.copyFromChannel(audioBuffer, 0, 0);
-
-    const step = Math.ceil(audioBuffer.length / canvas.width);
+    if (!buffer) return console.error("No audio data");
+    const step = Math.ceil(buffer.length / canvas.width);
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return console.error("Could not get canvas context");
@@ -23,7 +20,7 @@
     ctx.beginPath();
 
     // if empty, just draw a line
-    if (audioBuffer.every((datum) => datum === 0)) {
+    if (buffer.every((datum) => datum === 0)) {
       ctx.moveTo(0, canvas.height / 2);
       ctx.lineTo(canvas.width, canvas.height / 2);
       ctx.stroke();
@@ -36,7 +33,7 @@
 
       // loop over step-sized chunks of data, find min and max, and draw to screen for that "pixel column"
       for (let j = 0; j < step; j++) {
-        const datum = audioBuffer[i * step + j];
+        const datum = buffer[i * step + j];
 
         if (datum < min) min = datum;
         if (datum > max) max = datum;
