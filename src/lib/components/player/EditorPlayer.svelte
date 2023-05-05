@@ -13,6 +13,7 @@
   let videoA: HTMLVideoElement, videoB: HTMLVideoElement, audioA: HTMLAudioElement, audioB: HTMLAudioElement;
   let preview: HTMLVideoElement;
   let audioContext: AudioContext;
+  let audioNode: AudioBufferSourceNode;
 
   onMount(() => {
     preview = videoA;
@@ -27,19 +28,21 @@
   $: videoSrcB = $timeline.clips[bufferBIndex]?.src;
   $: currentIndex = preview === videoA ? bufferAIndex : bufferBIndex;
   $: currentTime = preview?.currentTime || 0;
-  $: accumulatedTime = $timeline.clips.slice(0, Math.max(bufferAIndex, bufferBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
+  $: accumulatedTime = $timeline.clips.slice(0, Math.min(bufferAIndex, bufferBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
 
   const handlePlay = () => {
-    const audioNode = $timeline.clips[currentIndex].audioData;
-    const startOffset = $timeline.clips[currentIndex].startTime + currentTime;
-    const duration = $timeline.clips[currentIndex].duration - currentTime - $timeline.clips[currentIndex].endTime;
+    //create node from AudioBuffer
+    audioNode = audioContext.createBufferSource();
+    audioNode.buffer = $timeline.clips[currentIndex].buffer;
 
+    const startOffset = $timeline.clips[currentIndex].startTime + preview.currentTime;
+    const duration = $timeline.clips[currentIndex].duration - preview.currentTime - $timeline.clips[currentIndex].endTime;
+
+    audioNode.connect(audioContext.destination);
     audioNode.start(0, startOffset, duration);
   };
 
   const handleEnded = () => {
-    const audioNode = $timeline.clips[currentIndex].audioData;
-    audioNode.stop();
     if ((preview === videoA ? bufferAIndex : bufferBIndex) === $timeline.clips.length - 1) {
       audioContext && audioContext.suspend();
       isPaused = true;
@@ -78,10 +81,12 @@
     if (front) {
       (bufferAIndex = 0), (bufferBIndex = 1);
       currentTime = 0;
+      accumulatedTime = 0;
     } else {
       // TODO: kinda shitty code; probably should directly set src attribute of preview. Works for now but consider refactoring
       preview.src = $timeline.clips[$timeline.clips.length - 1].src;
       currentTime = preview.duration;
+      accumulatedTime = $timeline.clips.reduce((acc, cur) => acc + cur.duration, 0) - preview.duration;
       if (preview === videoA) {
         bufferAIndex = $timeline.clips.length - 1;
         bufferBIndex = $timeline.clips.length;
@@ -95,6 +100,7 @@
   const togglePlayState = () => {
     isPaused = !isPaused;
     if (isPaused) {
+      audioNode.disconnect();
       audioContext.suspend();
     } else {
       audioContext.resume();
