@@ -67,7 +67,7 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
 
 });
 
-export const loadAudioBufferSourceNode = async (src: string) => new Promise<Float32Array>((resolve, reject) => {
+export const loadAudioBufferSourceNode = async (src: string) => new Promise<MediaAudioData>((resolve, reject) => {
   const audioContext = new AudioContext();
   fetch(src)
     .then(res => res.arrayBuffer())
@@ -80,8 +80,7 @@ export const loadAudioBufferSourceNode = async (src: string) => new Promise<Floa
 
           const dataArray = new Float32Array(buffer.length);
           buffer.copyFromChannel(dataArray, 0);
-
-          resolve(dataArray);
+          resolve({buffer: dataArray, sampleRate: buffer.sampleRate});
         },
         (err) => reject(`Error decoding audio data: ${err}`))
       ).catch(err => reject(`Error fetching audio data: ${err}`));

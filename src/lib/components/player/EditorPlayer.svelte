@@ -2,6 +2,7 @@
   import { timeline } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import { onMount } from "svelte";
+  import { regenerateEditorAudio } from "./audioHandler";
 
   export let width = 640,
     height = 480;
@@ -12,17 +13,24 @@
 
   let trackA: HTMLVideoElement, trackB: HTMLVideoElement;
   let preview: HTMLVideoElement;
+  let audioContext: AudioContext;
 
-  onMount(() => (preview = trackA));
+  onMount(() => {
+    preview = trackA;
+    audioContext = new AudioContext();
+  });
 
-  $: if (preview) isPaused, isPaused ? preview.pause() : preview.play();
+  $: if (preview) isPaused ? preview.pause() : preview.play(); //check removal of isPaused,
+  $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
   $: srcA = $timeline.clips[srcAIndex]?.src;
   $: srcB = $timeline.clips[srcBIndex]?.src;
   $: currentTime = preview?.currentTime || 0;
   $: accumulatedTime = $timeline.clips.slice(0, Math.max(srcAIndex, srcBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
+  $: $timeline.clips && audioContext && regenerateEditorAudio(audioContext);
 
   const handleEnded = () => {
     if ((preview === trackA ? srcAIndex : srcBIndex) === $timeline.clips.length - 1) {
+      audioContext && audioContext.suspend();
       isPaused = true;
       return;
     }
