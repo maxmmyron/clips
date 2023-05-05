@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
+  import { studio, timeline } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import { onMount } from "svelte";
-  import { regenerateEditorAudio } from "./audioHandler";
 
   export let width = 640,
     height = 480;
@@ -24,16 +23,23 @@
   $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
 
   // TODO: expand src with video & audio srcs
-  $: videoSrcA = $timeline.clips[bufferAIndex]?.src.video;
-  $: videoSrcB = $timeline.clips[bufferBIndex]?.src.video;
-  $: audioSrcA = $timeline.clips[bufferAIndex]?.src.audio;
-  $: audioSrcB = $timeline.clips[bufferBIndex]?.src.audio;
-
+  $: videoSrcA = $timeline.clips[bufferAIndex]?.src;
+  $: videoSrcB = $timeline.clips[bufferBIndex]?.src;
+  $: currentIndex = preview === videoA ? bufferAIndex : bufferBIndex;
   $: currentTime = preview?.currentTime || 0;
   $: accumulatedTime = $timeline.clips.slice(0, Math.max(bufferAIndex, bufferBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
-  //$: $timeline.clips && audioContext && regenerateEditorAudio(audioContext);
+
+  const handlePlay = () => {
+    const audioNode = $timeline.clips[currentIndex].audioData;
+    const startOffset = $timeline.clips[currentIndex].startTime + currentTime;
+    const duration = $timeline.clips[currentIndex].duration - currentTime - $timeline.clips[currentIndex].endTime;
+
+    audioNode.start(0, startOffset, duration);
+  };
 
   const handleEnded = () => {
+    const audioNode = $timeline.clips[currentIndex].audioData;
+    audioNode.stop();
     if ((preview === videoA ? bufferAIndex : bufferBIndex) === $timeline.clips.length - 1) {
       audioContext && audioContext.suspend();
       isPaused = true;
@@ -85,13 +91,19 @@
       }
     }
   }
+
+  const togglePlayState = () => {
+    isPaused = !isPaused;
+    if (isPaused) {
+      audioContext.suspend();
+    } else {
+      audioContext.resume();
+    }
+  };
 </script>
 
-<video class="hidden" muted src={videoSrcA} bind:this={videoA} on:ended={handleEnded} />
-<video class="hidden" muted src={videoSrcB} bind:this={videoB} on:ended={handleEnded} />
-
-<audio class="hidden" src={audioSrcA} bind:this={audioA} />
-<audio class="hidden" src={audioSrcB} bind:this={audioB} />
+<video class="hidden" muted src={videoSrcA} bind:this={videoA} on:ended={handleEnded} on:play={handlePlay} />
+<video class="hidden" muted src={videoSrcB} bind:this={videoB} on:ended={handleEnded} on:play={handlePlay} />
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
@@ -107,6 +119,6 @@
 
 <div class="w-full flex justify-center gap-4">
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(true)}>⏪</button>
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => (isPaused = !isPaused)}>{isPaused ? "▶️" : "⏸️"}</button>
+  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={togglePlayState}>{isPaused ? "▶️" : "⏸️"}</button>
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(false)}>⏩</button>
 </div>
