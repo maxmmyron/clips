@@ -1,3 +1,6 @@
+import { get } from "svelte/store";
+import { studio } from "./stores";
+
 export const loadMediaMetadata = async (file: File) => {
   const src = URL.createObjectURL(file);
 
@@ -63,25 +66,19 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
 
     resolve(thumbnails);
   });
-
-
 });
 
-export const loadAudioBufferSourceNode = async (src: string) => new Promise<MediaAudioData>((resolve, reject) => {
-  const audioContext = new AudioContext();
-  fetch(src)
-    .then(res => res.arrayBuffer())
-      .then(buffer => audioContext.decodeAudioData(
-        buffer,
-        (buffer: AudioBuffer) => {
-          const source = audioContext.createBufferSource();
-          source.buffer = buffer;
-          source.connect(audioContext.destination);
-
-          const dataArray = new Float32Array(buffer.length);
-          buffer.copyFromChannel(dataArray, 0);
-          resolve({buffer: dataArray, sampleRate: buffer.sampleRate});
-        },
-        (err) => reject(`Error decoding audio data: ${err}`))
-      ).catch(err => reject(`Error fetching audio data: ${err}`));
+export const loadAudioBufferSourceNode = async (src: string) => new Promise<AudioBufferSourceNode>((resolve, reject) => {
+  const audioContext = get(studio).audioContext;
+  if(!audioContext) reject("No audio context");
+  else fetch(src).then(res => res.arrayBuffer()).then(buffer => audioContext.decodeAudioData(
+    buffer,
+    (buffer: AudioBuffer) => {
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      resolve(source);
+    },
+    (err) => reject(`Error decoding audio data: ${err}`))
+  ).catch(err => reject(`Error fetching audio data: ${err}`));
 });
