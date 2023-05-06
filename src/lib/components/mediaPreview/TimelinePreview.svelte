@@ -4,7 +4,7 @@
   export let metadata: TimelineMedia;
 
   let duration = metadata.duration;
-  let width = (duration - metadata.startTime - metadata.endTime) * $timeline.zoomScale + "px";
+  $: width = (duration - metadata.startTime - metadata.endTime) * $timeline.zoomScale ** 1.75 + "px";
   let mediaPreview: HTMLButtonElement;
 
   $: isSelected = $timeline.selected.includes(metadata);
@@ -36,7 +36,7 @@
   bind:this={mediaPreview}
   style="width: {width};"
   on:click|capture|stopPropagation={handleClick}
-  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48"
+  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48 bg-black"
   class:outline={isSelected}
   on:mousedown={handleDragStart}
 >
