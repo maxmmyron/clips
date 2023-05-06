@@ -9,25 +9,24 @@
   let isPaused = true;
   let bufferAIndex = 0,
     bufferBIndex = 1;
+  let currentTime = 0;
 
-  let videoA: HTMLVideoElement, videoB: HTMLVideoElement, audioA: HTMLAudioElement, audioB: HTMLAudioElement;
-  let preview: HTMLVideoElement;
-  let audioContext: AudioContext;
-  let audioNode: AudioBufferSourceNode;
+  let videoA: HTMLVideoElement, videoB: HTMLVideoElement, preview: HTMLVideoElement;
+  let audioContext: AudioContext, audioNode: AudioBufferSourceNode;
 
   onMount(() => {
     preview = videoA;
     audioContext = new AudioContext();
   });
 
-  $: if (preview) isPaused ? preview.pause() : preview.play(); //check removal of isPaused,
+  $: if (preview) isPaused ? preview.pause() : preview.play();
   $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
+  $: if (audioNode) isPaused && audioNode && audioNode.disconnect();
 
   // TODO: expand src with video & audio srcs
   $: videoSrcA = $timeline.clips[bufferAIndex]?.src;
   $: videoSrcB = $timeline.clips[bufferBIndex]?.src;
   $: currentIndex = preview === videoA ? bufferAIndex : bufferBIndex;
-  $: currentTime = preview?.currentTime || 0;
   $: accumulatedTime = $timeline.clips.slice(0, Math.min(bufferAIndex, bufferBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
 
   const handlePlay = () => {
@@ -49,13 +48,9 @@
       return;
     }
 
-    if (preview === videoA) {
-      preview = videoB;
-      bufferAIndex = bufferBIndex + 1;
-    } else {
-      preview = videoB;
-      bufferBIndex = bufferAIndex + 1;
-    }
+    preview = (preview === videoA ? videoB : videoA) as HTMLVideoElement;
+    // skip forward previous index to next clip
+    preview === videoA ? (bufferBIndex += 2) : (bufferAIndex += 2);
   };
 
   let render: Render;
@@ -66,6 +61,10 @@
       return;
     }
 
+    // TODO: not good svelte code... this could be reactive
+    currentTime = preview.currentTime;
+
+    // TODO: no need to recompute this every frame
     const mediaSize = {
       width: preview.videoWidth * Math.min(width / preview.videoWidth, height / preview.videoHeight),
       height: preview.videoHeight * Math.min(width / preview.videoWidth, height / preview.videoHeight),
@@ -79,13 +78,18 @@
   function setPlayerTime(front: boolean = true): any {
     isPaused = true;
     if (front) {
-      (bufferAIndex = 0), (bufferBIndex = 1);
-      currentTime = 0;
+      bufferAIndex = 0;
+      bufferBIndex = 1;
+      preview = videoA;
+      preview.currentTime = 0;
       accumulatedTime = 0;
     } else {
       // TODO: kinda shitty code; probably should directly set src attribute of preview. Works for now but consider refactoring
       preview.src = $timeline.clips[$timeline.clips.length - 1].src;
-      currentTime = preview.duration;
+      preview.load();
+      preview.addEventListener("loadedmetadata", () => {
+        preview.currentTime = preview.duration;
+      });
       accumulatedTime = $timeline.clips.reduce((acc, cur) => acc + cur.duration, 0) - preview.duration;
       if (preview === videoA) {
         bufferAIndex = $timeline.clips.length - 1;
@@ -98,13 +102,8 @@
   }
 
   const togglePlayState = () => {
+    if (currentIndex === $timeline.clips.length - 1 && preview.currentTime === preview.duration) setPlayerTime();
     isPaused = !isPaused;
-    if (isPaused) {
-      audioNode.disconnect();
-      audioContext.suspend();
-    } else {
-      audioContext.resume();
-    }
   };
 </script>
 
@@ -124,7 +123,7 @@
 <p class="w-full text-white text-right">{(accumulatedTime + currentTime).toPrecision(2)}</p>
 
 <div class="w-full flex justify-center gap-4">
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(true)}>⏪</button>
+  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime()}>⏪</button>
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={togglePlayState}>{isPaused ? "▶️" : "⏸️"}</button>
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(false)}>⏩</button>
 </div>
