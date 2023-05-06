@@ -1,11 +1,11 @@
 import {spring, type Spring} from "svelte/motion";
 import { writable } from "svelte/store";
 
+
 export const studio = writable({
-  /**
-   * The current resize direction. Used to determine cursor stile and resize logic. If null, no resizing will occur.
-   */
   resizeMode: null,
+  audioContext: null,
+
   /**
    * The drag data. used to determine what media is being dragged, and how to transform it on the screen given certain drag actions.
    * If null, no dragging is occurring.
@@ -20,14 +20,12 @@ export const studio = writable({
       size: spring({width: 0, height: 0}),
     }
   },
-  /**
-   * The current mouse position
-   */
   mouse: {x: 0, y: 0},
 } as {
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
+  audioContext: AudioContext | null;
   dragData: {
-    media: StudioMediaMetadata | null;
+    media: UploadedMedia | null;
     originType: "mediaPool" | "timeline" | null;
     originPosition: {x:number, y:number} | null;
     dragEvent: "dragstart" | "drag" | "dragend" | null;
@@ -41,11 +39,6 @@ export const studio = writable({
 });
 
 export const mediaPool: WritableMediaPool = writable({
-  /**
-   * The current preview media. Used to determine what media to display on the preview video element.
-   * If null, no preview is being shown.
-   */
-  previewSrc: null,
   /**
    * An array of currently selected media indexes. Used to determine what media to display as selected in the media pool.
    */
@@ -67,4 +60,9 @@ export const timeline: WritableTimeline = writable({
   clips: [],
   zoomScale: 5,
   dragIndex: -1,
+});
+
+export const player: WritablePlayer = writable({
+  playerState: "editor",
+  source: null,
 });

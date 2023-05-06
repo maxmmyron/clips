@@ -1,15 +1,22 @@
-// FIXME: these all resolve to nothing
+import { get } from "svelte/store";
+import { studio } from "./stores";
 
-export const loadMediaMetadata = (file: File) => {
+export const loadMediaMetadata = async (file: File) => {
   const src = URL.createObjectURL(file);
+
+  if(file.type === "video/quicktime") {
+    // TODO: relay warning to kitty
+    console.warn("Quicktime videos are not supported. Please convert to a different format.")
+    return null;
+  }
 
   return {
     src,
     name: file.name,
-    duration: loadMediaDuration(src),
-    thumbnails: loadThumbnails(src),
-    audioData: loadAudioBufferSourceNode(src),
-  } as StudioMediaMetadata;
+    duration: await loadMediaDuration(src),
+    thumbnails: await loadThumbnails(src),
+    buffer: await loadAudioBuffer(src),
+  } as UploadedMedia;
 };
 
 export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
@@ -59,20 +66,14 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
 
     resolve(thumbnails);
   });
-
-
 });
 
-export const loadAudioBufferSourceNode = async (src: string) => new Promise<Float32Array>((resolve, reject) => {
-  const audioContext = new AudioContext();
-  fetch(src).then(res => res.arrayBuffer().then(buffer => audioContext.decodeAudioData(buffer, (buffer: AudioBuffer) => {
-    const source = audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.connect(audioContext.destination);
-
-    const dataArray = new Float32Array(buffer.length);
-    buffer.copyFromChannel(dataArray, 0);
-
-    resolve(dataArray);
-  })));
+export const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
+  const audioContext = get(studio).audioContext;
+  if(!audioContext) reject("No audio context");
+  else fetch(src).then(res => res.arrayBuffer())
+  .then(buffer => audioContext.decodeAudioData(buffer)
+    .then(buffer => resolve(buffer))
+    .catch(err => reject(`Error decoding audio data: ${err}`)))
+  .catch(err => reject(`Error fetching audio data: ${err}`));
 });

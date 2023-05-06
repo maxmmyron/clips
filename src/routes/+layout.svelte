@@ -1,11 +1,12 @@
 <script lang="ts">
   import MediaPool from "$lib/components/MediaPool.svelte";
-  import Player from "$lib/components/Player.svelte";
+  import Player from "$lib/components/player/Player.svelte";
   import ResizeStalk from "$lib/components/util/ResizeStalk.svelte";
   import Timeline from "$lib/components/Timeline.svelte";
   import { studio, timeline } from "$lib/stores";
   import "../app.css";
   import { spring } from "svelte/motion";
+  import { onMount } from "svelte";
 
   let isResizing = false;
   let mediaColumnWidth = "40vw";
@@ -14,6 +15,8 @@
 
   $: ghostPos = $studio.dragData.ghost.position;
   $: ghostSize = $studio.dragData.ghost.size;
+
+  onMount(() => ($studio.audioContext = new AudioContext()));
 
   const handleResize = (e: MouseEvent) => {
     if (!isResizing || !$studio.resizeMode) return;
