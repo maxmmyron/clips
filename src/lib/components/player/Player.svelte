@@ -35,7 +35,7 @@
 </div>
 
 <div
-  class="aspect-video w-full"
+  class="aspect-video w-full max-w-[50%]"
   bind:this={videoContainer}
   on:mouseup={handleDrop}
   on:mousemove={handleDrag}
