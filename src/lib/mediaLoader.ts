@@ -58,9 +58,9 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
 
     // one thumbnail every 5 seconds
     for (let i = 0; i < duration; i+=5) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      thumbnails.push(canvas.toDataURL("image/jpeg", 0.85));
+      thumbnails.push(canvas.toDataURL());
       video.currentTime += 5;
     }
 
