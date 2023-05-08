@@ -4,6 +4,8 @@
   import PreviewPlayer from "./PreviewPlayer.svelte";
 
   let videoContainer: HTMLDivElement | null = null;
+  let width: number | null = null;
+  let height: number | null = null;
 
   const handleDrag = () => {
     if (!$studio.dragData || $studio.dragData.dragEvent !== "drag" || !videoContainer) return;
@@ -35,8 +37,10 @@
 </div>
 
 <div
-  class="aspect-video w-full max-w-[50%]"
+  class="aspect-video w-full max-w-[75%]"
   bind:this={videoContainer}
+  bind:clientWidth={width}
+  bind:clientHeight={height}
   on:mouseup={handleDrop}
   on:mousemove={handleDrag}
   on:mouseenter={() => ($studio.dragData.currentDragRegion = "player")}
@@ -44,7 +48,7 @@
 >
   {#key $player.source}
     {#if $player.playerState === "editor"}
-      <EditorPlayer width={videoContainer?.clientWidth || 640} height={videoContainer?.clientHeight || 480} />
+      <EditorPlayer width={width || 640} height={height || 480} />
     {:else}
       <PreviewPlayer />
     {/if}
