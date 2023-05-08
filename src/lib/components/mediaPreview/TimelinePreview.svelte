@@ -7,6 +7,9 @@
   let isAdjustingOffsets = false;
   let mediaPreview: HTMLButtonElement;
 
+  let isAdjustingOffset = false;
+  let offsetIndex = 0;
+
   $: isSelected = $timeline.selected.includes(metadata);
   $: width = (duration - metadata.startTime - metadata.endTime) * $timeline.zoomScale ** 1.75 + "px";
 
@@ -36,23 +39,23 @@
     $timeline.dragIndex = $timeline.clips.indexOf(metadata);
   };
 
-  const handleOffsetAdjust = (e: MouseEvent, offsetIndex: number) => {
-    // TODO: implement
-    // $studio.dragData = {
-    //   ...$studio.dragData,
-    //   media: metadata,
-    //   originType: "timeline",
-    //   originPosition: { x: e.clientX, y: e.clientY },
-    //   dragEvent: "dragstart",
-    //   currentDragRegion: "timeline",
-    // };
-
-    const offset = offsetIndex === 0 ? "startTime" : "endTime";
-    const currentOffset = metadata[offset];
-
-    console.log(e.clientX, mediaPreview.getBoundingClientRect().x);
+  const handleOffsets = (e: MouseEvent) => {
+    if (!isAdjustingOffsets) return;
+    const offset = e.clientX - mediaPreview.getBoundingClientRect().left;
+    if (offsetIndex == 0) {
+      metadata.startTime = Math.max(0, Math.min(metadata.endTime, offset / $timeline.zoomScale ** 1.75));
+    } else {
+      metadata.endTime = Math.max(metadata.startTime, offset / $timeline.zoomScale ** 1.75);
+    }
   };
 </script>
+
+<svelte:window
+  on:mousemove={handleOffsets}
+  on:mouseup={() => {
+    isAdjustingOffsets = false;
+  }}
+/>
 
 <button
   bind:this={mediaPreview}
@@ -64,11 +67,17 @@
 >
   <button
     class="z-10 absolute h-full left-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
-    on:mousedown|stopPropagation={(e) => handleOffsetAdjust(e, 0)}
+    on:mousedown|stopPropagation={(e) => {
+      isAdjustingOffsets = true;
+      offsetIndex = 0;
+    }}
   />
   <slot />
   <button
     class="z-10 absolute h-full right-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
-    on:mousedown|stopPropagation={(e) => handleOffsetAdjust(e, 1)}
+    on:mousedown|stopPropagation={(e) => {
+      isAdjustingOffsets = true;
+      offsetIndex = 1;
+    }}
   />
 </button>
