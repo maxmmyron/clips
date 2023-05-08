@@ -2,13 +2,14 @@
   import { studio, timeline } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import { onMount } from "svelte";
+  import PreviewPlayer from "./PreviewPlayer.svelte";
 
   export let width = 640,
     height = 480;
 
   let isPaused = true;
-  let bufferAIndex = 0,
-    bufferBIndex = 1;
+  let bufferAIdx = 0,
+    bufferBIdx = 1;
   let currentTime = 0;
 
   let videoA: HTMLVideoElement, videoB: HTMLVideoElement, preview: HTMLVideoElement;
@@ -23,28 +24,29 @@
   $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
   $: if (audioNode) isPaused && audioNode && audioNode.disconnect();
 
-  $: videoSrcA = $timeline.clips[bufferAIndex]?.src;
-  $: videoSrcB = $timeline.clips[bufferBIndex]?.src;
-  $: currentIndex = preview === videoA ? bufferAIndex : bufferBIndex;
-  $: accumulatedTime = $timeline.clips.slice(0, Math.min(bufferAIndex, bufferBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
+  $: videoSrcA = $timeline.clips[bufferAIdx]?.src;
+  $: videoSrcB = $timeline.clips[bufferBIdx]?.src;
+  $: accumulatedTime = $timeline.clips.slice(0, Math.min(bufferAIdx, bufferBIdx)).reduce((acc, cur) => acc + (cur.duration - cur.startTime - cur.endTime), 0);
+  $: currentMetadata = $timeline.clips[preview === videoA ? bufferAIdx : bufferBIdx];
 
   const handlePlay = () => {
-    //create node from AudioBuffer
+    if (!preview) throw new Error("No preview to play");
+
     audioNode = audioContext.createBufferSource();
     const audioNodeBuffer = audioContext.createBuffer(
-      $timeline.clips[currentIndex].buffer.numberOfChannels,
-      $timeline.clips[currentIndex].buffer.length,
-      $timeline.clips[currentIndex].buffer.sampleRate
+      currentMetadata.buffer.numberOfChannels,
+      currentMetadata.buffer.length,
+      currentMetadata.buffer.sampleRate
     );
 
-    for (let i = 0; i < $timeline.clips[currentIndex].buffer.numberOfChannels; i++) {
-      audioNodeBuffer.copyToChannel($timeline.clips[currentIndex].buffer.getChannelData(i), i);
+    for (let i = 0; i < currentMetadata.buffer.numberOfChannels; i++) {
+      audioNodeBuffer.copyToChannel(currentMetadata.buffer.getChannelData(i), i);
     }
 
     audioNode.buffer = audioNodeBuffer;
 
-    const startOffset = $timeline.clips[currentIndex].startTime + preview.currentTime;
-    const duration = $timeline.clips[currentIndex].duration - $timeline.clips[currentIndex].endTime - startOffset;
+    const startOffset = currentMetadata.startTime + (preview.currentTime - currentMetadata.startTime);
+    const duration = currentMetadata.duration - currentMetadata.endTime - startOffset;
 
     audioNode.connect(audioContext.destination);
     audioNode.start(0, startOffset, duration);
@@ -52,7 +54,7 @@
   };
 
   const handleEnded = () => {
-    if ((preview === videoA ? bufferAIndex : bufferBIndex) === $timeline.clips.length - 1) {
+    if ((preview === videoA ? bufferAIdx : bufferBIdx) === $timeline.clips.length - 1) {
       audioContext && audioContext.suspend();
       isPaused = true;
       return;
@@ -62,7 +64,11 @@
 
     preview = (preview === videoA ? videoB : videoA) as HTMLVideoElement;
     // skip forward previous index to next clip
-    preview === videoA ? (bufferBIndex += 2) : (bufferAIndex += 2);
+    preview === videoA ? (bufferBIdx += 2) : (bufferAIdx += 2);
+
+    const startTime = preview === videoA ? $timeline.clips[bufferAIdx].startTime : $timeline.clips[bufferBIdx].startTime;
+
+    preview.currentTime = startTime;
   };
 
   let render: Render;
@@ -90,30 +96,31 @@
   function setPlayerTime(front: boolean = true): any {
     isPaused = true;
     if (front) {
-      bufferAIndex = 0;
-      bufferBIndex = 1;
+      bufferAIdx = 0;
+      bufferBIdx = 1;
       preview = videoA;
-      preview.currentTime = 0;
+      preview.currentTime = currentMetadata.startTime;
       accumulatedTime = 0;
     } else {
       // TODO: kinda shitty code; probably should directly set src attribute of preview. Works for now but consider refactoring
       preview.src = $timeline.clips[$timeline.clips.length - 1].src;
       preview.load();
-      preview.addEventListener("loadedmetadata", () => {
-        preview.currentTime = preview.duration;
-      });
-      accumulatedTime = $timeline.clips.reduce((acc, cur) => acc + cur.duration, 0) - preview.duration;
+      let lastDuration = preview.duration - $timeline.clips[$timeline.clips.length - 1].startTime;
+      preview.addEventListener("loadedmetadata", () => (preview.currentTime = lastDuration));
+      accumulatedTime = $timeline.clips.reduce((acc, cur) => acc + (cur.duration - cur.startTime - cur.endTime), 0) - lastDuration;
+
       if (preview === videoA) {
-        bufferAIndex = $timeline.clips.length - 1;
-        bufferBIndex = $timeline.clips.length;
+        bufferAIdx = $timeline.clips.length - 1;
+        bufferBIdx = $timeline.clips.length;
       } else {
-        bufferAIndex = $timeline.clips.length;
-        bufferBIndex = $timeline.clips.length - 1;
+        bufferAIdx = $timeline.clips.length;
+        bufferBIdx = $timeline.clips.length - 1;
       }
     }
   }
 
   const togglePlayState = () => {
+    const currentIndex = preview === videoA ? bufferAIdx : bufferBIdx;
     if (currentIndex === $timeline.clips.length - 1 && preview.currentTime === preview.duration) setPlayerTime();
     isPaused = !isPaused;
   };
