@@ -23,7 +23,6 @@
   $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
   $: if (audioNode) isPaused && audioNode && audioNode.disconnect();
 
-  // TODO: expand src with video & audio srcs
   $: videoSrcA = $timeline.clips[bufferAIndex]?.src;
   $: videoSrcB = $timeline.clips[bufferBIndex]?.src;
   $: currentIndex = preview === videoA ? bufferAIndex : bufferBIndex;
@@ -32,13 +31,24 @@
   const handlePlay = () => {
     //create node from AudioBuffer
     audioNode = audioContext.createBufferSource();
-    audioNode.buffer = $timeline.clips[currentIndex].buffer;
+    const audioNodeBuffer = audioContext.createBuffer(
+      $timeline.clips[currentIndex].buffer.numberOfChannels,
+      $timeline.clips[currentIndex].buffer.length,
+      $timeline.clips[currentIndex].buffer.sampleRate
+    );
+
+    for (let i = 0; i < $timeline.clips[currentIndex].buffer.numberOfChannels; i++) {
+      audioNodeBuffer.copyToChannel($timeline.clips[currentIndex].buffer.getChannelData(i), i);
+    }
+
+    audioNode.buffer = audioNodeBuffer;
 
     const startOffset = $timeline.clips[currentIndex].startTime + preview.currentTime;
-    const duration = $timeline.clips[currentIndex].duration - preview.currentTime - $timeline.clips[currentIndex].endTime;
+    const duration = $timeline.clips[currentIndex].duration - $timeline.clips[currentIndex].endTime - startOffset;
 
     audioNode.connect(audioContext.destination);
     audioNode.start(0, startOffset, duration);
+    audioNode.addEventListener("ended", handleEnded);
   };
 
   const handleEnded = () => {
@@ -47,6 +57,8 @@
       isPaused = true;
       return;
     }
+
+    audioNode.disconnect();
 
     preview = (preview === videoA ? videoB : videoA) as HTMLVideoElement;
     // skip forward previous index to next clip
@@ -63,6 +75,12 @@
 
     // TODO: not good svelte code... this could be reactive
     currentTime = preview.currentTime;
+    console.log(preview === videoA ? "A" : "B", preview.currentTime, preview.duration, $timeline.clips[currentIndex].duration);
+
+    // if (preview.currentTime >= preview.duration - $timeline.clips[currentIndex].endTime - $timeline.clips[currentIndex].startTime) {
+    //   handleEnded();
+    //   return;
+    // }
 
     // TODO: no need to recompute this every frame
     const mediaSize = {
@@ -107,8 +125,8 @@
   };
 </script>
 
-<video class="hidden" muted src={videoSrcA} bind:this={videoA} on:ended={handleEnded} on:play={handlePlay} />
-<video class="hidden" muted src={videoSrcB} bind:this={videoB} on:ended={handleEnded} on:play={handlePlay} />
+<video class="hidden" muted src={videoSrcA} bind:this={videoA} on:play={handlePlay} />
+<video class="hidden" muted src={videoSrcB} bind:this={videoB} on:play={handlePlay} />
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
