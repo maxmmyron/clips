@@ -1,51 +1,63 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { timeline } from "$lib/stores";
+  import { Canvas, Layer, type Render } from "svelte-canvas";
 
-  export let buffer: Float32Array | null = null;
+  export let metadata: TimelineMedia;
 
-  let canvas: HTMLCanvasElement;
+  let buffer = metadata.buffer.getChannelData(0);
+  let containerWidth, containerHeight;
 
-  onMount(() => {
+  let render: Render;
+  $: render = ({ context, width, height }) => {
+    console.log("rendering audio preview");
+    // recalc on zoom
+    $timeline.zoomScale;
+
     if (!buffer) return console.error("No audio data");
-    const step = Math.ceil(buffer.length / canvas.width);
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return console.error("Could not get canvas context");
+    context.fillStyle = "black";
+    context.fillRect(0, 0, width, height);
+    context.lineWidth = 1;
+    context.strokeStyle = "white";
 
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "white";
-
-    ctx.beginPath();
+    context.beginPath();
 
     // if empty, just draw a line
     if (buffer.every((datum) => datum === 0)) {
-      ctx.moveTo(0, canvas.height / 2);
-      ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
+      context.moveTo(0, height / 2);
+      context.lineTo(width, height / 2);
+      context.stroke();
       return;
     }
 
-    for (let i = 0; i < canvas.width; i++) {
+    const start = (metadata.startTime / metadata.duration) * buffer.length;
+    const end = ((metadata.duration - metadata.endTime) / metadata.duration) * buffer.length;
+
+    const offsetBuffer = buffer.slice(start, end);
+
+    const step = Math.ceil(offsetBuffer.length / width);
+
+    for (let i = 0; i < width; i++) {
       let min = 1.0;
       let max = -1.0;
 
       // loop over step-sized chunks of data, find min and max, and draw to screen for that "pixel column"
       for (let j = 0; j < step; j++) {
-        const datum = buffer[i * step + j];
+        const datum = offsetBuffer[i * step + j];
 
         if (datum < min) min = datum;
         if (datum > max) max = datum;
       }
 
-      ctx.moveTo(i, ((1 + min) * canvas.height) / 2);
-      ctx.lineTo(i, ((1 + max) * canvas.height) / 2);
+      context.moveTo(i, ((1 + min) * height) / 2);
+      context.lineTo(i, ((1 + max) * height) / 2);
     }
-    ctx.stroke();
-  });
+    context.stroke();
+  };
 </script>
 
-<div class="w-full h-1/2 flex justify-center items-center rounded-md overflow-clip">
-  <canvas class="w-full h-full" bind:this={canvas} />
+<div class="h-1/2 flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={containerWidth} bind:clientHeight={containerHeight}>
+  <Canvas class="w-full h-full" width={containerWidth} height={containerHeight}>
+    <Layer {render} />
+  </Canvas>
 </div>

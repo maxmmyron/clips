@@ -76,7 +76,7 @@
       console.log(`initialPosition: ${initialPosition}. initialOffset: ${initialOffset}`);
     }}
   />
-  <slot />
+  <slot {width} />
   <button
     class="z-10 absolute h-full right-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
     on:mousedown|stopPropagation={(e) => {

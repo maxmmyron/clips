@@ -91,7 +91,7 @@
         >
           <TimelinePreview {metadata}>
             <MediaVideoPreview metadata={{ name: metadata.name, thumbnails: metadata.thumbnails }} isTimelineElement={true} />
-            <MediaAudioPreview buffer={metadata.buffer.getChannelData(0)} />
+            <MediaAudioPreview {metadata} />
           </TimelinePreview>
         </div>
       {/each}
