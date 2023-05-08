@@ -75,12 +75,6 @@
 
     // TODO: not good svelte code... this could be reactive
     currentTime = preview.currentTime;
-    console.log(preview === videoA ? "A" : "B", preview.currentTime, preview.duration, $timeline.clips[currentIndex].duration);
-
-    // if (preview.currentTime >= preview.duration - $timeline.clips[currentIndex].endTime - $timeline.clips[currentIndex].startTime) {
-    //   handleEnded();
-    //   return;
-    // }
 
     // TODO: no need to recompute this every frame
     const mediaSize = {
