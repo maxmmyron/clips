@@ -9,7 +9,6 @@
 
   let render: Render;
   $: render = ({ context, width, height }) => {
-    console.log("rendering audio preview");
     // recalc on zoom
     $timeline.zoomScale;
 
