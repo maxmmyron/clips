@@ -73,7 +73,6 @@
       offsetIndex = 0;
       initialPosition = mediaPreview.getBoundingClientRect().left;
       initialOffset = metadata.startTime;
-      console.log(`initialPosition: ${initialPosition}. initialOffset: ${initialOffset}`);
     }}
   />
   <slot {width} />
@@ -83,7 +82,6 @@
       offsetIndex = 1;
       initialPosition = mediaPreview.getBoundingClientRect().right;
       initialOffset = metadata.endTime;
-      console.log(`initialPosition: ${initialPosition}. initialOffset: ${initialOffset}`);
     }}
   />
 </button>
