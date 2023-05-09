@@ -60,6 +60,8 @@ export const timeline: WritableTimeline = writable({
   clips: [],
   zoomScale: 5,
   dragIndex: -1,
+  buffers: [],
+  currentBufferIndex: -1,
 });
 
 export const player: WritablePlayer = writable({

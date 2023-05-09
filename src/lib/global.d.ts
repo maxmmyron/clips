@@ -33,6 +33,8 @@ type WritableTimeline = import("svelte/store").Writable<{
   clips: TimelineMedia[];
   zoomScale: number;
   dragIndex: number;
+  buffers: HTMLVideoElement[];
+  currentBufferIndex: number;
 }>;
 
 type WritablePlayer = import("svelte/store").Writable<{
