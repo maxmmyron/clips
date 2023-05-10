@@ -54,21 +54,31 @@
     if ($studio.dragData.originType === "timeline") {
       if ($timeline.dragIndex === -1) return;
 
-      const media = $timeline.clips.splice($timeline.dragIndex, 1)[0];
+      let clip = $timeline.clips.getAt($timeline.dragIndex) as TimelineLayerNode;
+      $timeline.clips.remove(clip.uuid);
 
-      if (dropIndex === -1) $timeline.clips.push(media);
-      else $timeline.clips.splice(dropIndex, 0, media);
+      if (dropIndex === -1) $timeline.clips.add(clip);
+      else $timeline.clips.add(clip, dropIndex);
+
+      $timeline.dragIndex = -1;
       return;
     }
     // handle dragging new media into timeline
-    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { uuid: uuidv4(), ...$studio.dragData.media, startOffset: 0, endOffset: 0 }]);
+
+    if (!$studio.dragData.media) return;
+    $timeline.clips.add({
+      uuid: uuidv4(),
+      metadata: { ...$studio.dragData.media, startOffset: 0, endOffset: 0 },
+      next: null,
+      prev: null,
+    });
   };
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
     const deleteIDs = $timeline.selected.map((clip) => clip.uuid);
-    $timeline.clips = $timeline.clips.filter((clip) => !deleteIDs.includes(clip.uuid));
+    deleteIDs.forEach((id) => $timeline.clips.remove(id));
 
     $timeline.selected = [];
   };
@@ -85,15 +95,15 @@
     on:mouseleave={() => ($studio.dragData.currentDragRegion = null)}
   >
     <div class="flex h-fit min-h-[50%]" bind:this={timelineContainer}>
-      {#each $timeline.clips as metadata, idx (metadata.uuid)}
+      {#each $timeline.clips.toArray() as node, idx (node.uuid)}
         <div
           class="draggable overflow-clip"
           class:dragging={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
           class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
         >
-          <TimelinePreview {metadata}>
-            <MediaVideoPreview metadata={{ name: metadata.name, thumbnails: metadata.thumbnails }} isTimelineElement={true} />
-            <MediaAudioPreview {metadata} />
+          <TimelinePreview metadata={node.metadata}>
+            <MediaVideoPreview metadata={{ name: node.metadata.name, thumbnails: node.metadata.thumbnails }} isTimelineElement={true} />
+            <MediaAudioPreview metadata={node.metadata} />
           </TimelinePreview>
         </div>
       {/each}

@@ -36,31 +36,14 @@
     if (e.key !== "Delete") return;
 
     const timelineConfirm = `Deleting these files will remove their references from the timeline. Are you sure?`;
-
     const selectedSources = $mediaPool.selected.map((file) => file.src);
 
     // check if selected files are in timeline; show confirmation if so
-    let selectedTimelineNodes = [];
-    let head = $timeline.head;
-    while (head) {
-      selectedSources.includes(head.metadata.src) && selectedTimelineNodes.push(head);
-      head = head.next;
-    }
-
+    let selectedTimelineNodes = $timeline.clips.toArray().filter((node) => selectedSources.includes(node.metadata.src));
     if (selectedTimelineNodes.length > 0 && confirm(timelineConfirm) === false) return;
 
     // delete files from timeline and media pool, clear selection arr
-
-    selectedTimelineNodes.forEach((node) => {
-      if (!node.prev) $timeline.head = node.next;
-      if (!node.next) $timeline.tail = node.prev;
-      if (node.prev && node.next) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
-      }
-      $mediaPool.media = $mediaPool.media.filter((file) => file !== node.metadata);
-    });
-
+    selectedTimelineNodes.forEach((node) => $timeline.clips.remove(node.uuid));
     $mediaPool.media = $mediaPool.media.filter((file) => !$mediaPool.selected.includes(file));
     $mediaPool.selected = [];
   };
