@@ -13,8 +13,8 @@
 
   $: isSelected = $timeline.selected.includes(metadata);
   // duration factor
-  $: scaleFactor = $timeline.zoomScale ** 1.75;
-  $: width = (duration - metadata.startTime - metadata.endTime) * scaleFactor + "px";
+  $: scaleFactor = $timeline.zoom ** 1.75;
+  $: width = (duration - metadata.startOffset - metadata.endOffset) * scaleFactor + "px";
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
@@ -49,10 +49,10 @@
 
     if (offsetIndex == 0) {
       offset = initialOffset + (e.clientX - initialPosition) / scaleFactor;
-      metadata.startTime = Math.max(0, offset);
+      metadata.startOffset = Math.max(0, offset);
     } else {
       offset = initialOffset + (initialPosition - e.clientX) / scaleFactor;
-      metadata.endTime = Math.max(0, offset);
+      metadata.endOffset = Math.max(0, offset);
     }
   };
 </script>
@@ -72,7 +72,7 @@
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 0;
       initialPosition = mediaPreview.getBoundingClientRect().left;
-      initialOffset = metadata.startTime;
+      initialOffset = metadata.startOffset;
     }}
   />
   <slot {width} />
@@ -81,7 +81,7 @@
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 1;
       initialPosition = mediaPreview.getBoundingClientRect().right;
-      initialOffset = metadata.endTime;
+      initialOffset = metadata.endOffset;
     }}
   />
 </button>

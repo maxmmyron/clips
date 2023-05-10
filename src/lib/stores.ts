@@ -59,13 +59,13 @@ export const timeline: WritableTimeline = writable({
    */
   clips: [],
   videos: new Map(),
-  currentVideo: null,
   zoom: 5,
+  clipIndex: -1,
   dragIndex: -1,
-  playIndex: -1,
 });
 
 export const player: WritablePlayer = writable({
   playerState: "editor",
   source: null,
+  isPaused: true,
 });

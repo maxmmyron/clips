@@ -4,13 +4,13 @@
 
   export let metadata: TimelineMedia;
 
-  let buffer = metadata.buffer.getChannelData(0);
+  let buffer = metadata.audio.getChannelData(0);
   let containerWidth, containerHeight;
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     // recalc on zoom
-    $timeline.zoomScale;
+    $timeline.zoom;
 
     if (!buffer) return console.error("No audio data");
 
@@ -29,8 +29,8 @@
       return;
     }
 
-    const start = (metadata.startTime / metadata.duration) * buffer.length;
-    const end = ((metadata.duration - metadata.endTime) / metadata.duration) * buffer.length;
+    const start = (metadata.startOffset / metadata.duration) * buffer.length;
+    const end = ((metadata.duration - metadata.endOffset) / metadata.duration) * buffer.length;
 
     const offsetBuffer = buffer.slice(start, end);
 

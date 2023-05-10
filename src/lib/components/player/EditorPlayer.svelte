@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
+  import { timeline, player } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import { onMount } from "svelte";
   import VideoBuffer from "./VideoBuffer.svelte";
@@ -7,28 +7,31 @@
   export let width = 640,
     height = 480;
 
-  let isPaused = true;
   let currentPreviewTime = 0;
-
   let audioContext: AudioContext;
+
+  $: currentVideo = $timeline.videos.get($timeline.clips[$timeline.clipIndex]?.uuid);
+  $: if (currentVideo) $player.isPaused ? currentVideo.pause() : currentVideo.play();
 
   onMount(() => {
     audioContext = new AudioContext();
   });
 
-  $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
-  $: if (currentBuffer) isPaused ? currentBuffer.video.pause() : currentBuffer.video.play();
-  $: accumulatedTime = $timeline.clips.slice(0, $timeline.currentBufferIndex).reduce((acc, cur) => acc + (cur.duration - cur.startTime - cur.endTime), 0);
-  $: currentBuffer = $timeline.buffers[$timeline.currentBufferIndex];
-  $: if ($timeline.currentBufferIndex === -1 && $timeline.buffers.length > 0) $timeline.currentBufferIndex = 0;
-  $: video = currentBuffer?.video;
-  $: metadata = currentBuffer?.metadata;
+  $: if (audioContext) $player.isPaused ? audioContext.suspend() : audioContext.resume();
+  $: accumulatedTime = $timeline.clips.slice(0, $timeline.clipIndex).reduce((acc, cur) => acc + (cur.duration - cur.startOffset - cur.endOffset), 0);
+  $: if ($timeline.clipIndex === -1 && $timeline.clips.length > 0) $timeline.clipIndex = 0;
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
-    if ($timeline.buffers.length === 0 || !currentBuffer) return;
-    currentPreviewTime = video.currentTime - metadata.startTime;
+    if ($timeline.clips.length === 0) return;
+
+    const metadata = $timeline.clips[$timeline.clipIndex];
+    const video = $timeline.videos.get(metadata.uuid);
+
+    if (!video) return;
+
+    currentPreviewTime = video.currentTime - metadata.startOffset;
 
     // TODO: no need to recompute this every frame
     const mediaSize = {
@@ -42,33 +45,36 @@
   };
 
   function setPlayerTime(front: boolean = true): any {
-    isPaused = true;
+    console.log($timeline.videos);
+    $player.isPaused = true;
     if (front) {
-      for (let i = 0; i < $timeline.buffers.length; i++) $timeline.buffers[i].video.currentTime = $timeline.clips[i].startTime;
-      $timeline.currentBufferIndex = 0;
-      video.currentTime = metadata.startTime;
+      console.log("A");
+      $timeline.clipIndex = 0;
+      const metadata = $timeline.clips[0];
+      const video = $timeline.videos.get(metadata.uuid);
+      if (video) video.currentTime = metadata.startOffset;
     } else {
-      $timeline.currentBufferIndex = $timeline.buffers.length - 1;
-      video.currentTime = metadata.duration - metadata.startTime - metadata.endTime;
+      $timeline.clipIndex = $timeline.clips.length - 1;
+      const metadata = $timeline.clips[$timeline.clips.length - 1];
+      const video = $timeline.videos.get(metadata.uuid);
+      if (video) video.currentTime = metadata.duration - metadata.startOffset - metadata.endOffset;
     }
   }
 
   const togglePlayState = () => {
-    const currentMetadata = $timeline.clips[$timeline.currentBufferIndex];
-    const isLastClip = $timeline.currentBufferIndex === $timeline.buffers.length - 1;
-    const isLastFrame = currentPreviewTime >= currentMetadata.duration - currentMetadata.startTime - currentMetadata.endTime;
+    const currentMetadata = $timeline.clips[$timeline.clipIndex];
+    const isLastClip = $timeline.clipIndex === $timeline.clips.length;
+    const isLastFrame = currentPreviewTime >= currentMetadata.duration - currentMetadata.startOffset - currentMetadata.endOffset;
     if (isLastClip && isLastFrame) {
       setPlayerTime();
     }
-    isPaused = !isPaused;
+    $player.isPaused = !$player.isPaused;
   };
 </script>
 
-{#key $timeline.clips}
-  {#each $timeline.clips as metadata}
-    <VideoBuffer {audioContext} {isPaused} {metadata} />
-  {/each}
-{/key}
+{#each $timeline.clips as metadata}
+  <VideoBuffer {audioContext} {metadata} />
+{/each}
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
@@ -84,6 +90,6 @@
 
 <div class="w-full flex justify-center gap-4">
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime()}>⏪</button>
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={togglePlayState}>{isPaused ? "▶️" : "⏸️"}</button>
+  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={togglePlayState}>{$player.isPaused ? "▶️" : "⏸️"}</button>
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(false)}>⏩</button>
 </div>

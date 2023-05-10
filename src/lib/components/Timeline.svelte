@@ -5,12 +5,12 @@
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
   import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
 
-  let zoomScale = 5;
+  let zoom = 5;
   let timelineContainer: HTMLElement;
 
   let dropIndex: number = -1;
 
-  $: $timeline.zoomScale = zoomScale;
+  $: $timeline.zoom = zoom;
 
   const handleDrag = (e: MouseEvent) => {
     if ($studio.dragData.dragEvent !== "drag" || $studio.dragData.currentDragRegion !== "timeline") return;
@@ -61,7 +61,7 @@
       return;
     }
     // handle dragging new media into timeline
-    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { uuid: uuidv4(), ...$studio.dragData.media, startTime: 0, endTime: 0 }]);
+    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { uuid: uuidv4(), ...$studio.dragData.media, startOffset: 0, endOffset: 0 }]);
   };
 
   const handleKey = (e: KeyboardEvent) => {
@@ -69,7 +69,6 @@
 
     const deleteIDs = $timeline.selected.map((clip) => clip.uuid);
     $timeline.clips = $timeline.clips.filter((clip) => !deleteIDs.includes(clip.uuid));
-    $timeline.buffers = $timeline.buffers.filter((buffer) => !deleteIDs.includes(buffer.metadata.uuid));
 
     $timeline.selected = [];
   };
@@ -100,5 +99,5 @@
       {/each}
     </div>
   </div>
-  <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
+  <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoom} />
 </div>

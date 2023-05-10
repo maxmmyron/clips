@@ -32,14 +32,15 @@ type WritableTimeline = import("svelte/store").Writable<{
   selected: TimelineMedia[];
   clips: TimelineMedia[];
   videos: Map<string, HTMLVideoElement>;
-  currentVideo: HTMLVideoElement | null;
   zoom: number;
   dragIndex: number;
+  clipIndex: number;
 }>;
 
 type WritablePlayer = import("svelte/store").Writable<{
   playerState: "editor" | "preview";
   source: string | null;
+  isPaused: boolean;
 }>;
 
 declare interface Window {
