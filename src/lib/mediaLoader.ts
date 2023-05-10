@@ -15,7 +15,7 @@ export const loadMediaMetadata = async (file: File) => {
     name: file.name,
     duration: await loadMediaDuration(src),
     thumbnails: await loadThumbnails(src),
-    buffer: await loadAudioBuffer(src),
+    audio: await loadAudioBuffer(src),
   } as UploadedMedia;
 };
 
