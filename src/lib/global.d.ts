@@ -18,8 +18,7 @@ interface TimelineLayerNode {
   next: TimelineLayerNode | null;
   prev: TimelineLayerNode | null;
 }
-
-interface TimelineNodeMetadata {
+interface TimelineNodeMetadata  {
   duration: number;
   name: string;
   src: string;
@@ -36,9 +35,8 @@ type WritableMediaPool = import("svelte/store").Writable<{
 
 type WritableTimeline = import("svelte/store").Writable<{
   selected: TimelineLayerNode[];
-  head: TimelineLayerNode | null;
+  clips: import("./components/util/TimelineLinkedList").default
   curr: TimelineLayerNode | null;
-  tail: TimelineLayerNode | null;
   videos: Map<string, HTMLVideoElement>;
   zoom: number;
   dragIndex: number;

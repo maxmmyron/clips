@@ -1,5 +1,6 @@
 import {spring, type Spring} from "svelte/motion";
 import { writable } from "svelte/store";
+import TimelineLinkedList from "./components/util/TimelineLinkedList";
 
 
 export const studio = writable({
@@ -51,9 +52,8 @@ export const mediaPool: WritableMediaPool = writable({
 
 export const timeline: WritableTimeline = writable({
   selected: [],
-  head: null,
+  clips: new TimelineLinkedList(),
   curr: null,
-  tail: null,
   videos: new Map(),
   zoom: 1,
   dragIndex: -1, // the index of the timeline node that is currently being dragged, or -1 if no node is being dragged
