@@ -2,7 +2,7 @@
   import { timeline, player } from "$lib/stores";
   import { onMount } from "svelte";
 
-  export let metadata: TimelineMedia, audioContext: AudioContext;
+  export let node: TimelineLayerNode, audioContext: AudioContext;
 
   let video: HTMLVideoElement;
   let currentTime: number;
@@ -12,36 +12,33 @@
 
   $: if (
     video &&
-    video === $timeline.videos.get($timeline.clips[$timeline.clipIndex].uuid) &&
-    currentTime >= video.duration - metadata.startOffset - metadata.endOffset
+    video === $timeline.videos.get($timeline.curr?.uuid || "") &&
+    currentTime >= video.duration - node.metadata.startOffset - node.metadata.endOffset
   ) {
     if (audioNode) audioNode.disconnect();
 
-    if ($timeline.clipIndex === $timeline.clips.length - 1) {
-      $player.isPaused = true;
-    } else {
-      $timeline.clipIndex++;
-    }
+    if (node === $timeline.clips.tail) $player.isPaused = true;
+    else $timeline.curr = node.next;
   }
 
   const handleBufferSetup = () => {
-    currentTime = metadata.startOffset;
+    currentTime = node.metadata.startOffset;
   };
 
   const handlePlay = () => {
     console.log("playing source");
     audioNode = audioContext.createBufferSource();
 
-    const startOffset = Math.max(metadata.startOffset, metadata.startOffset + (currentTime - metadata.startOffset));
+    const startOffset = Math.max(node.metadata.startOffset, node.metadata.startOffset + (currentTime - node.metadata.startOffset));
 
     video.currentTime = startOffset;
 
-    const audioNodeBuffer = audioContext.createBuffer(metadata.audio.numberOfChannels, metadata.audio.length, metadata.audio.sampleRate);
-    for (let i = 0; i < metadata.audio.numberOfChannels; i++) audioNodeBuffer.copyToChannel(metadata.audio.getChannelData(i), i);
+    const audioNodeBuffer = audioContext.createBuffer(node.metadata.audio.numberOfChannels, node.metadata.audio.length, node.metadata.audio.sampleRate);
+    for (let i = 0; i < node.metadata.audio.numberOfChannels; i++) audioNodeBuffer.copyToChannel(node.metadata.audio.getChannelData(i), i);
 
     audioNode.buffer = audioNodeBuffer;
 
-    const duration = metadata.duration - metadata.endOffset - startOffset;
+    const duration = node.metadata.duration - node.metadata.endOffset - startOffset;
 
     audioNode.connect(audioContext.destination);
     audioNode.start(0, startOffset, duration);
@@ -50,8 +47,8 @@
   onMount(() => {
     console.log("mounting video buffer");
     if (!video) throw new Error("No buffer");
-    $timeline.videos.set(metadata.uuid, video);
+    $timeline.videos.set(node.uuid, video);
   });
 </script>
 
-<video muted class="hidden" bind:currentTime src={metadata.src} bind:this={video} on:loadedmetadata={handleBufferSetup} on:play={handlePlay} />
+<video muted class="hidden" bind:currentTime src={node.metadata.src} bind:this={video} on:loadedmetadata={handleBufferSetup} on:play={handlePlay} />

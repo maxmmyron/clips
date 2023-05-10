@@ -9,8 +9,9 @@
 
   let currentPreviewTime = 0;
   let audioContext: AudioContext;
+  let accumulatedTime = 0;
 
-  $: currentVideo = $timeline.videos.get($timeline.clips[$timeline.clipIndex]?.uuid);
+  $: currentVideo = $timeline.videos.get($timeline.curr?.uuid || "") || null;
   $: if (currentVideo) $player.isPaused ? currentVideo.pause() : currentVideo.play();
 
   onMount(() => {
@@ -18,16 +19,21 @@
   });
 
   $: if (audioContext) $player.isPaused ? audioContext.suspend() : audioContext.resume();
-  $: accumulatedTime = $timeline.clips.slice(0, $timeline.clipIndex).reduce((acc, cur) => acc + (cur.duration - cur.startOffset - cur.endOffset), 0);
-  $: if ($timeline.clipIndex === -1 && $timeline.clips.length > 0) $timeline.clipIndex = 0;
+  $: if ($timeline.curr)
+    accumulatedTime = $timeline.clips
+      .toArray()
+      .slice(0, $timeline.clips.indexOf($timeline.curr.uuid))
+      .reduce((acc, { metadata }) => acc + (metadata.duration - metadata.startOffset - metadata.endOffset), 0);
+
+  $: if (!$timeline.curr && $timeline.clips.length > 0) $timeline.curr = $timeline.clips.head;
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
-    if ($timeline.clips.length === 0) return;
+    if ($timeline.clips.length === 0 || !$timeline.curr) return;
 
-    const metadata = $timeline.clips[$timeline.clipIndex];
-    const video = $timeline.videos.get(metadata.uuid);
+    const metadata = $timeline.curr.metadata;
+    const video = $timeline.videos.get($timeline.curr.uuid);
 
     if (!video) return;
 
@@ -48,23 +54,25 @@
     console.log($timeline.videos);
     $player.isPaused = true;
     if (front) {
-      console.log("A");
-      $timeline.clipIndex = 0;
-      const metadata = $timeline.clips[0];
-      const video = $timeline.videos.get(metadata.uuid);
+      $timeline.curr = $timeline.clips.head;
+      if (!$timeline.curr) return;
+      const metadata = $timeline.curr.metadata;
+      const video = $timeline.videos.get($timeline.curr.uuid);
       if (video) video.currentTime = metadata.startOffset;
     } else {
-      $timeline.clipIndex = $timeline.clips.length - 1;
-      const metadata = $timeline.clips[$timeline.clips.length - 1];
-      const video = $timeline.videos.get(metadata.uuid);
+      $timeline.curr = $timeline.clips.tail;
+      if (!$timeline.curr) return;
+      const metadata = $timeline.curr.metadata;
+      const video = $timeline.videos.get($timeline.curr.uuid);
       if (video) video.currentTime = metadata.duration - metadata.startOffset - metadata.endOffset;
     }
   }
 
   const togglePlayState = () => {
-    const currentMetadata = $timeline.clips[$timeline.clipIndex];
-    const isLastClip = $timeline.clipIndex === $timeline.clips.length;
-    const isLastFrame = currentPreviewTime >= currentMetadata.duration - currentMetadata.startOffset - currentMetadata.endOffset;
+    if (!$timeline.curr) return;
+    const metadata = $timeline.curr.metadata;
+    const isLastClip = $timeline.curr === $timeline.clips.tail;
+    const isLastFrame = currentPreviewTime >= metadata.duration - metadata.startOffset - metadata.endOffset;
     if (isLastClip && isLastFrame) {
       setPlayerTime();
     }
@@ -72,8 +80,8 @@
   };
 </script>
 
-{#each $timeline.clips as metadata}
-  <VideoBuffer {audioContext} {metadata} />
+{#each $timeline.clips.toArray() as node}
+  <VideoBuffer {audioContext} {node} />
 {/each}
 
 <div class="w-full h-full flex justify-center items-center">
