@@ -83,6 +83,26 @@ export default class TimelineLinkedList {
   }
 
   /**
+   * Returns the index of the node with the given uuid, if it exists.
+   *
+   * @param uuid uuid of the node to find
+   * @returns the index of the node with the given uuid, or -1 if the node was not found
+   *
+   */
+  indexOf(uuid: string) {
+    let curr = this.head;
+    let i = 0;
+
+    while(curr) {
+      if(curr.uuid === uuid) return i;
+      curr = curr.next;
+      i++;
+    }
+
+    return -1;
+  }
+
+  /**
    * Removes and returns a node with the given uuid from the list, if it exists.
    *
    * @param uuid uuid of the node to remove
