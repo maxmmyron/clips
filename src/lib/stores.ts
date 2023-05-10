@@ -50,18 +50,13 @@ export const mediaPool: WritableMediaPool = writable({
 });
 
 export const timeline: WritableTimeline = writable({
-  /**
-   * An array of currently selected clip indexes. Used to determine what clips to display as selected in the timeline.
-   */
   selected: [],
-  /**
-   * An array of loaded clips. Carries a variety of information that can be used to display clip details and preview clips.
-   */
-  clips: [],
+  head: null,
+  curr: null,
+  tail: null,
   videos: new Map(),
-  zoom: 5,
-  clipIndex: -1,
-  dragIndex: -1,
+  zoom: 1,
+  dragIndex: -1, // the index of the timeline node that is currently being dragged, or -1 if no node is being dragged
 });
 
 export const player: WritablePlayer = writable({

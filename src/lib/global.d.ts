@@ -12,8 +12,14 @@ interface UploadedMedia {
   audio: AudioBuffer;
 }
 
-interface TimelineMedia {
+interface TimelineLayerNode {
   uuid: string;
+  metadata: TimelineNodeMetadata;
+  next: TimelineLayerNode | null;
+  prev: TimelineLayerNode | null;
+}
+
+interface TimelineNodeMetadata {
   duration: number;
   name: string;
   src: string;
@@ -29,12 +35,13 @@ type WritableMediaPool = import("svelte/store").Writable<{
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
-  selected: TimelineMedia[];
-  clips: TimelineMedia[];
+  selected: TimelineLayerNode[];
+  head: TimelineLayerNode | null;
+  curr: TimelineLayerNode | null;
+  tail: TimelineLayerNode | null;
   videos: Map<string, HTMLVideoElement>;
   zoom: number;
   dragIndex: number;
-  clipIndex: number;
 }>;
 
 type WritablePlayer = import("svelte/store").Writable<{
