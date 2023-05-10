@@ -4,16 +4,19 @@
 
   export let metadata: TimelineMedia, audioContext: AudioContext, isPaused: boolean;
 
-  let buffer: HTMLVideoElement | undefined;
+  let bufferEl: HTMLVideoElement;
   let currentTime: number;
   let audioNode: AudioBufferSourceNode;
 
-  $: if (audioNode) isPaused ? audioNode.disconnect() : audioNode.connect(audioContext.destination);
+  $: if (audioNode) isPaused && audioNode.disconnect();
 
-  $: if (buffer && currentTime >= buffer.duration - metadata.startTime - metadata.endTime) {
+  $: if (
+    bufferEl &&
+    bufferEl === $timeline.buffers[$timeline.currentBufferIndex].video &&
+    currentTime >= bufferEl.duration - metadata.startTime - metadata.endTime
+  ) {
     audioNode.disconnect();
     if ($timeline.currentBufferIndex === $timeline.buffers.length - 1) {
-      audioContext && audioContext.suspend();
       isPaused = true;
     } else {
       $timeline.currentBufferIndex++;
@@ -25,6 +28,7 @@
   };
 
   const handlePlay = () => {
+    console.log("playing source");
     audioNode = audioContext.createBufferSource();
 
     const audioNodeBuffer = audioContext.createBuffer(metadata.buffer.numberOfChannels, metadata.buffer.length, metadata.buffer.sampleRate);
@@ -40,9 +44,13 @@
   };
 
   onMount(() => {
-    if (!buffer) throw new Error("No buffer");
-    $timeline.buffers.push(buffer);
+    console.log("mounting video buffer");
+    if (!bufferEl) throw new Error("No buffer");
+    $timeline.buffers.push({
+      video: bufferEl,
+      metadata,
+    });
   });
 </script>
 
-<video muted class="hidden" bind:currentTime src={metadata.src} bind:this={buffer} on:loadedmetadata={handleBufferSetup} on:play={handlePlay} />
+<video muted class="hidden" bind:currentTime src={metadata.src} bind:this={bufferEl} on:loadedmetadata={handleBufferSetup} on:play={handlePlay} />

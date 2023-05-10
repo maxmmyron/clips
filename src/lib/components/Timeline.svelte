@@ -67,7 +67,10 @@
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
-    $timeline.clips = $timeline.clips.filter((clip) => !$timeline.selected.includes(clip));
+    const deleteIDs = $timeline.selected.map((clip) => clip.uuid);
+    $timeline.clips = $timeline.clips.filter((clip) => !deleteIDs.includes(clip.uuid));
+    $timeline.buffers = $timeline.buffers.filter((buffer) => !deleteIDs.includes(buffer.metadata.uuid));
+
     $timeline.selected = [];
   };
 </script>
