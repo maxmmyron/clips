@@ -17,45 +17,44 @@
   });
 
   $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
-  $: if (currentBuffer) isPaused ? currentBuffer.pause() : currentBuffer.play();
+  $: if (currentBuffer) isPaused ? currentBuffer.video.pause() : currentBuffer.video.play();
   $: accumulatedTime = $timeline.clips.slice(0, $timeline.currentBufferIndex).reduce((acc, cur) => acc + (cur.duration - cur.startTime - cur.endTime), 0);
   $: currentBuffer = $timeline.buffers[$timeline.currentBufferIndex];
-  $: currentMetadata = $timeline.clips[$timeline.currentBufferIndex];
+  $: if ($timeline.currentBufferIndex === -1 && $timeline.buffers.length > 0) $timeline.currentBufferIndex = 0;
+  $: video = currentBuffer?.video;
+  $: metadata = currentBuffer?.metadata;
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
     if ($timeline.buffers.length === 0 || !currentBuffer) return;
-    currentPreviewTime = currentBuffer.currentTime - currentMetadata.startTime;
-
-    console.log($timeline.currentBufferIndex);
+    currentPreviewTime = video.currentTime - metadata.startTime;
 
     // TODO: no need to recompute this every frame
     const mediaSize = {
-      width: currentBuffer.videoWidth * Math.min(width / currentBuffer.videoWidth, height / currentBuffer.videoHeight),
-      height: currentBuffer.videoHeight * Math.min(width / currentBuffer.videoWidth, height / currentBuffer.videoHeight),
+      width: video.videoWidth * Math.min(width / video.videoWidth, height / video.videoHeight),
+      height: video.videoHeight * Math.min(width / video.videoWidth, height / video.videoHeight),
     };
 
     const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
 
-    context.drawImage(currentBuffer, 0, 0, currentBuffer.videoWidth, currentBuffer.videoHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
+    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
   };
 
   function setPlayerTime(front: boolean = true): any {
     isPaused = true;
     if (front) {
+      for (let i = 0; i < $timeline.buffers.length; i++) $timeline.buffers[i].video.currentTime = $timeline.clips[i].startTime;
       $timeline.currentBufferIndex = 0;
-      currentBuffer.currentTime = currentMetadata.startTime;
+      video.currentTime = metadata.startTime;
     } else {
-      // TODO: kinda shitty code; probably should directly set src attribute of preview. Works for now but consider refactoring
-      // [bufferAIdx, bufferBIdx] = [$timeline.clips.length - 1, $timeline.clips.length];
-      // preview = videoA;
-      // preview.load();
-      // preview.addEventListener("loadedmetadata", () => (preview.currentTime = preview.duration - currentMetadata.startTime));
+      $timeline.currentBufferIndex = $timeline.buffers.length - 1;
+      video.currentTime = metadata.duration - metadata.startTime - metadata.endTime;
     }
   }
 
   const togglePlayState = () => {
+    const currentMetadata = $timeline.clips[$timeline.currentBufferIndex];
     const isLastClip = $timeline.currentBufferIndex === $timeline.buffers.length - 1;
     const isLastFrame = currentPreviewTime >= currentMetadata.duration - currentMetadata.startTime - currentMetadata.endTime;
     if (isLastClip && isLastFrame) {
@@ -65,9 +64,11 @@
   };
 </script>
 
-{#each $timeline.clips as metadata, i}
-  <VideoBuffer {audioContext} {isPaused} {metadata} />
-{/each}
+{#key $timeline.clips}
+  {#each $timeline.clips as metadata}
+    <VideoBuffer {audioContext} {isPaused} {metadata} />
+  {/each}
+{/key}
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
