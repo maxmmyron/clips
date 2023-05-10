@@ -9,18 +9,18 @@ interface UploadedMedia {
   name: string;
   duration: number;
   thumbnails: string[];
-  buffer: AudioBuffer;
+  audio: AudioBuffer;
 }
 
 interface TimelineMedia {
   uuid: string;
-  src: string;
-  name: string;
   duration: number;
+  name: string;
+  src: string;
+  audio: AudioBuffer;
+  startOffset: number;
+  endOffset: number;
   thumbnails: string[];
-  buffer: AudioBuffer;
-  startTime: number;
-  endTime: number;
 }
 
 type WritableMediaPool = import("svelte/store").Writable<{
@@ -31,13 +31,10 @@ type WritableMediaPool = import("svelte/store").Writable<{
 type WritableTimeline = import("svelte/store").Writable<{
   selected: TimelineMedia[];
   clips: TimelineMedia[];
-  zoomScale: number;
+  videos: Map<string, HTMLVideoElement>;
+  currentVideo: HTMLVideoElement | null;
+  zoom: number;
   dragIndex: number;
-  buffers: {
-    video: HTMLVideoElement;
-    metadata: TimelineMedia;
-  }[];
-  currentBufferIndex: number;
 }>;
 
 type WritablePlayer = import("svelte/store").Writable<{

@@ -58,10 +58,11 @@ export const timeline: WritableTimeline = writable({
    * An array of loaded clips. Carries a variety of information that can be used to display clip details and preview clips.
    */
   clips: [],
-  zoomScale: 5,
+  videos: new Map(),
+  currentVideo: null,
+  zoom: 5,
   dragIndex: -1,
-  buffers: [],
-  currentBufferIndex: -1,
+  playIndex: -1,
 });
 
 export const player: WritablePlayer = writable({
