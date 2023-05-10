@@ -26,26 +26,26 @@
   };
 
   const handlePlay = () => {
-    console.log("playing source");
     audioNode = audioContext.createBufferSource();
-
-    const startOffset = Math.max(node.metadata.startOffset, node.metadata.startOffset + (currentTime - node.metadata.startOffset));
-
-    video.currentTime = startOffset;
 
     const audioNodeBuffer = audioContext.createBuffer(node.metadata.audio.numberOfChannels, node.metadata.audio.length, node.metadata.audio.sampleRate);
     for (let i = 0; i < node.metadata.audio.numberOfChannels; i++) audioNodeBuffer.copyToChannel(node.metadata.audio.getChannelData(i), i);
 
     audioNode.buffer = audioNodeBuffer;
 
-    const duration = node.metadata.duration - node.metadata.endOffset - startOffset;
+    let startOffset = node.metadata.startOffset + (currentTime - node.metadata.startOffset);
 
+    if (video.currentTime === 0 || video.currentTime >= video.duration - node.metadata.startOffset - node.metadata.endOffset) {
+      startOffset = node.metadata.startOffset;
+    }
+
+    video.currentTime = startOffset;
+    const duration = node.metadata.duration - node.metadata.endOffset - startOffset;
     audioNode.connect(audioContext.destination);
     audioNode.start(0, startOffset, duration);
   };
 
   onMount(() => {
-    console.log("mounting video buffer");
     if (!video) throw new Error("No buffer");
     $timeline.videos.set(node.uuid, video);
   });

@@ -19,6 +19,8 @@
   });
 
   $: if (audioContext) $player.isPaused ? audioContext.suspend() : audioContext.resume();
+
+  // FIXME: doesn't account for duplicate clips in timeline
   $: if ($timeline.curr)
     accumulatedTime = $timeline.clips
       .toArray()
@@ -51,14 +53,11 @@
   };
 
   function setPlayerTime(front: boolean = true): any {
-    console.log($timeline.videos);
     $player.isPaused = true;
     if (front) {
+      // FIXME: shit don't render, probably occurring here
       $timeline.curr = $timeline.clips.head;
-      if (!$timeline.curr) return;
-      const metadata = $timeline.curr.metadata;
-      const video = $timeline.videos.get($timeline.curr.uuid);
-      if (video) video.currentTime = metadata.startOffset;
+      $timeline.videos.forEach((video) => (video.currentTime = 0));
     } else {
       $timeline.curr = $timeline.clips.tail;
       if (!$timeline.curr) return;
