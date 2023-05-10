@@ -12,7 +12,7 @@
 
   $: if (
     bufferEl &&
-    bufferEl === $timeline.buffers[$timeline.currentBufferIndex].video &&
+    bufferEl === $timeline.buffers[$timeline.currentBufferIndex]?.video &&
     currentTime >= bufferEl.duration - metadata.startTime - metadata.endTime
   ) {
     audioNode.disconnect();
