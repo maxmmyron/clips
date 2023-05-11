@@ -53,6 +53,8 @@
   const handleMow = () => {
     mows = [...mows, Date.now()];
     let id = setTimeout(() => mows.shift() && clearTimeout(id), 1000);
+    console.log($timeline.clips.head);
+    console.log($timeline.curr);
   };
 </script>
 
