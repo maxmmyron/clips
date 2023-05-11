@@ -7,25 +7,16 @@
   export let width = 640,
     height = 480;
 
-  let currentPreviewTime = 0;
+  let previewTime = 0,
+    accumulatedTime = 0;
   let audioContext: AudioContext;
-  let accumulatedTime = 0;
 
-  $: currentVideo = $timeline.videos.get($timeline.curr?.uuid || "") || null;
-  $: if (currentVideo) $player.isPaused ? currentVideo.pause() : currentVideo.play();
+  onMount(() => (audioContext = new AudioContext()));
 
-  onMount(() => {
-    audioContext = new AudioContext();
-  });
-
-  $: if (audioContext) $player.isPaused ? audioContext.suspend() : audioContext.resume();
-
-  // FIXME: doesn't account for duplicate clips in timeline
-  $: if ($timeline.curr)
-    accumulatedTime = $timeline.clips
-      .toArray()
-      .slice(0, $timeline.clips.indexOf($timeline.curr.uuid))
-      .reduce((acc, { metadata }) => acc + (metadata.duration - metadata.startOffset - metadata.endOffset), 0);
+  $: if ($timeline.curr) {
+    const accumulatorClips = $timeline.clips.toArray().slice(0, $timeline.clips.indexOf($timeline.curr.uuid));
+    accumulatedTime = accumulatorClips.reduce((acc, { metadata }) => acc + (metadata.duration - metadata.startOffset - metadata.endOffset), 0);
+  }
 
   $: if (!$timeline.curr && $timeline.clips.length > 0) $timeline.curr = $timeline.clips.head;
 
@@ -39,7 +30,7 @@
 
     if (!video) return;
 
-    currentPreviewTime = video.currentTime - metadata.startOffset;
+    previewTime = video.currentTime - metadata.startOffset;
 
     // TODO: no need to recompute this every frame
     const mediaSize = {
@@ -54,27 +45,32 @@
 
   function setPlayerTime(front: boolean = true): any {
     $player.isPaused = true;
+
+    $timeline.clips.toArray().forEach((clip) => {
+      clip.metadata.hasEnded = !front;
+      clip.metadata.hasStarted = !front;
+    });
+
     if (front) {
-      // FIXME: shit don't render, probably occurring here
+      console.log("resetting state to head");
       $timeline.curr = $timeline.clips.head;
-      $timeline.videos.forEach((video) => (video.currentTime = 0));
+      previewTime = 0;
     } else {
+      console.log("resetting state to tail");
       $timeline.curr = $timeline.clips.tail;
+      // set last video time
       if (!$timeline.curr) return;
       const metadata = $timeline.curr.metadata;
       const video = $timeline.videos.get($timeline.curr.uuid);
       if (video) video.currentTime = metadata.duration - metadata.startOffset - metadata.endOffset;
+      previewTime = metadata.duration - metadata.startOffset - metadata.endOffset;
     }
   }
 
   const togglePlayState = () => {
+    console.log("toggling play state...");
     if (!$timeline.curr) return;
-    const metadata = $timeline.curr.metadata;
-    const isLastClip = $timeline.curr === $timeline.clips.tail;
-    const isLastFrame = currentPreviewTime >= metadata.duration - metadata.startOffset - metadata.endOffset;
-    if (isLastClip && isLastFrame) {
-      setPlayerTime();
-    }
+    if ($timeline.curr === $timeline.clips.tail && $timeline.curr.metadata.hasEnded) setPlayerTime();
     $player.isPaused = !$player.isPaused;
   };
 </script>
@@ -93,7 +89,7 @@
   {/if}
 </div>
 
-<p class="w-full text-white text-right">{Math.round((accumulatedTime + currentPreviewTime) * 100) / 100 || 0}</p>
+<p class="w-full text-white text-right">{Math.round((accumulatedTime + previewTime) * 100) / 100 || 0}</p>
 
 <div class="w-full flex justify-center gap-4">
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime()}>⏪</button>
