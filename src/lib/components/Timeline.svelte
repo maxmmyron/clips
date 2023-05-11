@@ -68,7 +68,7 @@
     if (!$studio.dragData.media) return;
     $timeline.clips.add({
       uuid: uuidv4(),
-      metadata: { ...$studio.dragData.media, startOffset: 0, endOffset: 0 },
+      metadata: { ...$studio.dragData.media, startOffset: 0, endOffset: 0, hasStarted: false, hasEnded: false },
       next: null,
       prev: null,
     });
