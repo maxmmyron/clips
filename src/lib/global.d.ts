@@ -26,6 +26,8 @@ interface TimelineNodeMetadata  {
   startOffset: number;
   endOffset: number;
   thumbnails: string[];
+  hasStarted: boolean;
+  hasEnded: boolean;
 }
 
 type WritableMediaPool = import("svelte/store").Writable<{
