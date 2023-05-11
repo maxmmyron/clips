@@ -47,30 +47,21 @@
     $player.isPaused = true;
 
     $timeline.clips.toArray().forEach((clip) => {
+      const video = $timeline.videos.get(clip.uuid);
+      if (!video) return;
+      video.currentTime = front ? clip.metadata.startOffset : clip.metadata.duration - clip.metadata.endOffset - clip.metadata.startOffset;
       clip.metadata.hasEnded = !front;
       clip.metadata.hasStarted = !front;
     });
 
-    if (front) {
-      console.log("resetting state to head");
-      $timeline.curr = $timeline.clips.head;
-      previewTime = 0;
-    } else {
-      console.log("resetting state to tail");
-      $timeline.curr = $timeline.clips.tail;
-      // set last video time
-      if (!$timeline.curr) return;
-      const metadata = $timeline.curr.metadata;
-      const video = $timeline.videos.get($timeline.curr.uuid);
-      if (video) video.currentTime = metadata.duration - metadata.startOffset - metadata.endOffset;
-      previewTime = metadata.duration - metadata.startOffset - metadata.endOffset;
-    }
+    $timeline.curr = front ? $timeline.clips.head : $timeline.clips.tail;
   }
 
   const togglePlayState = () => {
     console.log("toggling play state...");
     if (!$timeline.curr) return;
-    if ($timeline.curr === $timeline.clips.tail && $timeline.curr.metadata.hasEnded) setPlayerTime();
+    if (!$timeline.clips.tail) throw new Error("Timeline tail is null... Something has gone horribly wrong.");
+    if ($timeline.curr.uuid === $timeline.clips.tail.uuid && $timeline.curr.metadata.hasEnded) setPlayerTime();
     $player.isPaused = !$player.isPaused;
   };
 </script>
