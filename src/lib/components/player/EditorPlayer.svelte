@@ -28,6 +28,8 @@
     const metadata = $timeline.curr.metadata;
     const video = $timeline.videos.get($timeline.curr.uuid);
 
+    console.log(video?.src);
+
     if (!video) return;
 
     previewTime = video.currentTime - metadata.startOffset;
