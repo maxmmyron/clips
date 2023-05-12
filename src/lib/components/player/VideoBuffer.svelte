@@ -49,4 +49,4 @@
   });
 </script>
 
-<video muted class="hidden" bind:currentTime src={node.metadata.src} bind:this={video} on:play={handlePlay} />
+<video muted class="pointer-events-none opacity-0 absolute" bind:currentTime src={node.metadata.src} bind:this={video} on:play={handlePlay} />
