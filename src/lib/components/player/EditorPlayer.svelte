@@ -51,7 +51,8 @@
     $timeline.clips.toArray().forEach((clip) => {
       const video = $timeline.videos.get(clip.uuid);
       if (!video) return;
-      video.currentTime = front ? clip.metadata.startOffset : clip.metadata.duration - clip.metadata.endOffset - clip.metadata.startOffset;
+      console.log(`setting ${clip.uuid} to ${front ? clip.metadata.startOffset : clip.metadata.duration - clip.metadata.endOffset}`);
+      video.currentTime = front ? clip.metadata.startOffset : clip.metadata.duration - clip.metadata.endOffset;
       clip.metadata.hasEnded = !front;
       clip.metadata.hasStarted = !front;
     });
