@@ -35,14 +35,15 @@
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
-    // check if selected files are in timeline; show confirmation if so
-    const isSelectedMediaInTimeline = $timeline.clips.some((clip) => $mediaPool.selected.includes(clip));
     const timelineConfirm = `Deleting these files will remove their references from the timeline. Are you sure?`;
+    const selectedSources = $mediaPool.selected.map((file) => file.src);
 
-    if (isSelectedMediaInTimeline && confirm(timelineConfirm) === false) return;
+    // check if selected files are in timeline; show confirmation if so
+    let selectedTimelineNodes = $timeline.clips.toArray().filter((node) => selectedSources.includes(node.metadata.src));
+    if (selectedTimelineNodes.length > 0 && confirm(timelineConfirm) === false) return;
 
     // delete files from timeline and media pool, clear selection arr
-    $timeline.clips = $timeline.clips.filter((clip) => !$mediaPool.selected.includes(clip));
+    selectedTimelineNodes.forEach((node) => $timeline.clips.remove(node.uuid));
     $mediaPool.media = $mediaPool.media.filter((file) => !$mediaPool.selected.includes(file));
     $mediaPool.selected = [];
   };
@@ -52,6 +53,9 @@
   const handleMow = () => {
     mows = [...mows, Date.now()];
     let id = setTimeout(() => mows.shift() && clearTimeout(id), 1000);
+    console.log($timeline.clips.head);
+    console.log($timeline.clips.tail);
+    console.log($timeline.curr);
   };
 </script>
 

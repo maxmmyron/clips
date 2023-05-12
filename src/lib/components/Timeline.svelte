@@ -5,12 +5,12 @@
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
   import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
 
-  let zoomScale = 5;
+  let zoom = 5;
   let timelineContainer: HTMLElement;
 
   let dropIndex: number = -1;
 
-  $: $timeline.zoomScale = zoomScale;
+  $: $timeline.zoom = zoom;
 
   const handleDrag = (e: MouseEvent) => {
     if ($studio.dragData.dragEvent !== "drag" || $studio.dragData.currentDragRegion !== "timeline") return;
@@ -54,20 +54,32 @@
     if ($studio.dragData.originType === "timeline") {
       if ($timeline.dragIndex === -1) return;
 
-      const media = $timeline.clips.splice($timeline.dragIndex, 1)[0];
+      let clip = $timeline.clips.getAt($timeline.dragIndex) as TimelineLayerNode;
+      $timeline.clips.remove(clip.uuid);
 
-      if (dropIndex === -1) $timeline.clips.push(media);
-      else $timeline.clips.splice(dropIndex, 0, media);
+      if (dropIndex === -1) $timeline.clips.add(clip);
+      else $timeline.clips.add(clip, dropIndex);
+
+      $timeline.dragIndex = -1;
       return;
     }
     // handle dragging new media into timeline
-    $studio.dragData.media && ($timeline.clips = [...$timeline.clips, { uuid: uuidv4(), ...$studio.dragData.media, startTime: 0, endTime: 0 }]);
+
+    if (!$studio.dragData.media) return;
+    $timeline.clips.add({
+      uuid: uuidv4(),
+      metadata: { ...$studio.dragData.media, startOffset: 0, endOffset: 0, hasStarted: false, hasEnded: false },
+      next: null,
+      prev: null,
+    });
   };
 
   const handleKey = (e: KeyboardEvent) => {
     if (e.key !== "Delete") return;
 
-    $timeline.clips = $timeline.clips.filter((clip) => !$timeline.selected.includes(clip));
+    const deleteIDs = $timeline.selected.map((clip) => clip.uuid);
+    deleteIDs.forEach((id) => $timeline.clips.remove(id));
+
     $timeline.selected = [];
   };
 </script>
@@ -83,19 +95,19 @@
     on:mouseleave={() => ($studio.dragData.currentDragRegion = null)}
   >
     <div class="flex h-fit min-h-[50%]" bind:this={timelineContainer}>
-      {#each $timeline.clips as metadata, idx (metadata.uuid)}
+      {#each $timeline.clips.toArray() as node, idx (node.uuid)}
         <div
           class="draggable overflow-clip"
           class:dragging={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
           class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
         >
-          <TimelinePreview {metadata}>
-            <MediaVideoPreview metadata={{ name: metadata.name, thumbnails: metadata.thumbnails }} isTimelineElement={true} />
-            <MediaAudioPreview buffer={metadata.buffer.getChannelData(0)} />
+          <TimelinePreview metadata={node.metadata}>
+            <MediaVideoPreview metadata={{ name: node.metadata.name, thumbnails: node.metadata.thumbnails }} isTimelineElement={true} />
+            <MediaAudioPreview metadata={node.metadata} />
           </TimelinePreview>
         </div>
       {/each}
     </div>
   </div>
-  <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
+  <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoom} />
 </div>

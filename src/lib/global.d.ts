@@ -9,18 +9,25 @@ interface UploadedMedia {
   name: string;
   duration: number;
   thumbnails: string[];
-  buffer: AudioBuffer;
+  audio: AudioBuffer;
 }
 
-interface TimelineMedia {
+interface TimelineLayerNode {
   uuid: string;
-  src: string;
-  name: string;
+  metadata: TimelineNodeMetadata;
+  next: TimelineLayerNode | null;
+  prev: TimelineLayerNode | null;
+}
+interface TimelineNodeMetadata  {
   duration: number;
+  name: string;
+  src: string;
+  audio: AudioBuffer;
+  startOffset: number;
+  endOffset: number;
   thumbnails: string[];
-  buffer: AudioBuffer;
-  startTime: number;
-  endTime: number;
+  hasStarted: boolean;
+  hasEnded: boolean;
 }
 
 type WritableMediaPool = import("svelte/store").Writable<{
@@ -29,15 +36,18 @@ type WritableMediaPool = import("svelte/store").Writable<{
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
-  selected: TimelineMedia[];
-  clips: TimelineMedia[];
-  zoomScale: number;
+  selected: TimelineLayerNode[];
+  clips: import("./components/util/TimelineLinkedList").default
+  curr: TimelineLayerNode | null;
+  videos: Map<string, HTMLVideoElement>;
+  zoom: number;
   dragIndex: number;
 }>;
 
 type WritablePlayer = import("svelte/store").Writable<{
   playerState: "editor" | "preview";
   source: string | null;
+  isPaused: boolean;
 }>;
 
 declare interface Window {

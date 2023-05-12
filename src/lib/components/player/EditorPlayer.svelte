@@ -1,114 +1,76 @@
 <script lang="ts">
-  import { studio, timeline } from "$lib/stores";
+  import { timeline, player } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import { onMount } from "svelte";
+  import VideoBuffer from "./VideoBuffer.svelte";
 
   export let width = 640,
     height = 480;
 
-  let isPaused = true;
-  let bufferAIndex = 0,
-    bufferBIndex = 1;
-  let currentTime = 0;
+  let previewTime = 0,
+    accumulatedTime = 0;
+  let audioContext: AudioContext;
 
-  let videoA: HTMLVideoElement, videoB: HTMLVideoElement, preview: HTMLVideoElement;
-  let audioContext: AudioContext, audioNode: AudioBufferSourceNode;
+  onMount(() => (audioContext = new AudioContext()));
 
-  onMount(() => {
-    preview = videoA;
-    audioContext = new AudioContext();
-  });
+  $: if ($timeline.curr) {
+    const accumulatorClips = $timeline.clips.toArray().slice(0, $timeline.clips.indexOf($timeline.curr.uuid));
+    accumulatedTime = accumulatorClips.reduce((acc, { metadata }) => acc + (metadata.duration - metadata.startOffset - metadata.endOffset), 0);
+  }
 
-  $: if (preview) isPaused ? preview.pause() : preview.play();
-  $: if (audioContext) isPaused ? audioContext.suspend() : audioContext.resume();
-  $: if (audioNode) isPaused && audioNode && audioNode.disconnect();
-
-  // TODO: expand src with video & audio srcs
-  $: videoSrcA = $timeline.clips[bufferAIndex]?.src;
-  $: videoSrcB = $timeline.clips[bufferBIndex]?.src;
-  $: currentIndex = preview === videoA ? bufferAIndex : bufferBIndex;
-  $: accumulatedTime = $timeline.clips.slice(0, Math.min(bufferAIndex, bufferBIndex)).reduce((acc, cur) => acc + cur.duration, 0);
-
-  const handlePlay = () => {
-    //create node from AudioBuffer
-    audioNode = audioContext.createBufferSource();
-    audioNode.buffer = $timeline.clips[currentIndex].buffer;
-
-    const startOffset = $timeline.clips[currentIndex].startTime + preview.currentTime;
-    const duration = $timeline.clips[currentIndex].duration - preview.currentTime - $timeline.clips[currentIndex].endTime;
-
-    audioNode.connect(audioContext.destination);
-    audioNode.start(0, startOffset, duration);
-  };
-
-  const handleEnded = () => {
-    if ((preview === videoA ? bufferAIndex : bufferBIndex) === $timeline.clips.length - 1) {
-      audioContext && audioContext.suspend();
-      isPaused = true;
-      return;
-    }
-
-    preview = (preview === videoA ? videoB : videoA) as HTMLVideoElement;
-    // skip forward previous index to next clip
-    preview === videoA ? (bufferBIndex += 2) : (bufferAIndex += 2);
-  };
+  $: if (!$timeline.curr && $timeline.clips.length > 0) $timeline.curr = $timeline.clips.head;
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
-    if (!preview) {
-      console.warn("No video to render");
-      return;
-    }
+    if ($timeline.clips.length === 0 || !$timeline.curr) return;
 
-    // TODO: not good svelte code... this could be reactive
-    currentTime = preview.currentTime;
+    const metadata = $timeline.curr.metadata;
+    const video = $timeline.videos.get($timeline.curr.uuid);
+
+    console.log(video?.src);
+
+    if (!video) return;
+
+    previewTime = video.currentTime - metadata.startOffset;
 
     // TODO: no need to recompute this every frame
     const mediaSize = {
-      width: preview.videoWidth * Math.min(width / preview.videoWidth, height / preview.videoHeight),
-      height: preview.videoHeight * Math.min(width / preview.videoWidth, height / preview.videoHeight),
+      width: video.videoWidth * Math.min(width / video.videoWidth, height / video.videoHeight),
+      height: video.videoHeight * Math.min(width / video.videoWidth, height / video.videoHeight),
     };
 
     const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
 
-    context.drawImage(preview, 0, 0, preview.videoWidth, preview.videoHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
+    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
   };
 
   function setPlayerTime(front: boolean = true): any {
-    isPaused = true;
-    if (front) {
-      bufferAIndex = 0;
-      bufferBIndex = 1;
-      preview = videoA;
-      preview.currentTime = 0;
-      accumulatedTime = 0;
-    } else {
-      // TODO: kinda shitty code; probably should directly set src attribute of preview. Works for now but consider refactoring
-      preview.src = $timeline.clips[$timeline.clips.length - 1].src;
-      preview.load();
-      preview.addEventListener("loadedmetadata", () => {
-        preview.currentTime = preview.duration;
-      });
-      accumulatedTime = $timeline.clips.reduce((acc, cur) => acc + cur.duration, 0) - preview.duration;
-      if (preview === videoA) {
-        bufferAIndex = $timeline.clips.length - 1;
-        bufferBIndex = $timeline.clips.length;
-      } else {
-        bufferAIndex = $timeline.clips.length;
-        bufferBIndex = $timeline.clips.length - 1;
-      }
-    }
+    $player.isPaused = true;
+
+    $timeline.clips.toArray().forEach((clip) => {
+      const video = $timeline.videos.get(clip.uuid);
+      if (!video) return;
+      video.currentTime = front ? clip.metadata.startOffset : clip.metadata.duration - clip.metadata.endOffset - clip.metadata.startOffset;
+      clip.metadata.hasEnded = !front;
+      clip.metadata.hasStarted = !front;
+    });
+
+    $timeline.curr = front ? $timeline.clips.head : $timeline.clips.tail;
   }
 
   const togglePlayState = () => {
-    if (currentIndex === $timeline.clips.length - 1 && preview.currentTime === preview.duration) setPlayerTime();
-    isPaused = !isPaused;
+    console.log("toggling play state...");
+    if (!$timeline.curr) return;
+    if (!$timeline.clips.tail) throw new Error("Timeline tail is null... Something has gone horribly wrong.");
+    if ($timeline.curr.uuid === $timeline.clips.tail.uuid && $timeline.curr.metadata.hasEnded) setPlayerTime();
+    $player.isPaused = !$player.isPaused;
   };
 </script>
 
-<video class="hidden" muted src={videoSrcA} bind:this={videoA} on:ended={handleEnded} on:play={handlePlay} />
-<video class="hidden" muted src={videoSrcB} bind:this={videoB} on:ended={handleEnded} on:play={handlePlay} />
+{#each $timeline.clips.toArray() as node}
+  <VideoBuffer {audioContext} {node} />
+{/each}
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
@@ -120,10 +82,10 @@
   {/if}
 </div>
 
-<p class="w-full text-white text-right">{(accumulatedTime + currentTime).toPrecision(2)}</p>
+<p class="w-full text-white text-right">{Math.round((accumulatedTime + previewTime) * 100) / 100 || 0}</p>
 
 <div class="w-full flex justify-center gap-4">
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime()}>⏪</button>
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={togglePlayState}>{isPaused ? "▶️" : "⏸️"}</button>
+  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={togglePlayState}>{$player.isPaused ? "▶️" : "⏸️"}</button>
   <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(false)}>⏩</button>
 </div>
