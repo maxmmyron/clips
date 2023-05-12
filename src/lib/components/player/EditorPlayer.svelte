@@ -85,7 +85,25 @@
 <p class="w-full text-white text-right">{Math.round((accumulatedTime + previewTime) * 100) / 100 || 0}</p>
 
 <div class="w-full flex justify-center gap-4">
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime()}>⏪</button>
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={togglePlayState}>{$player.isPaused ? "▶️" : "⏸️"}</button>
-  <button class="text-white border-2 border-neutral-800 px-3 py-1" on:click={() => setPlayerTime(false)}>⏩</button>
+  <button
+    class="text-white border-2 border-neutral-800 px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+    on:click={() => setPlayerTime()}
+    disabled={$timeline.curr === null || ($timeline.curr === $timeline.clips.head && !$timeline.curr.metadata.hasStarted)}
+  >
+    ⏪
+  </button>
+  <button
+    class="text-white border-2 border-neutral-800 px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+    on:click={togglePlayState}
+    disabled={$timeline.curr === null}
+  >
+    {$player.isPaused ? "▶️" : "⏸️"}
+  </button>
+  <button
+    class="text-white border-2 border-neutral-800 px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+    on:click={() => setPlayerTime(false)}
+    disabled={$timeline.curr === null || ($timeline.curr === $timeline.clips.tail && $timeline.curr.metadata.hasEnded)}
+  >
+    ⏩
+  </button>
 </div>
