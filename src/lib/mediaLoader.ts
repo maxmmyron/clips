@@ -1,22 +1,36 @@
 import { get } from "svelte/store";
 import { studio } from "./stores";
 
-export const loadMediaMetadata = async (file: File) => {
-  const src = URL.createObjectURL(file);
+const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}];
 
-  if(file.type === "video/quicktime") {
-    // TODO: relay warning to kitty
-    console.warn("Quicktime videos are not supported. Please convert to a different format.")
+export const loadMediaMetadata = async (file: File) => {
+  if(disallowedTypes.some(type => file.type.includes(type.type))) {
+    const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as {type: string, name: string};
+    console.warn(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
     return null;
   }
 
-  return {
-    src,
-    name: file.name,
-    duration: await loadMediaDuration(src),
-    thumbnails: await loadThumbnails(src),
-    audio: await loadAudioBuffer(src),
-  } as UploadedMedia;
+  const src = URL.createObjectURL(file);
+
+  if(file.type.includes("audio")) {
+
+  }
+
+  if(file.type.includes("video")) {
+    return {
+      src,
+      name: file.name,
+      duration: await loadMediaDuration(src),
+      thumbnails: await loadThumbnails(src),
+      audio: await loadAudioBuffer(src),
+    } as UploadedMedia;
+  }
+
+  if(file.type.includes("image")) {
+
+  }
+
+
 };
 
 export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
@@ -72,8 +86,10 @@ export const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((
   const audioContext = get(studio).audioContext;
   if(!audioContext) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
-  .then(buffer => audioContext.decodeAudioData(buffer)
-    .then(buffer => resolve(buffer))
-    .catch(err => reject(`Error decoding audio data: ${err}`)))
+  .then(buffer => {
+    audioContext.decodeAudioData(buffer)
+      .then(buffer => resolve(buffer))
+      .catch(err => reject(`Error decoding audio data: ${err}`));
+  })
   .catch(err => reject(`Error fetching audio data: ${err}`));
 });
