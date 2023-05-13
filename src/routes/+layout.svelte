@@ -7,6 +7,10 @@
   import "../app.css";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
+  import { dev } from "$app/environment";
+  import { inject } from "@vercel/analytics";
+
+  inject({ mode: dev ? "development" : "production" });
 
   let isResizing = false;
   let mediaColumnWidth = "40vw";

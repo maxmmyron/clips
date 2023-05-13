@@ -24,6 +24,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@vercel/analytics": "^1.0.1",
 		"svelte-canvas": "^0.9.3",
 		"uuid": "^9.0.0"
 	}
