@@ -66,9 +66,21 @@
   };
 </script>
 
-<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} />
+<!-- <svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} /> -->
 
-<main
+<main class="bg-neutral-950 w-full h-[100dvh] flex justify-center items-center flex-col gap-4 p-4">
+  <div class="flex-1" />
+  <h1 class="text-white text-5xl font-bold font-mono">clippy.mov is in the works.</h1>
+  <br />
+  <p class="text-white text-2xl font-mono">
+    There is currently no stable build, but <a href="https://canary.clippy.mov/" class="underline text-green-300">the canary build</a> is continually updated if
+    you'd like to try it out.
+  </p>
+  <div class="flex-1" />
+  <p class="text-white text-2xl font-mono pb-5">🥰 and 🧑‍💻 by <a href="https://mmyron.com/" class="underline text-green-300">max myron</a>.</p>
+</main>
+
+<!-- <main
   style="--row-width: minmax(256px, {timelineHeight});"
   class="w-full h-[100dvh] bg-neutral-950 grid grid-cols-1 grid-rows-[minmax(0,1fr),3px,var(--row-width)] transition-none"
   class:select-none={isResizing}
@@ -105,4 +117,4 @@
     class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
     style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"
   />
-{/if}
+{/if} -->
