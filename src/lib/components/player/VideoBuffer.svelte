@@ -14,7 +14,7 @@
   $: if (
     video &&
     video === $timeline.videos.get($timeline.curr?.uuid || "") &&
-    currentTime >= video.duration - node.metadata.startOffset - node.metadata.endOffset
+    currentTime - node.metadata.startOffset >= node.metadata.duration - node.metadata.startOffset - node.metadata.endOffset
   ) {
     if (audioNode) audioNode.disconnect();
     if (node === $timeline.clips.tail) $player.isPaused = true;
@@ -49,4 +49,11 @@
   });
 </script>
 
-<video muted class="hidden" bind:currentTime src={node.metadata.src} bind:this={video} on:play={handlePlay} />
+<video
+  muted
+  class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0"
+  bind:currentTime
+  src={node.metadata.src}
+  bind:this={video}
+  on:play={handlePlay}
+/>
