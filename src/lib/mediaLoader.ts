@@ -17,20 +17,20 @@ export const loadMediaMetadata = async (file: File) => {
   }
 
   if(file.type.includes("video")) {
-    return {
-      src,
-      name: file.name,
-      duration: await loadMediaDuration(src),
-      thumbnails: await loadThumbnails(src),
-      audio: await loadAudioBuffer(src),
-    } as UploadedMedia;
+
   }
 
   if(file.type.includes("image")) {
 
   }
 
-
+  return {
+    src,
+    name: file.name,
+    duration: await loadMediaDuration(src),
+    thumbnails: await loadThumbnails(src),
+    audio: await loadAudioBuffer(src),
+  } as UploadedMedia;
 };
 
 export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
