@@ -10,9 +10,8 @@
   const handleDrop = (e: DragEvent) => {
     if (!e.dataTransfer) return;
 
-    if (e.dataTransfer.items)
-      updateMediaPool([...e.dataTransfer.items].filter((itm) => itm.kind === "file" && itm.type.startsWith("video/")).map((itm) => itm.getAsFile() as File));
-    else updateMediaPool([...e.dataTransfer.files].filter((file) => file.type.startsWith("video/")));
+    if (e.dataTransfer.items) updateMediaPool([...e.dataTransfer.items].filter((itm) => itm.kind === "file").map((itm) => itm.getAsFile() as File));
+    else updateMediaPool([...e.dataTransfer.files]);
   };
 
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
@@ -63,7 +62,7 @@
 
 <div class="relative pt-4 px-4 h-full overflow-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between gap-2">
-    <input type="file" accept=".mp4,.webm,.mpeg,.mov,.avi" class="text-white h-8" multiple on:change={handleUpload} />
+    <input type="file" accept="video/*,image/*,audio/*" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
   <div class="w-full flex flex-wrap gap-3">
     {#key $mediaPool.media.length}
