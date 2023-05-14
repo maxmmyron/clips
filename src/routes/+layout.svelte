@@ -1,3 +1,7 @@
+<script>
+  import "../app.css";
+</script>
+
 <main class="bg-neutral-950 w-full h-[100dvh] flex justify-center items-center flex-col gap-4 p-4">
   <div class="flex-1" />
   <h1 class="text-white text-5xl font-bold font-mono">clippy.mov is in the works.</h1>
