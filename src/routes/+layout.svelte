@@ -7,6 +7,7 @@
   import "../app.css";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
+
   import { dev } from "$app/environment";
   import { inject } from "@vercel/analytics";
 
@@ -16,11 +17,17 @@
   let mediaColumnWidth = "40vw";
   let timelineColumnWidth = "10vw";
   let timelineHeight = "384px";
+  let sizeQuery = -1,
+    touchModeQuery = -1;
 
   $: ghostPos = $studio.dragData.ghost.position;
   $: ghostSize = $studio.dragData.ghost.size;
 
-  onMount(() => ($studio.audioContext = new AudioContext()));
+  onMount(() => {
+    $studio.audioContext = new AudioContext();
+    sizeQuery = matchMedia("(max-width: 768px), (max-height: 768px)").matches ? 0 : 1;
+    touchModeQuery = matchMedia("(hover: none) and (pointer: coarse)").matches ? 0 : 1;
+  });
 
   const handleResize = (e: MouseEvent) => {
     if (!isResizing || !$studio.resizeMode) return;
@@ -72,41 +79,52 @@
 
 <svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} />
 
-<main
-  style="--row-width: minmax(256px, {timelineHeight});"
-  class="w-full h-[100dvh] bg-neutral-950 grid grid-cols-1 grid-rows-[minmax(0,1fr),3px,var(--row-width)] transition-none"
-  class:select-none={isResizing}
-  on:mousemove={(e) => handleResize(e)}
-  on:mousedown={(e) => e.button === 0 && (isResizing = true)}
-  on:mouseup={() => {
-    isResizing = false;
-    $studio.resizeMode = null;
-  }}
->
-  <section
-    style="--media-col-width: minmax(320px, {mediaColumnWidth});"
-    class="grid grid-rows-1 grid-cols-[var(--media-col-width),3px,minmax(0,1fr)] transition-none"
+{#if sizeQuery + touchModeQuery === -2}
+  <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
+    <p class="text-2xl text-white">Loading...</p>
+  </div>
+{:else if sizeQuery + touchModeQuery !== 2}
+  <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
+    <p class="text-2xl text-white">Sorry, this app is not optimized for mobile devices.</p>
+    <p class="text-2xl text-white">Please use a desktop browser.</p>
+  </div>
+{:else}
+  <main
+    style="--row-width: minmax(256px, {timelineHeight});"
+    class="w-full h-[100dvh] bg-neutral-950 grid grid-cols-1 grid-rows-[minmax(0,1fr),3px,var(--row-width)] transition-none"
+    class:select-none={isResizing}
+    on:mousemove={(e) => handleResize(e)}
+    on:mousedown={(e) => e.button === 0 && (isResizing = true)}
+    on:mouseup={() => {
+      isResizing = false;
+      $studio.resizeMode = null;
+    }}
   >
-    <MediaPool />
-    <ResizeStalk resizeMode="mediaCol" />
-    <div class="flex flex-col justify-center items-center gap-8 p-8">
-      <Player />
-    </div>
-  </section>
-  <ResizeStalk resizeMode="row" />
-  <section
-    style="--timeline-col-width: minmax(320px, {timelineColumnWidth});"
-    class="grid grid-rows-1 grid-cols-[var(--timeline-col-width),3px,minmax(0,1fr)] transition-none"
-  >
-    <p>tracks</p>
-    <ResizeStalk resizeMode="timelineCol" />
-    <Timeline />
-  </section>
-</main>
+    <section
+      style="--media-col-width: minmax(320px, {mediaColumnWidth});"
+      class="grid grid-rows-1 grid-cols-[var(--media-col-width),3px,minmax(0,1fr)] transition-none"
+    >
+      <MediaPool />
+      <ResizeStalk resizeMode="mediaCol" />
+      <div class="flex flex-col justify-center items-center gap-8 p-8">
+        <Player />
+      </div>
+    </section>
+    <ResizeStalk resizeMode="row" />
+    <section
+      style="--timeline-col-width: minmax(320px, {timelineColumnWidth});"
+      class="grid grid-rows-1 grid-cols-[var(--timeline-col-width),3px,minmax(0,1fr)] transition-none"
+    >
+      <p>tracks</p>
+      <ResizeStalk resizeMode="timelineCol" />
+      <Timeline />
+    </section>
+  </main>
 
-{#if $studio.dragData.media && $studio.dragData.dragEvent !== "dragstart"}
-  <div
-    class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
-    style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"
-  />
+  {#if $studio.dragData.media && $studio.dragData.dragEvent !== "dragstart"}
+    <div
+      class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
+      style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"
+    />
+  {/if}
 {/if}
