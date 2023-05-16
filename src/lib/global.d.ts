@@ -1,23 +1,20 @@
 enum DropLocation { PLAYER, TIMELINE };
 
-type AudioMetadata = {
-  duration: number;
-  audio: AudioBuffer
-}
-
-// TODO: flesh out image metadata (if necessary)
-type ImageMetadata = {
-  width: number;
-  height: number;
-}
-
-type VideoMetadata = {
+interface VideoMetadata extends MediaPoolMetadata {
   duration: number;
   thumbnails: string[];
   audio: AudioBuffer;
 };
 
-interface UploadedMedia<T> {
+interface AudioMetadata extends MediaPoolMetadata {
+  duration: number;
+  audio: AudioBuffer
+}
+
+// TODO: flesh out image metadata (if necessary)
+interface ImageMetadata extends MediaPoolMetadata {}
+
+interface UploadedMedia<T extends MediaPoolMetadata> {
   src: string;
   name: string;
   metadata: T;
@@ -29,14 +26,25 @@ interface TimelineLayerNode {
   next: TimelineLayerNode | null;
   prev: TimelineLayerNode | null;
 }
-interface TimelineNodeMetadata  {
-  duration: number;
-  name: string;
-  src: string;
+
+interface VideoTimelineMetadata extends TimelineMetadata {
   audio: AudioBuffer;
+  thumbnails: string[];
+}
+
+interface AudioTimelineMetadata extends TimelineMetadata {
+  audio: AudioBuffer;
+}
+
+interface ImageTimelineMetadata extends TimelineMetadata {}
+
+interface TimelineNodeMetadata<T extends TimelineMetadata>  {
+  src: string;
+  name: string;
+  duration: number;
+  payload: T;
   startOffset: number;
   endOffset: number;
-  thumbnails: string[];
   hasStarted: boolean;
   hasEnded: boolean;
 }
