@@ -16,6 +16,7 @@ type UploadedAudio = {
   type: MediaType.AUDIO;
   duration: number;
   audio: AudioBuffer;
+  offsets: number[];
 } & UploadedMedia;
 
 type UploadedImage = {
@@ -45,8 +46,7 @@ interface TimelineNodeMetadata<T extends TimelineMetadata>  {
   name: string;
   duration: number;
   payload: T;
-  startOffset: number;
-  endOffset: number;
+  offsets: number[];
   hasStarted: boolean;
   hasEnded: boolean;
 }
