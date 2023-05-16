@@ -1,24 +1,27 @@
+enum MediaType { VIDEO, AUDIO, IMAGE };
 enum DropLocation { PLAYER, TIMELINE };
 
-interface VideoMetadata extends MediaPoolMetadata {
+interface UploadedMedia {
+  src: string;
+  name: string;
+}
+
+type UploadedVideo = {
+  type: MediaType.VIDEO;
   duration: number;
   thumbnails: string[];
   audio: AudioBuffer;
-};
+} & UploadedMedia;
 
-interface AudioMetadata extends MediaPoolMetadata {
+type UploadedAudio = {
+  type: MediaType.AUDIO;
   duration: number;
-  audio: AudioBuffer
-}
+  audio: AudioBuffer;
+} & UploadedMedia;
 
-// TODO: flesh out image metadata (if necessary)
-interface ImageMetadata extends MediaPoolMetadata {}
-
-interface UploadedMedia<T extends MediaPoolMetadata> {
-  src: string;
-  name: string;
-  metadata: T;
-}
+type UploadedImage = {
+  type: MediaType.IMAGE;
+} & UploadedMedia;
 
 interface TimelineLayerNode {
   uuid: string;
@@ -50,8 +53,8 @@ interface TimelineNodeMetadata<T extends TimelineMetadata>  {
 }
 
 type WritableMediaPool = import("svelte/store").Writable<{
-  selected: UploadedMedia[];
-  media: UploadedMedia[];
+  selected: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata>[];
+  media: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata>[];
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
@@ -70,5 +73,5 @@ type WritablePlayer = import("svelte/store").Writable<{
 }>;
 
 declare interface Window {
-  mediaPool: UploadedMedia[];
+  mediaPool: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata>[];
 }
