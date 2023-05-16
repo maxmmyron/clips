@@ -68,7 +68,14 @@
     {#key $mediaPool.media.length}
       {#each $mediaPool.media as metadata}
         <MediaPoolPreview {metadata}>
-          <MediaVideoPreview {metadata} />
+          <!-- svelte-ignore missing-declaration TODO: why is this -->
+          {#if metadata.type === MediaType.VIDEO}
+            <MediaVideoPreview {metadata} />
+          {:else if metadata.type === MediaType.IMAGE}
+            <img src={metadata.src} alt={metadata.name} class="w-full h-full object-cover" />
+          {:else if metadata.type === MediaType.AUDIO}
+            <audio src={metadata.src} controls class="w-full h-full object-cover" />
+          {/if}
         </MediaPoolPreview>
       {/each}
     {/key}
