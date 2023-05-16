@@ -77,7 +77,7 @@
               <img src={metadata.src} alt={metadata.name} class="w-full h-full object-fit select-none" draggable="false" />
             </div>
           {:else if metadata.type === MediaType.AUDIO}
-            <MediaAudioPreview {metadata} />
+            <MediaAudioPreview metadata={{ ...metadata, offsets: [0, 0] }} />
           {/if}
         </MediaPoolPreview>
       {/each}

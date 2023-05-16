@@ -2,7 +2,7 @@
   import { timeline } from "$lib/stores";
   import { Canvas, Layer, type Render } from "svelte-canvas";
 
-  export let metadata: UploadedAudio;
+  export let metadata: TimelineAudio;
 
   let buffer = metadata.audio.getChannelData(0);
   let containerWidth, containerHeight;
