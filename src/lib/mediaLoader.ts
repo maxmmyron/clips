@@ -13,34 +13,60 @@ export const loadMediaMetadata = async (file: File) => {
   const src = URL.createObjectURL(file);
 
   if(file.type.includes("audio")) {
-
+    return {
+      src,
+      name: file.name,
+      metadata: {
+        duration: await loadMediaDuration(src, "audio"),
+        audio: await loadAudioBuffer(src),
+      }
+    } as UploadedMedia<AudioMetadata>;
   }
 
   if(file.type.includes("video")) {
-
+    return {
+      src,
+      name: file.name,
+      metadata: {
+        duration: await loadMediaDuration(src, "video"),
+        thumbnails: await loadThumbnails(src),
+        audio: await loadAudioBuffer(src),
+      }
+    } as UploadedMedia<VideoMetadata>;
   }
 
   if(file.type.includes("image")) {
-
+    return {
+      src,
+      name: file.name,
+    } as UploadedMedia<ImageMetadata>;
   }
 
-  return {
-    src,
-    name: file.name,
-    duration: await loadMediaDuration(src),
-    thumbnails: await loadThumbnails(src),
-    audio: await loadAudioBuffer(src),
-  } as UploadedMedia;
+  else throw Error("Unsupported file type");
 };
 
-export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
-  const video = document.createElement("video");
-  video.src = src;
-  video.preload = "metadata";
-  video.load();
-  video.addEventListener("loadedmetadata", () => {
-    resolve(video.duration);
-  });
+export const loadMediaDuration = (src: string, type: string) => new Promise<number>((resolve, reject) => {
+  if(type === "audio") {
+    const audio = document.createElement("audio");
+    audio.src = src;
+    audio.preload = "metadata";
+    audio.load();
+
+    audio.addEventListener("loadedmetadata", () => {
+      resolve(audio.duration);
+    });
+  }
+  else if(type === "video") {
+    const video = document.createElement("video");
+    video.src = src;
+    video.preload = "metadata";
+    video.load();
+
+    video.addEventListener("loadedmetadata", () => {
+      resolve(video.duration);
+    });
+  }
+  else reject("Unsupported media type");
 });
 
 /**
@@ -51,7 +77,7 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
-  const duration = await loadMediaDuration(src);
+  const duration = await loadMediaDuration(src, "video");
 
   const video = document.createElement("video");
   video.src = src;
