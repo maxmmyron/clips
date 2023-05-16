@@ -3,13 +3,12 @@
 
   export let metadata: UploadedMedia;
 
-  let duration = metadata.duration;
-
-  let width = "12rem";
-
   let mediaPreview: HTMLButtonElement;
+  let containerWidth: number, nameWidth: number;
 
   $: isSelected = $mediaPool.selected.includes(metadata);
+  $: shouldNameAnimate = nameWidth > containerWidth;
+  $: nameOffset = containerWidth - nameWidth - 16;
 
   const handleClick = (e: MouseEvent) => {
     if (e.detail == 2) $player.source = metadata.src;
@@ -34,11 +33,36 @@
 
 <button
   bind:this={mediaPreview}
-  style="width: {width};"
   on:click|capture|stopPropagation={handleClick}
   class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip aspect-video"
   class:outline={isSelected}
   on:mousedown={handleDragStart}
 >
   <slot />
+  <div class="absolute py-1 px-2 bg-[rgba(0,0,0,0.4)] backdrop-blur-sm w-full bottom-0 overflow-clip" bind:clientWidth={containerWidth}>
+    <p style="--overflow-scroll-pos: {nameOffset}px" class="relative text-white m-0 w-max {shouldNameAnimate && 'animate'}" bind:clientWidth={nameWidth}>
+      {metadata.name}
+    </p>
+  </div>
 </button>
+
+<style>
+  .animate {
+    animation: name-scroll 7.5s linear infinite alternate;
+  }
+
+  @keyframes name-scroll {
+    0% {
+      left: 0px;
+    }
+    25% {
+      left: 0px;
+    }
+    75% {
+      left: var(--overflow-scroll-pos);
+    }
+    100% {
+      left: var(--overflow-scroll-pos);
+    }
+  }
+</style>
