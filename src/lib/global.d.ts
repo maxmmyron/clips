@@ -1,15 +1,26 @@
 enum DropLocation { PLAYER, TIMELINE };
 
-interface PreviewMedia {
-  src: string;
+type AudioMetadata = {
+  duration: number;
+  audio: AudioBuffer
 }
 
-interface UploadedMedia {
-  src: string;
-  name: string;
+// TODO: flesh out image metadata (if necessary)
+type ImageMetadata = {
+  width: number;
+  height: number;
+}
+
+type VideoMetadata = {
   duration: number;
   thumbnails: string[];
   audio: AudioBuffer;
+};
+
+interface UploadedMedia<T> {
+  src: string;
+  name: string;
+  metadata: T;
 }
 
 interface TimelineLayerNode {
