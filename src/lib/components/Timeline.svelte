@@ -137,7 +137,7 @@
           class:dragging={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
           class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
         >
-          <TimelinePreview metadata={node.metadata}>
+          <TimelinePreview {node}>
             {#if node.metadata.type === MediaType.VIDEO}
               <MediaVideoPreview metadata={node.metadata} isTimelineElement={true} />
               <MediaAudioPreview
