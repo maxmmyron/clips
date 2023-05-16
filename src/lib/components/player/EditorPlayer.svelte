@@ -15,7 +15,7 @@
 
   $: if ($timeline.curr) {
     const accumulatorClips = $timeline.clips.toArray().slice(0, $timeline.clips.indexOf($timeline.curr.uuid));
-    accumulatedTime = accumulatorClips.reduce((acc, { metadata }) => acc + (metadata.duration - metadata.startOffset - metadata.endOffset), 0);
+    accumulatedTime = accumulatorClips.reduce((acc, { metadata }) => acc + (metadata.duration - metadata.offsets[0] - metadata.offsets[1]), 0);
   }
 
   $: if (!$timeline.curr && $timeline.clips.length > 0) $timeline.curr = $timeline.clips.head;
@@ -30,7 +30,7 @@
 
     if (!video) return;
 
-    previewTime = video.currentTime - metadata.startOffset;
+    previewTime = video.currentTime - metadata.offsets[0];
 
     // TODO: no need to recompute this every frame
     const mediaSize = {
@@ -49,8 +49,8 @@
     $timeline.clips.toArray().forEach((clip) => {
       const video = $timeline.videos.get(clip.uuid);
       if (!video) return;
-      console.log(`setting ${clip.uuid} to ${front ? clip.metadata.startOffset : clip.metadata.duration - clip.metadata.endOffset}`);
-      video.currentTime = front ? clip.metadata.startOffset : clip.metadata.duration - clip.metadata.endOffset;
+      console.log(`setting ${clip.uuid} to ${front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1]}`);
+      video.currentTime = front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1];
       clip.metadata.hasEnded = !front;
       clip.metadata.hasStarted = !front;
     });
