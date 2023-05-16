@@ -31,7 +31,6 @@ interface TimelineLayerNode {
 }
 
 interface TimelineMedia {
-  uuid: string;
   src: string;
   name: string;
   duration: number;
