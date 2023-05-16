@@ -3,46 +3,38 @@ import { studio } from "./stores";
 
 const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}];
 
-export const loadMediaMetadata = async (file: File) => {
+export const loadMediaMetadata = async (file: File): Promise<UploadedAudio | UploadedImage | UploadedVideo> => {
   if(disallowedTypes.some(type => file.type.includes(type.type))) {
     const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as {type: string, name: string};
-    console.warn(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
-    return null;
+    throw new Error(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
   }
 
   const src = URL.createObjectURL(file);
 
   if(file.type.includes("audio")) {
     return {
+      type: MediaType.AUDIO,
       src,
       name: file.name,
-      metadata: {
-        duration: await loadMediaDuration(src, "audio"),
-        audio: await loadAudioBuffer(src),
-      }
-    } as UploadedMedia<AudioMetadata>;
-  }
-
-  if(file.type.includes("video")) {
+      duration: await loadMediaDuration(src, "audio"),
+      audio: await loadAudioBuffer(src),
+    } as UploadedAudio;
+  } else if(file.type.includes("video")) {
     return {
+      type: MediaType.VIDEO,
       src,
       name: file.name,
-      metadata: {
-        duration: await loadMediaDuration(src, "video"),
-        thumbnails: await loadThumbnails(src),
-        audio: await loadAudioBuffer(src),
-      }
-    } as UploadedMedia<VideoMetadata>;
-  }
-
-  if(file.type.includes("image")) {
+      duration: await loadMediaDuration(src, "video"),
+      thumbnails: await loadThumbnails(src),
+      audio: await loadAudioBuffer(src),
+    } as UploadedVideo;
+  } else if(file.type.includes("image")) {
     return {
+      type: MediaType.IMAGE,
       src,
       name: file.name,
-    } as UploadedMedia<ImageMetadata>;
-  }
-
-  else throw Error("Unsupported file type");
+    } as UploadedImage;
+  } else throw Error("Unsupported file type");
 };
 
 export const loadMediaDuration = (src: string, type: string) => new Promise<number>((resolve, reject) => {
