@@ -4,6 +4,7 @@
   import { loadMediaMetadata } from "$lib/mediaLoader";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
+  import { MediaType } from "../exports";
 
   $: browser && (window.mediaPool = $mediaPool.media);
 
@@ -16,7 +17,7 @@
 
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
     if (!(e.target as HTMLInputElement).files) return;
-    updateMediaPool([...((e.target as HTMLInputElement).files as FileList)].filter((file) => file.type.startsWith("video/")));
+    updateMediaPool([...((e.target as HTMLInputElement).files as FileList)]);
   };
 
   const updateMediaPool = (uploadedFiles: File[]) => {
@@ -68,7 +69,6 @@
     {#key $mediaPool.media.length}
       {#each $mediaPool.media as metadata}
         <MediaPoolPreview {metadata}>
-          <!-- svelte-ignore missing-declaration TODO: why is this -->
           {#if metadata.type === MediaType.VIDEO}
             <MediaVideoPreview {metadata} />
           {:else if metadata.type === MediaType.IMAGE}
