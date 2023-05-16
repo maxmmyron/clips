@@ -26,7 +26,7 @@ export const studio = writable({
   resizeMode: "row" | "mediaCol" | "timelineCol" | null;
   audioContext: AudioContext | null;
   dragData: {
-    media: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata> | null;
+    media: UploadedVideo | UploadedAudio | UploadedImage | null;
     originType: "mediaPool" | "timeline" | null;
     originPosition: {x:number, y:number} | null;
     dragEvent: "dragstart" | "drag" | "dragend" | null;
