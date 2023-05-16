@@ -1,7 +1,7 @@
 <script lang="ts">
   import { player, studio, mediaPool } from "$lib/stores";
 
-  export let metadata: UploadedMedia;
+  export let metadata: UploadedVideo | UploadedAudio | UploadedImage;
 
   let mediaPreview: HTMLButtonElement;
   let containerWidth: number, nameWidth: number;

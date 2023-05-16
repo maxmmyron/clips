@@ -1,7 +1,9 @@
 <script lang="ts">
   import { player, studio, timeline } from "$lib/stores";
 
-  export let metadata: TimelineMedia;
+  export let node: TimelineLayerNode;
+
+  const metadata = node.metadata;
 
   let duration = metadata.duration;
   let isAdjustingOffsets = false;
@@ -11,10 +13,10 @@
   let initialPosition = 0;
   let initialOffset = 0;
 
-  $: isSelected = $timeline.selected.includes(metadata);
+  $: isSelected = $timeline.selected.includes(node);
   // duration factor
   $: scaleFactor = $timeline.zoom ** 1.75;
-  $: width = (duration - metadata.startOffset - metadata.endOffset) * scaleFactor + "px";
+  $: width = (duration - metadata.offsets[0] - metadata.offsets[1]) * scaleFactor + "px";
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
@@ -22,8 +24,8 @@
       return;
     }
     if (e.detail == 2) $player.source = metadata.src;
-    else if (e.shiftKey) $timeline.selected = [...$timeline.selected, metadata];
-    else $timeline.selected = [metadata];
+    else if (e.shiftKey) $timeline.selected = [...$timeline.selected, node];
+    else $timeline.selected = [node];
   };
 
   const handleReorder = (e: MouseEvent) => {
@@ -39,7 +41,7 @@
     $studio.dragData.ghost.position.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
     $studio.dragData.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
 
-    $timeline.dragIndex = $timeline.clips.indexOf(metadata);
+    $timeline.dragIndex = $timeline.clips.indexOf(node.uuid);
   };
 
   const handleOffsets = (e: MouseEvent) => {
@@ -49,10 +51,10 @@
 
     if (offsetIndex == 0) {
       offset = initialOffset + (e.clientX - initialPosition) / scaleFactor;
-      metadata.startOffset = Math.max(0, offset);
+      metadata.offsets[0] = Math.max(0, offset);
     } else {
       offset = initialOffset + (initialPosition - e.clientX) / scaleFactor;
-      metadata.endOffset = Math.max(0, offset);
+      metadata.offsets[1] = Math.max(0, offset);
     }
   };
 </script>
@@ -72,7 +74,7 @@
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 0;
       initialPosition = mediaPreview.getBoundingClientRect().left;
-      initialOffset = metadata.startOffset;
+      initialOffset = metadata.offsets[0];
     }}
   />
   <slot {width} />
@@ -81,7 +83,7 @@
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 1;
       initialPosition = mediaPreview.getBoundingClientRect().right;
-      initialOffset = metadata.endOffset;
+      initialOffset = metadata.offsets[1];
     }}
   />
 </button>
