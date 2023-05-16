@@ -1,4 +1,3 @@
-enum MediaType { VIDEO, AUDIO, IMAGE };
 enum DropLocation { PLAYER, TIMELINE };
 
 interface UploadedMedia {
