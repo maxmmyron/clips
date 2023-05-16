@@ -1,7 +1,8 @@
 import { get } from "svelte/store";
 import { studio } from "./stores";
+import { MediaType } from "./exports"
 
-const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}];
+const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}, {type: "video/x-matroska", name: "MKV"}];
 
 export const loadMediaMetadata = async (file: File): Promise<UploadedAudio | UploadedImage | UploadedVideo> => {
   if(disallowedTypes.some(type => file.type.includes(type.type))) {
