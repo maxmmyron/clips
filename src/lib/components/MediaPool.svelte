@@ -5,6 +5,7 @@
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
   import { MediaType } from "../exports";
+  import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
 
   $: browser && (window.mediaPool = $mediaPool.media);
 
@@ -76,7 +77,7 @@
               <img src={metadata.src} alt={metadata.name} class="w-full h-full object-fit select-none" draggable="false" />
             </div>
           {:else if metadata.type === MediaType.AUDIO}
-            <audio src={metadata.src} controls class="w-full h-full object-cover" />
+            <MediaAudioPreview {metadata} />
           {/if}
         </MediaPoolPreview>
       {/each}

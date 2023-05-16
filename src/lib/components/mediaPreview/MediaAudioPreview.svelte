@@ -2,7 +2,7 @@
   import { timeline } from "$lib/stores";
   import { Canvas, Layer, type Render } from "svelte-canvas";
 
-  export let metadata: TimelineMedia;
+  export let metadata: UploadedAudio;
 
   let buffer = metadata.audio.getChannelData(0);
   let containerWidth, containerHeight;
@@ -29,8 +29,8 @@
       return;
     }
 
-    const start = (metadata.startOffset / metadata.duration) * buffer.length;
-    const end = ((metadata.duration - metadata.endOffset) / metadata.duration) * buffer.length;
+    const start = (metadata.offsets[0] / metadata.duration) * buffer.length;
+    const end = ((metadata.duration - metadata.offsets[1]) / metadata.duration) * buffer.length;
 
     const offsetBuffer = buffer.slice(start, end);
 
