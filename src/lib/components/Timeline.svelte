@@ -4,6 +4,7 @@
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
   import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
+  import { MediaType } from "$lib/exports";
 
   let zoom = 5;
   let timelineContainer: HTMLElement;
@@ -68,7 +69,7 @@
     if (!$studio.dragData.media) return;
     $timeline.clips.add({
       uuid: uuidv4(),
-      metadata: { ...$studio.dragData.media, startOffset: 0, endOffset: 0, hasStarted: false, hasEnded: false },
+      metadata: { ...$studio.dragData.media, offsets: [0, 0], hasStarted: false, hasEnded: false },
       next: null,
       prev: null,
     });
@@ -102,8 +103,29 @@
           class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
         >
           <TimelinePreview metadata={node.metadata}>
-            <MediaVideoPreview metadata={{ name: node.metadata.name, thumbnails: node.metadata.thumbnails }} isTimelineElement={true} />
-            <MediaAudioPreview metadata={node.metadata} />
+            {#if node.metadata.type === MediaType.VIDEO}
+              <MediaVideoPreview metadata={node.metadata} isTimelineElement={true} />
+              <MediaAudioPreview
+                metadata={{
+                  ...node.metadata,
+                  type: MediaType.AUDIO,
+                }}
+              />
+            {:else if node.metadata.type === MediaType.AUDIO}
+              <div />
+              <MediaAudioPreview metadata={node.metadata} />
+            {:else if node.metadata.type === MediaType.IMAGE}
+              <MediaVideoPreview
+                metadata={{
+                  ...node.metadata,
+                  type: MediaType.VIDEO,
+                  thumbnails: [node.metadata.src],
+                  audio: new AudioBuffer({ length: 0, sampleRate: 0 }),
+                }}
+                isTimelineElement={true}
+              />
+              <div />
+            {/if}
           </TimelinePreview>
         </div>
       {/each}
