@@ -1,8 +1,5 @@
 <script lang="ts">
-  export let metadata: {
-    name: string;
-    thumbnails: string[];
-  };
+  export let metadata: UploadedVideo;
   export let isTimelineElement: boolean = false;
 
   let containerWidth: number, nameWidth: number;
