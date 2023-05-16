@@ -6,50 +6,54 @@ interface UploadedMedia {
 }
 
 type UploadedVideo = {
-  type: MediaType.VIDEO;
+  type: import("./exports").MediaType.VIDEO;
   duration: number;
   thumbnails: string[];
   audio: AudioBuffer;
 } & UploadedMedia;
 
 type UploadedAudio = {
-  type: MediaType.AUDIO;
+  type: import("./exports").MediaType.AUDIO;
   duration: number;
   audio: AudioBuffer;
   offsets: number[];
 } & UploadedMedia;
 
 type UploadedImage = {
-  type: MediaType.IMAGE;
+  type: import("./exports").MediaType.IMAGE;
 } & UploadedMedia;
 
 interface TimelineLayerNode {
   uuid: string;
-  metadata: TimelineNodeMetadata;
+  metadata: TimelineVideo | TimelineAudio | TimelineImage;
   next: TimelineLayerNode | null;
   prev: TimelineLayerNode | null;
 }
 
-interface VideoTimelineMetadata extends TimelineMetadata {
-  audio: AudioBuffer;
-  thumbnails: string[];
-}
-
-interface AudioTimelineMetadata extends TimelineMetadata {
-  audio: AudioBuffer;
-}
-
-interface ImageTimelineMetadata extends TimelineMetadata {}
-
-interface TimelineNodeMetadata<T extends TimelineMetadata>  {
+interface TimelineMedia {
+  uuid: string;
   src: string;
   name: string;
   duration: number;
-  payload: T;
   offsets: number[];
   hasStarted: boolean;
   hasEnded: boolean;
 }
+
+type TimelineVideo = {
+  type: import("./exports").MediaType.VIDEO;
+  thumbnails: string[];
+  audio: AudioBuffer;
+} & TimelineMedia;
+
+type TimelineAudio = {
+  type: import("./exports").MediaType.AUDIO;
+  audio: AudioBuffer;
+} & TimelineMedia;
+
+type TimelineImage = {
+  type: import("./exports").MediaType.IMAGE;
+} & TimelineMedia;
 
 type WritableMediaPool = import("svelte/store").Writable<{
   selected: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata>[];
