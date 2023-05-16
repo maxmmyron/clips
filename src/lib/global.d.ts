@@ -56,8 +56,8 @@ type TimelineImage = {
 } & TimelineMedia;
 
 type WritableMediaPool = import("svelte/store").Writable<{
-  selected: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata>[];
-  media: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata>[];
+  selected: UploadedMedia<UploadedVideo | UploadedAudio | UploadedImage>[];
+  media: UploadedMedia<UploadedVideo | UploadedAudio | UploadedImage>[];
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
@@ -76,5 +76,5 @@ type WritablePlayer = import("svelte/store").Writable<{
 }>;
 
 declare interface Window {
-  mediaPool: UploadedMedia<VideoMetadata | AudioMetadata | ImageMetadata>[];
+  mediaPool: UploadedMedia<UploadedVideo | UploadedAudio | UploadedImage>[];
 }
