@@ -72,7 +72,9 @@
           {#if metadata.type === MediaType.VIDEO}
             <MediaVideoPreview {metadata} />
           {:else if metadata.type === MediaType.IMAGE}
-            <img src={metadata.src} alt={metadata.name} class="w-full h-full object-cover" />
+            <div class="w-full h-full bg-neutral-400">
+              <img src={metadata.src} alt={metadata.name} class="w-full h-full object-fit select-none" draggable="false" />
+            </div>
           {:else if metadata.type === MediaType.AUDIO}
             <audio src={metadata.src} controls class="w-full h-full object-cover" />
           {/if}
