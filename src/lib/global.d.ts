@@ -16,7 +16,6 @@ type UploadedAudio = {
   type: import("./exports").MediaType.AUDIO;
   duration: number;
   audio: AudioBuffer;
-  offsets: number[];
 } & UploadedMedia;
 
 type UploadedImage = {
