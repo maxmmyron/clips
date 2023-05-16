@@ -67,9 +67,44 @@
     // handle dragging new media into timeline
 
     if (!$studio.dragData.media) return;
+
+    const dragData = $studio.dragData.media;
+
+    const generateMetadata = (dragData: UploadedVideo | UploadedAudio | UploadedImage): TimelineVideo | TimelineAudio | TimelineImage => {
+      const defaultMetadata = {
+        src: dragData.src,
+        name: dragData.name,
+        duration: dragData.type !== MediaType.IMAGE ? dragData.duration : 3,
+        offsets: [0, 0],
+        hasStarted: false,
+        hasEnded: false,
+      };
+
+      switch (dragData.type) {
+        case MediaType.VIDEO:
+          return {
+            ...defaultMetadata,
+            audio: dragData.audio,
+            thumbnails: dragData.thumbnails,
+            type: MediaType.VIDEO,
+          } as TimelineVideo;
+        case MediaType.AUDIO:
+          return {
+            ...defaultMetadata,
+            audio: dragData.audio,
+            type: MediaType.AUDIO,
+          } as TimelineAudio;
+        case MediaType.IMAGE:
+          return {
+            ...defaultMetadata,
+            type: MediaType.IMAGE,
+          } as TimelineImage;
+      }
+    };
+
     $timeline.clips.add({
       uuid: uuidv4(),
-      metadata: { ...$studio.dragData.media, offsets: [0, 0], hasStarted: false, hasEnded: false },
+      metadata: generateMetadata(dragData),
       next: null,
       prev: null,
     });
