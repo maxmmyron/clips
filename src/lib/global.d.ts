@@ -22,9 +22,9 @@ type UploadedImage = {
   type: import("./exports").MediaType.IMAGE;
 } & UploadedMedia;
 
-interface TimelineLayerNode {
+interface TimelineLayerNode<T = TimelineVideo | TimelineAudio | TimelineImage> {
   uuid: string;
-  metadata: TimelineVideo | TimelineAudio | TimelineImage;
+  metadata: T;
   next: TimelineLayerNode | null;
   prev: TimelineLayerNode | null;
 }
@@ -34,6 +34,7 @@ interface TimelineMedia {
   name: string;
   duration: number;
   offsets: number[];
+  currentTime: number;
   hasStarted: boolean;
   hasEnded: boolean;
 }
@@ -59,10 +60,10 @@ type WritableMediaPool = import("svelte/store").Writable<{
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
-  selected: TimelineLayerNode[];
+  selected: TimelineLayerNode<TimelineVideo | TimelineAudio | TimelineImage>[];
   clips: import("./components/util/TimelineLinkedList").default
   curr: TimelineLayerNode | null;
-  videos: Map<string, HTMLVideoElement>;
+  buffers: Map<string, HTMLVideoElement | HTMLImageElement>;
   zoom: number;
   dragIndex: number;
 }>;
