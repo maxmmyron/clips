@@ -2,7 +2,8 @@
   import { timeline, player } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import { onMount } from "svelte";
-  import VideoBuffer from "./VideoBuffer.svelte";
+  import Buffer from "./Buffer.svelte";
+  import { MediaType } from "$lib/exports";
 
   export let width = 640,
     height = 480;
@@ -26,31 +27,39 @@
     if ($timeline.clips.length === 0 || !$timeline.curr) return;
 
     const metadata = $timeline.curr.metadata;
-    const video = $timeline.videos.get($timeline.curr.uuid);
+    const bufferEl = $timeline.buffers.get($timeline.curr.uuid);
 
-    if (!video) return;
+    console.log(bufferEl?.src);
+    if (!bufferEl) return;
 
-    previewTime = video.currentTime - metadata.offsets[0];
+    previewTime = metadata.currentTime - metadata.offsets[0];
 
-    // TODO: no need to recompute this every frame
+    // TODO: try to remove video width calculations outside of render so we aren't recomputing this every frame
+    const bufferWidth = metadata.type === MediaType.VIDEO ? (bufferEl as HTMLVideoElement).videoWidth : bufferEl.width;
+    const bufferHeight = metadata.type === MediaType.VIDEO ? (bufferEl as HTMLVideoElement).videoHeight : bufferEl.height;
+
     const mediaSize = {
-      width: video.videoWidth * Math.min(width / video.videoWidth, height / video.videoHeight),
-      height: video.videoHeight * Math.min(width / video.videoWidth, height / video.videoHeight),
+      width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
+      height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
     };
 
     const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
 
-    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
+    context.drawImage(bufferEl, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
   };
 
   function setPlayerTime(front: boolean = true): any {
     $player.isPaused = true;
 
     $timeline.clips.toArray().forEach((clip) => {
-      const video = $timeline.videos.get(clip.uuid);
-      if (!video) return;
+      if (!$timeline.curr) return;
+      const metadata = $timeline.curr.metadata;
+      const bufferEl = $timeline.buffers.get($timeline.curr.uuid);
+
+      if (!bufferEl) return;
       console.log(`setting ${clip.uuid} to ${front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1]}`);
-      video.currentTime = front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1];
+
+      metadata.currentTime = front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1];
       clip.metadata.hasEnded = !front;
       clip.metadata.hasStarted = !front;
     });
@@ -61,15 +70,17 @@
   const togglePlayState = () => {
     console.log("toggling play state...");
     if (!$timeline.curr) return;
-    if (!$timeline.clips.tail) throw new Error("Timeline tail is null... Something has gone horribly wrong.");
+    if (!$timeline.clips.tail) throw new Error("Timeline tail is null... Something has gone horribly wrong. (Button was clicked despite timeline being empty)");
     if ($timeline.curr.uuid === $timeline.clips.tail.uuid && $timeline.curr.metadata.hasEnded) setPlayerTime();
     $player.isPaused = !$player.isPaused;
   };
 </script>
 
-{#each $timeline.clips.toArray() as node}
-  <VideoBuffer {audioContext} {node} />
-{/each}
+{#key $timeline.clips}
+  {#each $timeline.clips.toArray().filter((node) => node.metadata.type !== MediaType.AUDIO) as node}
+    <Buffer {audioContext} {node} />
+  {/each}
+{/key}
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
