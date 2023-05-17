@@ -54,7 +54,7 @@ export const timeline: WritableTimeline = writable({
   selected: [],
   clips: new TimelineLinkedList(),
   curr: null,
-  videos: new Map(),
+  buffers: new Map(),
   zoom: 1,
   dragIndex: -1, // the index of the timeline node that is currently being dragged, or -1 if no node is being dragged
 });
