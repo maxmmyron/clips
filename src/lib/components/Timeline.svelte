@@ -147,7 +147,7 @@
                 }}
               />
             {:else if node.metadata.type === MediaType.AUDIO}
-              <div />
+              <div class="h-full" />
               <MediaAudioPreview metadata={node.metadata} />
             {:else if node.metadata.type === MediaType.IMAGE}
               <MediaVideoPreview
@@ -155,11 +155,11 @@
                   ...node.metadata,
                   type: MediaType.VIDEO,
                   thumbnails: [node.metadata.src],
-                  audio: new AudioBuffer({ length: 0, sampleRate: 0 }),
+                  audio: new AudioBuffer({ length: node.metadata.duration, sampleRate: 44100 }),
                 }}
                 isTimelineElement={true}
               />
-              <div />
+              <div class="h-full" />
             {/if}
           </TimelinePreview>
         </div>
