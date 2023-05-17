@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
   import { MediaType } from "$lib/exports";
   import { timeline, player } from "$lib/stores";
   import { onMount } from "svelte";
@@ -6,7 +6,7 @@
   export let node: TimelineLayerNode, audioContext: AudioContext;
   const metadata = node.metadata;
 
-  let video: HTMLVideoElement;
+  let video: HTMLVideoElement, image: HTMLImageElement;
   let currentTime: number = 0;
   let audioNode: AudioBufferSourceNode;
 
@@ -57,4 +57,16 @@
   });
 </script>
 
-<video muted class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0" bind:currentTime src={metadata.src} bind:this={video} on:play={handlePlay} />
+{#if metadata.type === MediaType.VIDEO}
+  <video
+    muted
+    class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0"
+    bind:currentTime
+    src={metadata.src}
+    bind:this={video}
+    on:play={handlePlay}
+  />
+{:else if metadata.type === MediaType.IMAGE}
+  <!-- TODO: handle currentTime
+  <img class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0" src={metadata.src} bind:this={image} alt="" />
+{/if} -->
