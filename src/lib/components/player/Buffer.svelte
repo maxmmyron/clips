@@ -3,24 +3,42 @@
   import { player, timeline } from "$lib/stores";
   import { onMount } from "svelte";
 
-  // only accept video and image (we don't need a loaded audio element to handle audio data)
-  export let node: TimelineLayerNode<TimelineVideo | TimelineImage>, audioContext: AudioContext;
-  const metadata: TimelineVideo | TimelineImage = node.metadata;
+  // TODO: fix this so we only accept video and image buffers.
+  export let node: TimelineLayerNode<TimelineVideo | TimelineImage | TimelineAudio>, audioContext: AudioContext;
+
+  const metadata = node.metadata;
 
   let video: HTMLVideoElement, image: HTMLImageElement, audioNode: AudioBufferSourceNode;
-  let audioStartTime: number = 0,
-    audioPauseTime: number = 0;
+  let playOffset = 0,
+    pauseOffset = 0;
+  let lastStartTime = 0,
+    lastPauseTime = 0;
 
-  $: metadata.currentTime = audioPauseTime - audioStartTime;
+  $: {
+    audioContext.currentTime;
+    console.log("abc");
+    metadata.runtime = $player.isPaused ? lastPauseTime : audioContext.currentTime - lastStartTime;
+  }
+
+  // $: metadata.runtime = $player.isPaused ? lastPauseTime : audioContext.currentTime - lastStartTime;
+  $: lastPauseTime = $player.isPaused ? audioContext.currentTime - lastStartTime : lastPauseTime;
+  // handle video playback if dealing with video el
+  $: if (node === $timeline.curr && video) !$player.isPaused ? video.play() : video.pause();
 
   $: if (audioNode) {
     if ($player.isPaused) {
       audioNode.disconnect();
-      audioPauseTime = audioContext.currentTime - audioStartTime;
+      lastPauseTime = audioContext.currentTime - lastStartTime;
     }
   }
-  // handle video playback if dealing with video el
-  $: if (node === $timeline.curr && video) !$player.isPaused ? video.play() : video.pause();
+
+  $: if (node.uuid === $timeline.curr?.uuid && metadata.runtime >= metadata.duration - metadata.offsets.reduce((p, c) => p + c)) {
+    console.log("ended");
+    audioNode.disconnect();
+    metadata.hasEnded = true;
+    if (node === $timeline.clips.tail) $player.isPaused = true;
+    else $timeline.curr = node.next;
+  }
 
   const handlePlay = () => {
     audioNode = audioContext.createBufferSource();
@@ -35,11 +53,15 @@
     }
 
     let startOffset = metadata.offsets[0];
-    if (metadata.hasStarted) startOffset = metadata.offsets[0] + (metadata.currentTime - metadata.offsets[0]);
+    // set initial start time (to track play/pause)
+    if (!metadata.hasStarted) {
+      lastStartTime = startOffset;
+    } else {
+      startOffset = metadata.offsets[0] + (lastPauseTime - lastStartTime);
+      lastStartTime = audioContext.currentTime - lastPauseTime;
+    }
 
     console.log(`playing from ${startOffset} to ${metadata.duration - metadata.offsets[1] - startOffset}`);
-
-    audioStartTime = audioContext.currentTime - startOffset;
     metadata.hasStarted = true;
     const duration = metadata.duration - metadata.offsets[1] - startOffset;
     audioNode.connect(audioContext.destination);

@@ -30,9 +30,9 @@
     const bufferEl = $timeline.buffers.get($timeline.curr.uuid);
 
     console.log(bufferEl?.src);
-    if (!bufferEl) return;
+    if (!bufferEl || !audioContext) return;
 
-    previewTime = metadata.currentTime - metadata.offsets[0];
+    previewTime = metadata.runtime;
 
     // TODO: try to remove video width calculations outside of render so we aren't recomputing this every frame
     const bufferWidth = metadata.type === MediaType.VIDEO ? (bufferEl as HTMLVideoElement).videoWidth : bufferEl.width;
@@ -59,7 +59,7 @@
       if (!bufferEl) return;
       console.log(`setting ${clip.uuid} to ${front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1]}`);
 
-      metadata.currentTime = front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1];
+      metadata.runtime = front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1];
       clip.metadata.hasEnded = !front;
       clip.metadata.hasStarted = !front;
     });
@@ -77,6 +77,7 @@
 </script>
 
 {#key $timeline.clips}
+  <!-- TODO: this *will* filter out audio nodes, but a type error is thrown unless the Buffer.svelte element accepts all node types. Need to investigate and fix (shoddy types) -->
   {#each $timeline.clips.toArray().filter((node) => node.metadata.type !== MediaType.AUDIO) as node}
     <Buffer {audioContext} {node} />
   {/each}

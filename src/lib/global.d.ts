@@ -34,7 +34,7 @@ interface TimelineMedia {
   name: string;
   duration: number;
   offsets: number[];
-  currentTime: number;
+  runtime: number;
   hasStarted: boolean;
   hasEnded: boolean;
 }
