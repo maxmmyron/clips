@@ -35,6 +35,8 @@ interface TimelineMedia {
   duration: number;
   offsets: number[];
   runtime: number;
+  pauseTimestamp: number;
+  playTimestamp: number;
   hasStarted: boolean;
   hasEnded: boolean;
 }
