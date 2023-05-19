@@ -41,13 +41,14 @@ interface TimelineMedia {
   /**
    * The audioContext time when the media first began playing
    */
-  startTimestamp: number;
+  initialTimestamp: number;
   /**
    * The total amount of time the media has been paused
    */
-  accumulatedPauseOffset: number;
+  pauseAccumulator: number;
   hasStarted: boolean;
   hasEnded: boolean;
+  setMediaTime: (time: number) => void;
 }
 
 type TimelineVideo = {
