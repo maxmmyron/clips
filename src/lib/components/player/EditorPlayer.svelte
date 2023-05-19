@@ -31,9 +31,9 @@
 
     const metadata = $timeline.curr.metadata;
     if (!$player.isPaused) {
-      metadata.runtime = audioContext.currentTime - metadata.startTimestamp - metadata.accumulatedPauseOffset;
-      previewTime = metadata.runtime;
+      metadata.runtime = audioContext.currentTime - (metadata.initialTimestamp + metadata.pauseAccumulator);
     }
+    previewTime = metadata.runtime;
 
     // TODO: try to remove video width calculations outside of render so we aren't recomputing this every frame
     const bufferWidth = metadata.type === MediaType.VIDEO ? (bufferEl as HTMLVideoElement).videoWidth : bufferEl.width;
@@ -61,15 +61,20 @@
       console.log(`setting ${clip.uuid} to ${front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1]}`);
 
       metadata.runtime = front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1];
+      metadata.setMediaTime(front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1]);
       clip.metadata.hasEnded = !front;
       clip.metadata.hasStarted = !front;
+      if (front) {
+        metadata.pauseAccumulator = 0;
+        metadata.initialTimestamp = audioContext.currentTime;
+        metadata.runtime = 0;
+      }
     });
 
     $timeline.curr = front ? $timeline.clips.head : $timeline.clips.tail;
   }
 
   const togglePlayState = () => {
-    console.log("toggling play state...");
     if (!$timeline.curr) return;
     if (!$timeline.clips.tail) throw new Error("Timeline tail is null... Something has gone horribly wrong. (Button was clicked despite timeline being empty)");
     if ($timeline.curr.uuid === $timeline.clips.tail.uuid && $timeline.curr.metadata.hasEnded) setPlayerTime();
@@ -77,12 +82,10 @@
   };
 </script>
 
-{#key $timeline.clips}
-  <!-- TODO: this *will* filter out audio nodes, but a type error is thrown unless the Buffer.svelte element accepts all node types. Need to investigate and fix (shoddy types) -->
-  {#each $timeline.clips.toArray().filter((node) => node.metadata.type !== MediaType.AUDIO) as node}
-    <Buffer {audioContext} {node} />
-  {/each}
-{/key}
+<!-- TODO: this *will* filter out audio nodes, but a type error is thrown unless the Buffer.svelte element accepts all node types. Need to investigate and fix (shoddy types) -->
+{#each $timeline.clips.toArray().filter((node) => node.metadata.type !== MediaType.AUDIO) as node}
+  <Buffer {audioContext} {node} />
+{/each}
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.clips.length}
