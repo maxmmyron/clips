@@ -24,6 +24,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@ffmpeg/core": "^0.11.0",
+		"@ffmpeg/ffmpeg": "^0.11.6",
 		"@vercel/analytics": "^1.0.1",
 		"svelte-canvas": "^0.9.3",
 		"uuid": "^9.0.0"
