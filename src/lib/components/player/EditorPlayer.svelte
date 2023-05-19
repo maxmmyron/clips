@@ -31,6 +31,7 @@
 
     const metadata = $timeline.curr.metadata;
     if (!$player.isPaused) {
+      console.log("setting");
       metadata.runtime = audioContext.currentTime - (metadata.initialTimestamp + metadata.pauseAccumulator);
     }
     previewTime = metadata.runtime;
@@ -50,25 +51,23 @@
   };
 
   function setPlayerTime(front: boolean = true): any {
+    console.log(`skipping to ${front ? "front" : "back"}`);
     $player.isPaused = true;
 
+    console.log($timeline.clips.toArray().map((clip) => clip.metadata.name));
+
     $timeline.clips.toArray().forEach((clip) => {
-      if (!$timeline.curr) return;
-      const metadata = $timeline.curr.metadata;
-      const bufferEl = $timeline.buffers.get($timeline.curr.uuid);
-
-      if (!bufferEl) return;
-      console.log(`setting ${clip.uuid} to ${front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1]}`);
-
-      metadata.runtime = front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1];
+      const metadata = clip.metadata;
+      metadata.runtime = front ? 0 : metadata.duration - metadata.offsets[1];
       metadata.setMediaTime(front ? clip.metadata.offsets[0] : clip.metadata.duration - clip.metadata.offsets[1]);
+      metadata.pauseAccumulator = 0;
+      if (front) metadata.initialTimestamp = audioContext.currentTime;
+      else metadata.initialTimestamp = audioContext.currentTime - metadata.duration;
+
       clip.metadata.hasEnded = !front;
       clip.metadata.hasStarted = !front;
-      if (front) {
-        metadata.pauseAccumulator = 0;
-        metadata.initialTimestamp = audioContext.currentTime;
-        metadata.runtime = 0;
-      }
+
+      console.log(`clip ${metadata.name} runtime: ${metadata.runtime}`);
     });
 
     $timeline.curr = front ? $timeline.clips.head : $timeline.clips.tail;
