@@ -10,6 +10,7 @@
 
   import { dev } from "$app/environment";
   import { inject } from "@vercel/analytics";
+  import Export from "$lib/components/util/Export.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -107,6 +108,7 @@
       <MediaPool />
       <ResizeStalk resizeMode="mediaCol" />
       <div class="flex flex-col justify-center items-center gap-8 p-8">
+        <Export />
         <Player />
       </div>
     </section>
