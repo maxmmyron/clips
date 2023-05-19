@@ -7,38 +7,29 @@
   export let node: TimelineLayerNode<TimelineVideo | TimelineImage | TimelineAudio>, audioContext: AudioContext;
 
   const metadata = node.metadata;
+  let video: HTMLVideoElement, image: HTMLImageElement, audioNode: AudioBufferSourceNode | undefined;
 
-  let video: HTMLVideoElement, image: HTMLImageElement, audioNode: AudioBufferSourceNode;
-  let playOffset = 0,
-    pauseOffset = 0;
-  let lastStartTime = 0,
-    lastPauseTime = 0;
+  /**
+   * A private timestamp of the timestamp at last pause. Used to calculate value for accumulatedPauseOffset.
+   */
+  let lastPauseTimestamp = 0,
+    lastStartOffset = 0;
 
-  $: {
-    audioContext.currentTime;
-    console.log("abc");
-    metadata.runtime = $player.isPaused ? lastPauseTime : audioContext.currentTime - lastStartTime;
-  }
-
-  // $: metadata.runtime = $player.isPaused ? lastPauseTime : audioContext.currentTime - lastStartTime;
-  $: lastPauseTime = $player.isPaused ? audioContext.currentTime - lastStartTime : lastPauseTime;
   // handle video playback if dealing with video el
   $: if (node === $timeline.curr && video) !$player.isPaused ? video.play() : video.pause();
+  $: if (audioNode && $player.isPaused) audioNode.disconnect();
 
-  $: if (audioNode) {
-    if ($player.isPaused) {
-      audioNode.disconnect();
-      lastPauseTime = audioContext.currentTime - lastStartTime;
-    }
-  }
+  // update timestamps
+  $: $player.isPaused && (lastPauseTimestamp = audioContext.currentTime);
 
-  $: if (node.uuid === $timeline.curr?.uuid && metadata.runtime >= metadata.duration - metadata.offsets.reduce((p, c) => p + c)) {
-    console.log("ended");
-    audioNode.disconnect();
-    metadata.hasEnded = true;
-    if (node === $timeline.clips.tail) $player.isPaused = true;
-    else $timeline.curr = node.next;
-  }
+  if (audioNode && node.uuid == $timeline.curr?.uuid)
+    audioNode.addEventListener("ended", () => {
+      console.log("ended");
+      audioNode && audioNode.disconnect();
+      metadata.hasEnded = true;
+      if (node === $timeline.clips.tail) $player.isPaused = true;
+      else $timeline.curr = node.next;
+    });
 
   const handlePlay = () => {
     audioNode = audioContext.createBufferSource();
@@ -52,18 +43,21 @@
       audioNode.buffer = audioContext.createBuffer(1, metadata.duration * 44100, 44100);
     }
 
+    let currCtxTimestamp = audioContext.currentTime;
+
     let startOffset = metadata.offsets[0];
-    // set initial start time (to track play/pause)
     if (!metadata.hasStarted) {
-      lastStartTime = startOffset;
+      metadata.startTimestamp = currCtxTimestamp;
+      metadata.hasStarted = true;
     } else {
-      startOffset = metadata.offsets[0] + (lastPauseTime - lastStartTime);
-      lastStartTime = audioContext.currentTime - lastPauseTime;
+      startOffset = metadata.offsets[0] + metadata.runtime;
+      metadata.accumulatedPauseOffset += currCtxTimestamp - lastPauseTimestamp;
     }
 
-    console.log(`playing from ${startOffset} to ${metadata.duration - metadata.offsets[1] - startOffset}`);
-    metadata.hasStarted = true;
+    lastStartOffset = currCtxTimestamp;
+
     const duration = metadata.duration - metadata.offsets[1] - startOffset;
+    console.log(`playing from ${startOffset}s to ${metadata.duration - metadata.offsets[1]}s (${duration} seconds)`);
     audioNode.connect(audioContext.destination);
     audioNode.start(0, startOffset, duration);
   };

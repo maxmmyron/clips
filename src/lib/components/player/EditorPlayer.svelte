@@ -19,20 +19,21 @@
     accumulatedTime = accumulatorClips.reduce((acc, { metadata }) => acc + (metadata.duration - metadata.offsets[0] - metadata.offsets[1]), 0);
   }
 
+  // update current clip on add
   $: if (!$timeline.curr && $timeline.clips.length > 0) $timeline.curr = $timeline.clips.head;
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
     if ($timeline.clips.length === 0 || !$timeline.curr) return;
-
-    const metadata = $timeline.curr.metadata;
     const bufferEl = $timeline.buffers.get($timeline.curr.uuid);
-
-    console.log(bufferEl?.src);
     if (!bufferEl || !audioContext) return;
 
-    previewTime = metadata.runtime;
+    const metadata = $timeline.curr.metadata;
+    if (!$player.isPaused) {
+      metadata.runtime = audioContext.currentTime - metadata.startTimestamp - metadata.accumulatedPauseOffset;
+      previewTime = metadata.runtime;
+    }
 
     // TODO: try to remove video width calculations outside of render so we aren't recomputing this every frame
     const bufferWidth = metadata.type === MediaType.VIDEO ? (bufferEl as HTMLVideoElement).videoWidth : bufferEl.width;
