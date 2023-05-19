@@ -78,9 +78,9 @@
         offsets: [0, 0],
         hasStarted: false,
         hasEnded: false,
-        accumulatedPauseOffset: 0,
+        pauseAccumulator: 0,
         runtime: 0,
-        startTimestamp: 0,
+        initialTimestamp: 0,
       } as TimelineVideo | TimelineAudio | TimelineImage;
 
       switch (dragData.type) {
