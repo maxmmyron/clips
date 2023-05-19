@@ -78,7 +78,10 @@
         offsets: [0, 0],
         hasStarted: false,
         hasEnded: false,
-      };
+        accumulatedPauseOffset: 0,
+        runtime: 0,
+        startTimestamp: 0,
+      } as TimelineVideo | TimelineAudio | TimelineImage;
 
       switch (dragData.type) {
         case MediaType.VIDEO:
