@@ -56,6 +56,8 @@
 
     console.log($timeline.clips.toArray().map((clip) => clip.metadata.name));
 
+    audioContext = new AudioContext();
+
     $timeline.clips.toArray().forEach((clip) => {
       const metadata = clip.metadata;
       metadata.runtime = front ? 0 : metadata.duration - metadata.offsets[1];
