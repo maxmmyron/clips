@@ -25,6 +25,7 @@
 
   $: if (metadata.runtime >= metadata.duration - metadata.offsets[1] - metadata.offsets[0] && node.uuid == $timeline.curr?.uuid) {
     audioNode && audioNode.disconnect();
+    console.log(`${node.metadata.name} ended: ${metadata.runtime} >= ${metadata.duration - metadata.offsets[1] - metadata.offsets[0]}`);
     metadata.hasEnded = true;
     if (node === $timeline.clips.tail) $player.isPaused = true;
     else $timeline.curr = node.next;
