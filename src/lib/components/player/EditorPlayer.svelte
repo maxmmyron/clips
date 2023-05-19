@@ -14,6 +14,8 @@
 
   onMount(() => (audioContext = new AudioContext()));
 
+  $: console.log($timeline.curr);
+
   $: if ($timeline.curr) {
     const accumulatorClips = $timeline.clips.toArray().slice(0, $timeline.clips.indexOf($timeline.curr.uuid));
     accumulatedTime = accumulatorClips.reduce((acc, { metadata }) => acc + (metadata.duration - metadata.offsets[0] - metadata.offsets[1]), 0);

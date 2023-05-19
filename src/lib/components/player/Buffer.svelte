@@ -24,11 +24,11 @@
   }
 
   $: if (metadata.runtime >= metadata.duration - metadata.offsets[1] - metadata.offsets[0] && node.uuid == $timeline.curr?.uuid) {
-    audioNode && audioNode.disconnect();
     console.log(`${node.metadata.name} ended: ${metadata.runtime} >= ${metadata.duration - metadata.offsets[1] - metadata.offsets[0]}`);
-    metadata.hasEnded = true;
-    if (node === $timeline.clips.tail) $player.isPaused = true;
+    audioNode && audioNode.disconnect();
+    if (node.uuid === $timeline.clips.tail?.uuid) $player.isPaused = true;
     else $timeline.curr = node.next;
+    metadata.hasEnded = true;
   }
 
   const handlePlay = () => {
@@ -45,10 +45,12 @@
 
     let startOffset = metadata.offsets[0] + metadata.runtime;
     if (!metadata.hasStarted) metadata.initialTimestamp = audioContext.currentTime;
-    else metadata.pauseAccumulator += audioContext.currentTime - pauseTimestamp;
+    else metadata.pauseAccumulator += audioContext.currentTime - pauseTimestamp - metadata.initialTimestamp;
 
     audioNode.connect(audioContext.destination);
     audioNode.start(0, startOffset, metadata.duration - metadata.offsets[1] - startOffset);
+
+    console.log(`playing ${node.metadata.name} at ${startOffset} for ${metadata.duration - metadata.offsets[1] - startOffset}`);
   };
 
   onMount(() => {
