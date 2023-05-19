@@ -34,9 +34,18 @@ interface TimelineMedia {
   name: string;
   duration: number;
   offsets: number[];
+  /**
+   * current runtime of the media
+   */
   runtime: number;
-  pauseTimestamp: number;
-  playTimestamp: number;
+  /**
+   * The audioContext time when the media first began playing
+   */
+  startTimestamp: number;
+  /**
+   * The total amount of time the media has been paused
+   */
+  accumulatedPauseOffset: number;
   hasStarted: boolean;
   hasEnded: boolean;
 }
