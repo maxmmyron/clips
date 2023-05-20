@@ -7,6 +7,19 @@
 
   let innerText = "";
 
+  const getNames = (uuid: string) => {
+    const node = $timeline.clips.getByUUID(uuid);
+
+    if (!node) return;
+
+    const baseName = node.metadata.name.split(".").splice(0, -1).join(".") + `-${node.uuid}`;
+    return {
+      base: baseName + "." + node.metadata.name.split(".").pop(),
+      trimmed: baseName + "-trimmed" + "." + node.metadata.name.split(".").pop(),
+      scaled: baseName + "-scaled" + "." + node.metadata.name.split(".").pop(),
+    };
+  };
+
   onMount(async () => {
     innerText = "Loading ffmpeg-core.js";
     await ffmpeg.load();
@@ -15,21 +28,37 @@
 
   const exportTimeline = async () => {
     const nodes = $timeline.clips.toArray();
-    let files = [];
-    innerText = "concatenating files";
-    for (const node of nodes) {
-      const name = node.metadata.name;
-      ffmpeg.FS("writeFile", name, await fetchFile(node.metadata.src));
-      files.push(`file '${name}'`);
-    }
 
-    // 1: remove start/end offsets from each clip
-    innerText = "removing offsets complete, scaling...";
+    // 1: trim offsets
+    for (const node of nodes) {
+      const names = getNames(node.uuid);
+      if (!names) continue;
+
+      const start = node.metadata.startOffset.toString();
+      const end = node.metadata.endOffset.toString();
+      await ffmpeg.run("-i", names.base, "-ss", start, "-to", end, names.trimmed);
+    }
+    innerText = "offsets trimmed, scaling...";
 
     // 2: scale each clip to 1920x1080
+    for (const node of nodes) {
+      const names = getNames(node.uuid);
+      if (!names) continue;
+
+      await ffmpeg.run("-i", names.trimmed, "-vf", "scale=1920:1080", names.scaled);
+    }
     innerText = "scaling complete, concatenating...";
 
-    // 3: concat clips
+    // 3: concat scaled clips
+    let files = [];
+    for (const node of nodes) {
+      const names = getNames(node.uuid);
+      if (!names) continue;
+
+      ffmpeg.FS("writeFile", names.base, await fetchFile(node.metadata.src));
+      files.push(`file '${names.scaled}'`);
+    }
+
     ffmpeg.FS("writeFile", "files.txt", files.join("\n"));
     await ffmpeg.run("-f", "concat", "-safe", "0", "-i", "files.txt", "-c", "copy", "output.mp4");
     innerText = "concat complete, exporting...";
