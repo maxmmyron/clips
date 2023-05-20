@@ -5,19 +5,19 @@
 
   const ffmpeg = createFFmpeg({ log: true });
 
-  let innerText = "";
+  let innerText = "",
+    url = "";
+
+  let downloadLink: HTMLAnchorElement;
 
   const getNames = (uuid: string) => {
     const node = $timeline.clips.getByUUID(uuid);
-
-    if (!node) return;
+    if (!node) throw new Error("node not found");
 
     const baseName = node.metadata.name.split(".").slice(0, -1).join(".") + `-${node.uuid}`.replaceAll("-", "_");
     return {
       base: baseName + "." + node.metadata.name.split(".").pop(),
       trimmed: baseName + "_trimmed" + "." + node.metadata.name.split(".").pop(),
-      scaled: baseName + "_scaled" + "." + node.metadata.name.split(".").pop(),
-      normalized: baseName + "_normalized" + "." + node.metadata.name.split(".").pop(),
     };
   };
 
@@ -28,77 +28,53 @@
   });
 
   const exportTimeline = async () => {
+    // ****************
+    // 0. Setup
+    // ****************
     const nodes = $timeline.clips.toArray();
     for (const node of nodes) {
-      const names = getNames(node.uuid);
-      if (!names) continue;
+      const { base, trimmed } = getNames(node.uuid);
 
-      ffmpeg.FS("writeFile", names.base, await fetchFile(node.metadata.src));
+      ffmpeg.FS("writeFile", base, await fetchFile(node.metadata.src));
+      ffmpeg.FS("writeFile", trimmed, "");
     }
+    ffmpeg.FS("writeFile", "output.mp4", "");
 
-    // 1: trim offsets
+    // ****************
+    // 1. Trim offsets
+    // ****************
     innerText = "trimming...";
-    for (const node of nodes) {
-      const names = getNames(node.uuid);
-      if (!names) continue;
+    for (const { uuid, metadata } of nodes) {
+      const { base, trimmed } = getNames(uuid);
 
-      const start = node.metadata.startOffset.toString();
-      const end = (node.metadata.duration - node.metadata.endOffset).toString();
-      ffmpeg.FS("writeFile", names.trimmed, "");
-      await ffmpeg.run("-i", names.base, "-ss", start, "-to", end, names.trimmed);
-      // re
+      await ffmpeg.run("-i", base, "-ss", metadata.startOffset.toString(), "-to", (metadata.duration - metadata.endOffset).toString(), trimmed);
     }
 
-    // 2: scale each clip to 1920x1080
-    innerText = "scaling...";
-    for (const node of nodes) {
-      const names = getNames(node.uuid);
-      if (!names) continue;
-
-      ffmpeg.FS("writeFile", names.scaled, "");
-      // TODO: fix this scaling command to work with videos of non-similar aspect ratios
-      //await ffmpeg.run("-i", names.trimmed, "-vf", "scale=1920:1080", names.scaled);
-      await ffmpeg.run("-i", names.trimmed, "-vf", "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:-1:-1:color=black", names.scaled);
-    }
-
-    // 3: clean clips: fix timestamps, normalize codecs, etc.
-    innerText = "normalizing...";
-    for (const node of nodes) {
-      const names = getNames(node.uuid);
-      if (!names) continue;
-
-      let tempA = "temp.mp4";
-
-      // fix timestamps
-      // FIXME: see https://stackoverflow.com/a/11175851/9473692
-      ffmpeg.FS("writeFile", tempA, "");
-      await ffmpeg.run("-i", "-fflags", "+genpts+igndts", "-i", names.scaled, "-c", "copy", tempA);
-
-      // normalize codecs
-      // ffmpeg.FS("writeFile", names.normalized, "");
-      // await ffmpeg.run("-i", tempA, "-c:v", "libx264", "-crf", "23", "-preset", "veryfast", "-c:a", "aac", "-b:a", "128k", names.normalized);
-
-      // delete temp file
-      ffmpeg.FS("unlink", tempA);
-    }
-
-    // 4: concat scaled clips
+    // ****************
+    // 2. Run concat filter (scaling & normalizing codecs)
+    // ****************
+    // see: https://stackoverflow.com/a/11175851/9473692
+    //      https://superuser.com/a/972615
+    //      https://ffmpeg.org/ffmpeg-filters.html#concat
     innerText = "concatenating...";
-    let files = [];
-    for (const node of nodes) {
-      const names = getNames(node.uuid);
-      if (!names) continue;
 
-      files.push(`file '${names.scaled}'`);
-    }
+    const ftr = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:-1:-1:color=black,setsar=1,fps=30,format=yuv420p";
+    const filters = [
+      `-filter_complex`,
+      nodes.map((_, i) => `[${i}:v]${ftr}[v${i}];`).join("") + nodes.map((_, i) => `[v${i}][${i}:a]`).join("") + "concat=n=" + nodes.length + `:v=1:a=1[v][a]`,
+    ];
+    await ffmpeg.run(
+      ...(nodes.map(({ uuid }) => ["-i", getNames(uuid).trimmed]).flat() as string[]),
+      ...filters,
+      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `-strict`, `experimental`, `-vsync`, `2`, `output.mp4`]
+    );
 
-    ffmpeg.FS("writeFile", "files.txt", files.join("\n"));
-    await ffmpeg.run("-f", "concat", "-safe", "0", "-i", "files.txt", "-c", "copy", "output.mp4");
-
-    // 5: export
+    // ****************
+    // 3. Export
+    // ****************
     innerText = "exporting...";
     const data = ffmpeg.FS("readFile", "output.mp4");
-    const url = URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));
+    url = URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));
     innerText = "export complete";
     console.log(url);
   };
@@ -106,3 +82,4 @@
 
 <button on:click={exportTimeline} class="px-4 py-2 text-white border-[1px] border-neutral-600">export</button>
 <p class="text-white my-4" bind:innerText contenteditable />
+<a download="output.mp4" href={url} class="text-white my-4 hidden" bind:this={downloadLink}>download</a>
