@@ -67,8 +67,19 @@
       const names = getNames(node.uuid);
       if (!names) continue;
 
-      ffmpeg.FS("writeFile", names.scaled, "");
-      await ffmpeg.run("-i", names.scaled, "-r", "60", names.scaled);
+      let tempA = "temp.mp4";
+
+      // fix timestamps
+      // FIXME: see https://stackoverflow.com/a/11175851/9473692
+      ffmpeg.FS("writeFile", tempA, "");
+      await ffmpeg.run("-i", "-fflags", "+genpts+igndts", "-i", names.scaled, "-c", "copy", tempA);
+
+      // normalize codecs
+      // ffmpeg.FS("writeFile", names.normalized, "");
+      // await ffmpeg.run("-i", tempA, "-c:v", "libx264", "-crf", "23", "-preset", "veryfast", "-c:a", "aac", "-b:a", "128k", names.normalized);
+
+      // delete temp file
+      ffmpeg.FS("unlink", tempA);
     }
 
     // 4: concat scaled clips
