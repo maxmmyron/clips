@@ -60,7 +60,7 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($mediaPool.selected = [])} />
 
-<div class="relative pt-4 px-4 h-full overflow-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
+<div class="relative pt-4 px-4 h-full overflow-y-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between gap-2">
     <input type="file" accept="video/*,image/*,audio/*" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
