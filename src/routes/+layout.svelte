@@ -37,7 +37,7 @@
     touchModeQuery = matchMedia("(hover: none) and (pointer: coarse)").matches ? 0 : 1;
 
     preloadMessage = "Loading FFmpeg...";
-    !ffmpegInstance.isLoaded && (await loadFFmpeg());
+    await loadFFmpeg();
     isStudioLoaded = true;
   });
 
