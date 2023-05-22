@@ -22,17 +22,13 @@
   let sizeQuery = -1,
     touchModeQuery = -1;
 
-  const ffmpegInstance = createFFmpeg({ log: true });
-
   $: ghostPos = $studio.dragData.ghost.position;
   $: ghostSize = $studio.dragData.ghost.size;
 
-  onMount(async () => {
+  onMount(() => {
     $studio.audioContext = new AudioContext();
     sizeQuery = matchMedia("(max-width: 768px), (max-height: 768px)").matches ? 0 : 1;
     touchModeQuery = matchMedia("(hover: none) and (pointer: coarse)").matches ? 0 : 1;
-
-    $ffmpeg = await ffmpegInstance.load();
   });
 
   const handleResize = (e: MouseEvent) => {
