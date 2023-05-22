@@ -30,6 +30,9 @@ export const loadMediaMetadata = async (file: File): Promise<UploadedAudio | Upl
       audio: await loadAudioBuffer(src),
     } as UploadedVideo;
   } else if(file.type.includes("image")) {
+    // create video with a default length using ffmpeg
+    // ffmpeg -framerate 1/10 -i DJI_0024.JPG -c:v libx264 -t 10 -pix_fmt yuv420p -vf scale=320:240 out.mp4
+    // see https://stackoverflow.com/a/68876503/9473692
     return {
       type: MediaType.IMAGE,
       src,
