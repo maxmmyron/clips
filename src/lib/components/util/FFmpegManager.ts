@@ -1,6 +1,6 @@
 import { createFFmpeg } from '@ffmpeg/ffmpeg';
 
-export const FFmpeg = createFFmpeg({log:true});
+export const ffmpegInstance = createFFmpeg({log:true});
 
-export const loadFFmpeg = async () => await FFmpeg.load();
+export const loadFFmpeg = async () => await ffmpegInstance.load();
 
