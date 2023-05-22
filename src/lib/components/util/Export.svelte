@@ -1,9 +1,7 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
-  import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
-  import { onMount } from "svelte";
-
-  const ffmpeg = createFFmpeg({ log: true });
+  import { ffmpegInstance } from "$lib/components/util/FFmpegManager";
+  import { fetchFile } from "@ffmpeg/ffmpeg";
 
   let innerText = "",
     url = "";
@@ -21,24 +19,19 @@
     };
   };
 
-  onMount(async () => {
-    innerText = "Loading ffmpeg-core.js";
-    await ffmpeg.load();
-    innerText = "ready";
-  });
-
   const exportTimeline = async () => {
     // ****************
     // 0. Setup
     // ****************
+    if (!ffmpegInstance.isLoaded) throw new Error("ffmpeg.wasm did not load on editor startup. Please refresh the page.");
     const nodes = $timeline.clips.toArray();
     for (const node of nodes) {
       const { base, trimmed } = getNames(node.uuid);
 
-      ffmpeg.FS("writeFile", base, await fetchFile(node.metadata.src));
-      ffmpeg.FS("writeFile", trimmed, "");
+      ffmpegInstance.FS("writeFile", base, await fetchFile(node.metadata.src));
+      ffmpegInstance.FS("writeFile", trimmed, "");
     }
-    ffmpeg.FS("writeFile", "output.mp4", "");
+    ffmpegInstance.FS("writeFile", "output.mp4", "");
 
     // ****************
     // 1. Trim offsets
@@ -47,7 +40,7 @@
     for (const { uuid, metadata } of nodes) {
       const { base, trimmed } = getNames(uuid);
 
-      await ffmpeg.run("-i", base, "-ss", metadata.startOffset.toString(), "-to", (metadata.duration - metadata.endOffset).toString(), trimmed);
+      await ffmpegInstance.run("-i", base, "-ss", metadata.startOffset.toString(), "-to", (metadata.duration - metadata.endOffset).toString(), trimmed);
     }
 
     // ****************
@@ -63,7 +56,7 @@
       `-filter_complex`,
       nodes.map((_, i) => `[${i}:v]${ftr}[v${i}];`).join("") + nodes.map((_, i) => `[v${i}][${i}:a]`).join("") + "concat=n=" + nodes.length + `:v=1:a=1[v][a]`,
     ];
-    await ffmpeg.run(
+    await ffmpegInstance.run(
       ...(nodes.map(({ uuid }) => ["-i", getNames(uuid).trimmed]).flat() as string[]),
       ...filters,
       ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `-strict`, `experimental`, `-vsync`, `2`, `output.mp4`]
@@ -73,7 +66,7 @@
     // 3. Export
     // ****************
     innerText = "exporting...";
-    const data = ffmpeg.FS("readFile", "output.mp4");
+    const data = ffmpegInstance.FS("readFile", "output.mp4");
     url = URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));
     innerText = "export complete";
     console.log(url);
