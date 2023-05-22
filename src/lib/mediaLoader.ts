@@ -13,7 +13,8 @@ export const loadMediaMetadata = async (file: File) => {
   const src = URL.createObjectURL(file);
 
   if(file.type.includes("audio")) {
-
+    console.warn("Audio files are not yet supported");
+    return null;
   }
 
   if(file.type.includes("video")) {
