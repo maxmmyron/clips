@@ -65,8 +65,4 @@
   });
 </script>
 
-{#if metadata.type === MediaType.VIDEO}
-  <video muted class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0" src={metadata.src} bind:this={video} on:play={handlePlay} />
-{:else if metadata.type === MediaType.IMAGE}
-  <img class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0" src={metadata.src} bind:this={image} alt="" />
-{/if}
+<video muted class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0" src={metadata.src} bind:this={video} on:play={handlePlay} />
