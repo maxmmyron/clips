@@ -1,6 +1,7 @@
 import { get } from "svelte/store";
 import { studio } from "./stores";
 import { fetchFile } from "@ffmpeg/ffmpeg";
+import { v4 as uuidv4 } from "uuid";
 import { ffmpegInstance } from "./components/util/FFmpegManager";
 
 const disallowedTypes = [{ type: "audio/x-m4a", name: "M4A" }, { type: "video/quicktime", name: "Quicktime" }];
@@ -33,12 +34,11 @@ export const loadMediaMetadata = async (file: File) => {
 
   if (file.type.includes("image")) {
     console.log("writing image and output to file system");
-    ffmpegInstance.FS("writeFile", file.name, await fetchFile(src));
-    // TODO: is necessary
+    const uuid = uuidv4();
+    ffmpegInstance.FS("writeFile", uuid, await fetchFile(src));
     ffmpegInstance.FS("writeFile", "output.mp4", "");
     console.log("performing ffmpeg shit");
-    // TODO: is pix_fmt necessary
-    await ffmpegInstance.run("-i", file.name, "-framerate", "1/10", "-c:v", "libx264", "-t", "5", "-vf", "scale=720:-1", "-pix_fmt", "yuv420p", "output.mp4");
+    await ffmpegInstance.run("-framerate", "1/5", "-i", uuid, "-t", "5", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2,loop=-1:1", "-movflags", "faststart", "output.mp4");
     const data = ffmpegInstance.FS("readFile", "output.mp4");
     const blob = new Blob([data.buffer], { type: "image/png" });
     const url = URL.createObjectURL(blob);
@@ -50,7 +50,7 @@ export const loadMediaMetadata = async (file: File) => {
       name: file.name,
       duration: 5,
       thumbnails: [src],
-      audio: await loadAudioBuffer(url),
+      audio: new AudioBuffer({ length: 5 * 44100, sampleRate: 44100, numberOfChannels: 1})
     } as UploadedMedia;
   }
 
