@@ -13,18 +13,19 @@ export const loadMediaMetadata = async (file: File) => {
     return null;
   }
 
-  console.log("loading media metadata")
-
-  const src = URL.createObjectURL(file);
-
   if (file.type.includes("audio")) {
     console.warn("Audio files are not yet supported");
     return null;
   }
 
+  const uuid = uuidv4();
+  const src = URL.createObjectURL(file);
+
   if (file.type.includes("video")) {
     return {
       src,
+      type: "video",
+      uuid,
       name: file.name,
       duration: await loadMediaDuration(src),
       thumbnails: await loadThumbnails(src),
@@ -46,6 +47,8 @@ export const loadMediaMetadata = async (file: File) => {
     console.log("it has been done: " + url);
 
     return {
+      uuid,
+      type: "image",
       src: url,
       name: file.name,
       duration: 5,
