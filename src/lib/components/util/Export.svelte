@@ -12,10 +12,12 @@
     const node = $timeline.clips.getByUUID(uuid);
     if (!node) throw new Error("node not found");
 
-    const baseName = node.metadata.name.split(".").slice(0, -1).join(".") + `-${node.uuid}`.replaceAll("-", "_");
+    const baseName = `${node.uuid}`.replaceAll("-", "_");
+    const pictureExts = ["jpg", "jpeg", "png", "gif", "bmp", "webp"];
+    let ext = pictureExts.includes(node.metadata.src.split(".").pop()!) ? node.metadata.name.split(".").pop() : "mp4";
     return {
-      base: baseName + "." + node.metadata.name.split(".").pop(),
-      trimmed: baseName + "_trimmed" + "." + node.metadata.name.split(".").pop(),
+      base: baseName + "." + ext,
+      trimmed: baseName + "_trimmed" + "." + ext,
     };
   };
 
