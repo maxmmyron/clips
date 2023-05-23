@@ -54,7 +54,7 @@
     if ($studio.dragData.originType === "timeline") {
       if ($timeline.dragIndex === -1) return;
 
-      let clip = $timeline.clips.getAt($timeline.dragIndex) as TimelineLayerNode;
+      let clip = $timeline.clips.getAt($timeline.dragIndex) as Node;
       $timeline.clips.remove(clip.uuid);
 
       if (dropIndex === -1) $timeline.clips.add(clip);
@@ -101,7 +101,7 @@
           class:dragging={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
           class:w-0={idx === $timeline.dragIndex && $studio.dragData.dragEvent === "drag"}
         >
-          <TimelinePreview metadata={node.metadata}>
+          <TimelinePreview {node}>
             <MediaVideoPreview metadata={{ name: node.metadata.name, thumbnails: node.metadata.thumbnails }} isTimelineElement={true} />
             <MediaAudioPreview metadata={node.metadata} />
           </TimelinePreview>

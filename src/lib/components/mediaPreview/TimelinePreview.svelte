@@ -1,7 +1,9 @@
 <script lang="ts">
   import { player, studio, timeline } from "$lib/stores";
 
-  export let metadata: TimelineMedia;
+  export let node: Node;
+
+  const metadata = node.metadata;
 
   let duration = metadata.duration;
   let isAdjustingOffsets = false;
@@ -11,7 +13,7 @@
   let initialPosition = 0;
   let initialOffset = 0;
 
-  $: isSelected = $timeline.selected.includes(metadata);
+  $: isSelected = $timeline.selected.includes(node.uuid);
   // duration factor
   $: scaleFactor = $timeline.zoom ** 1.75;
   $: width = (duration - metadata.startOffset - metadata.endOffset) * scaleFactor + "px";
@@ -22,8 +24,8 @@
       return;
     }
     if (e.detail == 2) $player.source = metadata.src;
-    else if (e.shiftKey) $timeline.selected = [...$timeline.selected, metadata];
-    else $timeline.selected = [metadata];
+    else if (e.shiftKey) $timeline.selected = [...$timeline.selected, node.uuid];
+    else $timeline.selected = [node.uuid];
   };
 
   const handleReorder = (e: MouseEvent) => {
@@ -39,7 +41,7 @@
     $studio.dragData.ghost.position.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
     $studio.dragData.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
 
-    $timeline.dragIndex = $timeline.clips.indexOf(metadata);
+    $timeline.dragIndex = $timeline.clips.indexOf(node.uuid);
   };
 
   const handleOffsets = (e: MouseEvent) => {

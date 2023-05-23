@@ -48,7 +48,7 @@ type WritableMediaPool = import("svelte/store").Writable<{
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
-  selected: Node[];
+  selected: string[];
   clips: import("./components/util/TimelineLinkedList").default
   curr: Node | null;
   videos: Map<string, HTMLVideoElement>;
