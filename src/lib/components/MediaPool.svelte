@@ -16,7 +16,7 @@
 
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
     if (!(e.target as HTMLInputElement).files) return;
-    updateMediaPool([...((e.target as HTMLInputElement).files as FileList)].filter((file) => file.type.startsWith("video/")));
+    updateMediaPool([...((e.target as HTMLInputElement).files as FileList)]);
   };
 
   const updateMediaPool = (uploadedFiles: File[]) => {
