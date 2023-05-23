@@ -3,23 +3,25 @@ import { studio } from "./stores";
 import { fetchFile } from "@ffmpeg/ffmpeg";
 import { ffmpegInstance } from "./components/util/FFmpegManager";
 
-const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}];
+const disallowedTypes = [{ type: "audio/x-m4a", name: "M4A" }, { type: "video/quicktime", name: "Quicktime" }];
 
 export const loadMediaMetadata = async (file: File) => {
-  if(disallowedTypes.some(type => file.type.includes(type.type))) {
-    const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as {type: string, name: string};
+  if (disallowedTypes.some(type => file.type.includes(type.type))) {
+    const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as { type: string, name: string };
     console.warn(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
     return null;
   }
 
+  console.log("loading media metadata")
+
   const src = URL.createObjectURL(file);
 
-  if(file.type.includes("audio")) {
+  if (file.type.includes("audio")) {
     console.warn("Audio files are not yet supported");
     return null;
   }
 
-  if(file.type.includes("video")) {
+  if (file.type.includes("video")) {
     return {
       src,
       name: file.name,
@@ -29,15 +31,19 @@ export const loadMediaMetadata = async (file: File) => {
     } as UploadedMedia;
   }
 
-  if(file.type.includes("image")) {
+  if (file.type.includes("image")) {
+    console.log("writing image and output to file system");
     ffmpegInstance.FS("writeFile", file.name, await fetchFile(src));
     // TODO: is necessary
     ffmpegInstance.FS("writeFile", "output.mp4", "");
+    console.log("performing ffmpeg shit");
     // TODO: is pix_fmt necessary
     await ffmpegInstance.run("-i", file.name, "-framerate", "1/10", "-c:v", "libx264", "-t", "5", "-vf", "scale=720:-1", "-pix_fmt", "yuv420p", "output.mp4");
     const data = ffmpegInstance.FS("readFile", "output.mp4");
-    const blob = new Blob([data.buffer], {type: "image/png"});
+    const blob = new Blob([data.buffer], { type: "image/png" });
     const url = URL.createObjectURL(blob);
+
+    console.log("it has been done: " + url);
 
     return {
       src: url,
@@ -89,7 +95,7 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
     }
 
     // one thumbnail every 5 seconds
-    for (let i = 0; i < duration; i+=5) {
+    for (let i = 0; i < duration; i += 5) {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       thumbnails.push(canvas.toDataURL());
@@ -102,12 +108,12 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
 
 export const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
   const audioContext = get(studio).audioContext;
-  if(!audioContext) reject("No audio context");
+  if (!audioContext) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
-  .then(buffer => {
-    audioContext.decodeAudioData(buffer)
-      .then(buffer => resolve(buffer))
-      .catch(err => reject(`Error decoding audio data: ${err}`));
-  })
-  .catch(err => reject(`Error fetching audio data: ${err}`));
+    .then(buffer => {
+      audioContext.decodeAudioData(buffer)
+        .then(buffer => resolve(buffer))
+        .catch(err => reject(`Error decoding audio data: ${err}`));
+    })
+    .catch(err => reject(`Error fetching audio data: ${err}`));
 });
