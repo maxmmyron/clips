@@ -1,5 +1,7 @@
 import { get } from "svelte/store";
 import { studio } from "./stores";
+import { fetchFile } from "@ffmpeg/ffmpeg";
+import { ffmpegInstance } from "./components/util/FFmpegManager";
 
 const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}];
 
@@ -18,20 +20,35 @@ export const loadMediaMetadata = async (file: File) => {
   }
 
   if(file.type.includes("video")) {
-
+    return {
+      src,
+      name: file.name,
+      duration: await loadMediaDuration(src),
+      thumbnails: await loadThumbnails(src),
+      audio: await loadAudioBuffer(src),
+    } as UploadedMedia;
   }
 
   if(file.type.includes("image")) {
+    ffmpegInstance.FS("writeFile", file.name, await fetchFile(src));
+    // TODO: is necessary
+    ffmpegInstance.FS("writeFile", "output.mp4", "");
+    // TODO: is pix_fmt necessary
+    await ffmpegInstance.run("-i", file.name, "-framerate", "1/10", "-c:v", "libx264", "-t", "5", "-vf", "scale=720:-1", "-pix_fmt", "yuv420p", "output.mp4");
+    const data = ffmpegInstance.FS("readFile", "output.mp4");
+    const blob = new Blob([data.buffer], {type: "image/png"});
+    const url = URL.createObjectURL(blob);
 
+    return {
+      src: url,
+      name: file.name,
+      duration: 5,
+      thumbnails: [src],
+      audio: await loadAudioBuffer(url),
+    } as UploadedMedia;
   }
 
-  return {
-    src,
-    name: file.name,
-    duration: await loadMediaDuration(src),
-    thumbnails: await loadThumbnails(src),
-    audio: await loadAudioBuffer(src),
-  } as UploadedMedia;
+  throw new Error("Unsupported file type");
 };
 
 export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
