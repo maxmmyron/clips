@@ -1,7 +1,7 @@
 <script lang="ts">
   import { player, studio, timeline } from "$lib/stores";
 
-  export let node: Node;
+  export let node: TimelineNode;
 
   const metadata = node.metadata;
 
