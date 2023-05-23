@@ -29,11 +29,11 @@ interface UploadedMedia {
   audio: AudioBuffer;
 }
 
-interface Node {
+interface TimelineNode {
   uuid: string;
   metadata: TimelineNodeMetadata;
-  next: Node | null;
-  prev: Node | null;
+  next: TimelineNode | null;
+  prev: TimelineNode | null;
 }
 interface TimelineNodeMetadata extends UploadedMedia {
   startOffset: number;
@@ -50,7 +50,7 @@ type WritableMediaPool = import("svelte/store").Writable<{
 type WritableTimeline = import("svelte/store").Writable<{
   selected: string[];
   clips: import("./components/util/TimelineLinkedList").default
-  curr: Node | null;
+  curr: TimelineNode | null;
   videos: Map<string, HTMLVideoElement>;
   zoom: number;
   dragIndex: number;
