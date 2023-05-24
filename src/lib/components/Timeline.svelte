@@ -54,7 +54,7 @@
     if ($studio.dragData.originType === "timeline") {
       if ($timeline.dragIndex === -1) return;
 
-      let clip = $timeline.clips.getAt($timeline.dragIndex) as Node;
+      let clip = $timeline.clips.getAt($timeline.dragIndex) as TimelineNode;
       $timeline.clips.remove(clip.uuid);
 
       if (dropIndex === -1) $timeline.clips.add(clip);
