@@ -4,6 +4,7 @@
   import { loadMediaMetadata } from "$lib/mediaLoader";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
+  import { ffmpegInstance } from "./util/FFmpegManager";
 
   $: browser && (window.mediaPool = $mediaPool.media);
 
@@ -52,6 +53,14 @@
   const handleMow = () => {
     mows = [...mows, Date.now()];
     let id = setTimeout(() => mows.shift() && clearTimeout(id), 1000);
+    console.log("-----------------------");
+    console.log("MEDIA POOL DATA");
+    console.log("-----------------------");
+    console.log($mediaPool.media);
+
+    console.log("-----------------------");
+    console.log("TIMELINE DATA");
+    console.log("-----------------------");
     console.log($timeline.clips.head);
     console.log($timeline.clips.tail);
     console.log($timeline.curr);
