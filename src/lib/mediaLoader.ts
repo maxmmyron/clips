@@ -34,17 +34,16 @@ export const loadMediaMetadata = async (file: File) => {
   }
 
   if (file.type.includes("image")) {
-    console.log("writing image and output to file system");
-    const uuid = uuidv4();
-    ffmpegInstance.FS("writeFile", uuid, await fetchFile(src));
-    ffmpegInstance.FS("writeFile", "output.mp4", "");
-    console.log("performing ffmpeg shit");
-    await ffmpegInstance.run("-framerate", "1/5", "-i", uuid, "-t", "5", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2,loop=-1:1", "-movflags", "faststart", "output.mp4");
-    const data = ffmpegInstance.FS("readFile", "output.mp4");
-    const blob = new Blob([data.buffer], { type: "image/png" });
+    ffmpegInstance.FS("writeFile", "input", await fetchFile(src));
+    ffmpegInstance.FS("writeFile", `${uuid}.mp4`, "");
+    await ffmpegInstance.run("-framerate", "1/5", "-i", "input", "-f", "lavfi", "-i", "anullsrc", "-t", "5", "-c:v", "libx264", "-c:a", "aac", "-pix_fmt", "yuv420p", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2,loop=-1:1", "-movflags", "faststart", `${uuid}.mp4`);
+
+    const data = ffmpegInstance.FS("readFile", `${uuid}.mp4`);
+    const blob = new Blob([data.buffer], { type: "video/mp4" });
     const url = URL.createObjectURL(blob);
 
-    console.log("it has been done: " + url);
+    ffmpegInstance.FS("unlink", "input");
+    ffmpegInstance.FS("unlink", `${uuid}.mp4`);
 
     return {
       uuid,
