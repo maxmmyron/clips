@@ -36,7 +36,7 @@ export const loadMediaMetadata = async (file: File) => {
   if (file.type.includes("image")) {
     ffmpegInstance.FS("writeFile", "input", await fetchFile(src));
     ffmpegInstance.FS("writeFile", `${uuid}.mp4`, "");
-    await ffmpegInstance.run("-framerate", "1/5", "-i", "input", "-f", "lavfi", "-i", "anullsrc", "-t", "5", "-c:v", "libx264", "-c:a", "aac", "-pix_fmt", "yuv420p", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2,loop=-1:1", "-movflags", "faststart", `${uuid}.mp4`);
+    await ffmpegInstance.run("-framerate", "30", "-i", "input", "-f", "lavfi", "-i", "anullsrc", "-t", "5", "-c:v", "libx264", "-c:a", "aac", "-pix_fmt", "yuv420p", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2,loop=-1:1", "-movflags", "faststart", `${uuid}.mp4`);
 
     const data = ffmpegInstance.FS("readFile", `${uuid}.mp4`);
     const blob = new Blob([data.buffer], { type: "video/mp4" });
