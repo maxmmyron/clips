@@ -4,6 +4,7 @@
   import { loadMediaMetadata } from "$lib/mediaLoader";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
+  import { ffmpegInstance } from "./util/FFmpegManager";
 
   $: browser && (window.mediaPool = $mediaPool.media);
 
@@ -16,7 +17,7 @@
 
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
     if (!(e.target as HTMLInputElement).files) return;
-    updateMediaPool([...((e.target as HTMLInputElement).files as FileList)].filter((file) => file.type.startsWith("video/")));
+    updateMediaPool([...((e.target as HTMLInputElement).files as FileList)]);
   };
 
   const updateMediaPool = (uploadedFiles: File[]) => {
@@ -52,6 +53,14 @@
   const handleMow = () => {
     mows = [...mows, Date.now()];
     let id = setTimeout(() => mows.shift() && clearTimeout(id), 1000);
+    console.log("-----------------------");
+    console.log("MEDIA POOL DATA");
+    console.log("-----------------------");
+    console.log($mediaPool.media);
+
+    console.log("-----------------------");
+    console.log("TIMELINE DATA");
+    console.log("-----------------------");
     console.log($timeline.clips.head);
     console.log($timeline.clips.tail);
     console.log($timeline.curr);

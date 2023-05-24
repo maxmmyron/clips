@@ -2,8 +2,8 @@
 
 export default class TimelineLinkedList {
 
-  head: TimelineLayerNode | null;
-  tail: TimelineLayerNode | null;
+  head: TimelineNode | null;
+  tail: TimelineNode | null;
 
   constructor() {
     this.head = null;
@@ -16,7 +16,7 @@ export default class TimelineLinkedList {
    * @param node the node to add
    * @returns the node that was added
    */
-  add = (node: TimelineLayerNode, index: number = -1) => {
+  add = (node: TimelineNode, index: number = -1) => {
     if(this.getByUUID(node.uuid)) throw new Error(`A node with the uuid ${node.uuid} already exists in the list.`);
 
     if(index === 0) {

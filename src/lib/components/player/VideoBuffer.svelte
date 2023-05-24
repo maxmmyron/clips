@@ -2,7 +2,7 @@
   import { timeline, player } from "$lib/stores";
   import { onMount } from "svelte";
 
-  export let node: TimelineLayerNode, audioContext: AudioContext;
+  export let node: TimelineNode, audioContext: AudioContext;
 
   let video: HTMLVideoElement;
   let currentTime: number = 0;

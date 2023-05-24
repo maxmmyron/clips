@@ -5,27 +5,39 @@ interface PreviewMedia {
 }
 
 interface UploadedMedia {
-  src: string;
+  /**
+   * The name of the uploaded file. Used only for display purposes.
+   */
   name: string;
+  /**
+   * The format of the uploaded file.
+   */
+  type: "video" | "image";
+  /**
+   * The original source of the uploaded file.
+   */
+  src: string;
+  /**
+   * The unique identifier of the media. this, plus the extension, can be used to reference the original uploaded media.
+   */
+  uuid: string;
+  /**
+   * The duration of the media, in seconds.
+   */
   duration: number;
   thumbnails: string[];
   audio: AudioBuffer;
 }
 
-interface TimelineLayerNode {
+interface TimelineNode {
   uuid: string;
   metadata: TimelineNodeMetadata;
-  next: TimelineLayerNode | null;
-  prev: TimelineLayerNode | null;
+  next: TimelineNode | null;
+  prev: TimelineNode | null;
 }
-interface TimelineNodeMetadata  {
-  duration: number;
-  name: string;
-  src: string;
-  audio: AudioBuffer;
+interface TimelineNodeMetadata extends UploadedMedia {
   startOffset: number;
   endOffset: number;
-  thumbnails: string[];
   hasStarted: boolean;
   hasEnded: boolean;
 }
@@ -36,9 +48,9 @@ type WritableMediaPool = import("svelte/store").Writable<{
 }>;
 
 type WritableTimeline = import("svelte/store").Writable<{
-  selected: TimelineLayerNode[];
+  selected: string[];
   clips: import("./components/util/TimelineLinkedList").default
-  curr: TimelineLayerNode | null;
+  curr: TimelineNode | null;
   videos: Map<string, HTMLVideoElement>;
   zoom: number;
   dragIndex: number;

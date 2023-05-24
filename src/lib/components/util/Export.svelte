@@ -3,21 +3,7 @@
   import { ffmpegInstance } from "$lib/components/util/FFmpegManager";
   import { fetchFile } from "@ffmpeg/ffmpeg";
 
-  let innerText = "",
-    url = "";
-
-  let downloadLink: HTMLAnchorElement;
-
-  const getNames = (uuid: string) => {
-    const node = $timeline.clips.getByUUID(uuid);
-    if (!node) throw new Error("node not found");
-
-    const baseName = node.metadata.name.split(".").slice(0, -1).join(".") + `-${node.uuid}`.replaceAll("-", "_");
-    return {
-      base: baseName + "." + node.metadata.name.split(".").pop(),
-      trimmed: baseName + "_trimmed" + "." + node.metadata.name.split(".").pop(),
-    };
-  };
+  let progressText = "";
 
   const exportTimeline = async () => {
     // ****************
@@ -25,20 +11,18 @@
     // ****************
     if (!ffmpegInstance.isLoaded) throw new Error("ffmpeg.wasm did not load on editor startup. Please refresh the page.");
     const nodes = $timeline.clips.toArray();
-    for (const node of nodes) {
-      const { base, trimmed } = getNames(node.uuid);
-
-      ffmpegInstance.FS("writeFile", base, await fetchFile(node.metadata.src));
-      ffmpegInstance.FS("writeFile", trimmed, "");
+    for (const { uuid, metadata } of nodes) {
+      ffmpegInstance.FS("writeFile", `${uuid}.mp4`, await fetchFile(metadata.src));
+      ffmpegInstance.FS("writeFile", `${uuid}_trimmed.mp4`, "");
     }
     ffmpegInstance.FS("writeFile", "output.mp4", "");
 
     // ****************
     // 1. Trim offsets
     // ****************
-    innerText = "trimming...";
+    progressText = "trimming...";
     for (const { uuid, metadata } of nodes) {
-      const { base, trimmed } = getNames(uuid);
+      const [base, trimmed] = [`${uuid}.mp4`, `${uuid}_trimmed.mp4`];
 
       await ffmpegInstance.run("-i", base, "-ss", metadata.startOffset.toString(), "-to", (metadata.duration - metadata.endOffset).toString(), trimmed);
     }
@@ -49,7 +33,7 @@
     // see: https://stackoverflow.com/a/11175851/9473692
     //      https://superuser.com/a/972615
     //      https://ffmpeg.org/ffmpeg-filters.html#concat
-    innerText = "concatenating...";
+    progressText = "concatenating...";
 
     const ftr = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:-1:-1:color=black,setsar=1,fps=30,format=yuv420p";
     const filters = [
@@ -57,22 +41,26 @@
       nodes.map((_, i) => `[${i}:v]${ftr}[v${i}];`).join("") + nodes.map((_, i) => `[v${i}][${i}:a]`).join("") + "concat=n=" + nodes.length + `:v=1:a=1[v][a]`,
     ];
     await ffmpegInstance.run(
-      ...(nodes.map(({ uuid }) => ["-i", getNames(uuid).trimmed]).flat() as string[]),
+      ...nodes.map(({ uuid }) => ["-i", `${uuid}_trimmed.mp4`]).flat(),
       ...filters,
-      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `-strict`, `experimental`, `-vsync`, `2`, `output.mp4`]
+      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `output.mp4`]
     );
 
     // ****************
     // 3. Export
     // ****************
-    innerText = "exporting...";
-    const data = ffmpegInstance.FS("readFile", "output.mp4");
-    url = URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));
-    innerText = "export complete";
-    console.log(url);
+    progressText = "export complete";
+    const exportData = ffmpegInstance.FS("readFile", "output.mp4");
+
+    const link = document.createElement("a");
+    link.download = "output.mp4";
+    link.href = URL.createObjectURL(new Blob([exportData.buffer], { type: "video/mp4" }));
+    document.body.appendChild(link);
+    link.dispatchEvent(new MouseEvent("click"));
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(link.href), 7000);
   };
 </script>
 
 <button on:click={exportTimeline} class="px-4 py-2 text-white border-[1px] border-neutral-600">export</button>
-<p class="text-white my-4" bind:innerText contenteditable />
-<a download="output.mp4" href={url} class="text-white my-4 hidden" bind:this={downloadLink}>download</a>
+<p class="text-white my-4">{progressText}</p>
