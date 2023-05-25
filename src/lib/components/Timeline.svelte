@@ -173,16 +173,20 @@
           <TimelinePreview {node}>
             {#if node.type === "video"}
               <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
-              <MediaAudioPreview
-                mediaUUID={node.mediaUUID}
-                metadata={{
-                  start: node.metadata.start,
-                  end: node.metadata.end,
-                }}
-              />
+              {#key $timeline.zoomScale}
+                <MediaAudioPreview
+                  mediaUUID={node.mediaUUID}
+                  metadata={{
+                    start: node.metadata.start,
+                    end: node.metadata.end,
+                  }}
+                />
+              {/key}
             {:else if node.type === "audio"}
               <div class="h-full" />
-              <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
+              {#key $timeline.zoomScale}
+                <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
+              {/key}
             {:else if node.type === "image"}
               <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
               <div class="h-full" />
