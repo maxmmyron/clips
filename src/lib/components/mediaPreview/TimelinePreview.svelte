@@ -14,9 +14,7 @@
   let initialOffset = 0;
 
   $: isSelected = $timeline.selected.includes(node.uuid);
-  // duration factor
-  $: scaleFactor = $timeline.zoomScale ** 1.75;
-  $: width = (duration - metadata.start - metadata.end) * scaleFactor + "px";
+  $: width = (duration - metadata.start - metadata.end) * $timeline.zoomScale + "px";
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
