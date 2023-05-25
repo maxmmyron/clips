@@ -42,10 +42,12 @@ export const timeline: App.stores.WritableTimeline = writable({
   sources: new Map(),
   zoomScale: 1,
   dragIndex: -1,
+  runtime: 0,
 });
 
 export const player: App.stores.WritablePlayer = writable({
   source: null,
   isSinglePreview: false,
   isPaused: true,
+  lastPauseState: true,
 });
