@@ -139,7 +139,7 @@
   const moveUserScrubber = (e: MouseEvent) => {
     if (!canMoveScrubber) return;
 
-    $timeline.runtime = (e.clientX - timelineContainer.offsetLeft) / timelineScale;
+    $timeline.runtime = (e.clientX - timelineContainer.getBoundingClientRect().left) / timelineScale;
   };
 
   const endUserScrubberMove = (e: MouseEvent) => {
@@ -150,16 +150,18 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($timeline.selected = [])} />
 
-<div class="relative w-full h-full overflow-x-auto flex items-center" on:mousemove={handleDrag}>
-  <div class="w-2/5 h-full bg-neutral-900 border-r-2 border-r-neutral-700 flex-shrink-0" />
+<div
+  class="relative w-full h-full overflow-x-auto flex items-center"
+  on:mousemove={handleDrag}
+  on:mousedown={startUserScrubberMove}
+  on:mousemove={moveUserScrubber}
+  on:mouseup={endUserScrubberMove}
+>
   <div
     class="w-full h-full flex items-center"
     on:mouseup={handleDragEnd}
     on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
     on:mouseleave={() => ($studio.draggable.current.region = null)}
-    on:mousedown={startUserScrubberMove}
-    on:mousemove={moveUserScrubber}
-    on:mouseup={endUserScrubberMove}
   >
     <div class="flex h-fit min-h-[50%]" bind:this={timelineContainer}>
       {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
