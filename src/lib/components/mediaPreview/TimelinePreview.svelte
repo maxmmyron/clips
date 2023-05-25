@@ -55,10 +55,10 @@
     let offset;
 
     if (offsetIndex == 0) {
-      offset = initialOffset + (e.clientX - initialPosition) / scaleFactor;
+      offset = initialOffset + (e.clientX - initialPosition) / $timeline.zoomScale;
       metadata.start = Math.max(0, offset);
     } else {
-      offset = initialOffset + (initialPosition - e.clientX) / scaleFactor;
+      offset = initialOffset + (initialPosition - e.clientX) / $timeline.zoomScale;
       metadata.end = Math.max(0, offset);
     }
   };
