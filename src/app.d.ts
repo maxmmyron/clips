@@ -48,7 +48,7 @@ declare global {
 			} : T extends "audio" ? {
 				duration: number;
 				audio: AudioBuffer;
-			} : never);
+			} : {});
 		}
 
 		namespace stores {
