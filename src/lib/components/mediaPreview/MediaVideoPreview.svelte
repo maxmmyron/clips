@@ -1,5 +1,7 @@
 <script lang="ts">
-  export let metadata: UploadedVideo;
+  export let metadata: {
+    [Property in keyof App.VideoMedia["metadata"]]: App.VideoMedia["metadata"][Property];
+  };
   export let isTimelineElement: boolean = false;
 </script>
 

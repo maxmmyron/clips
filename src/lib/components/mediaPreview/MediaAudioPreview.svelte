@@ -2,7 +2,9 @@
   import { timeline } from "$lib/stores";
   import { Canvas, Layer, type Render } from "svelte-canvas";
 
-  export let metadata: TimelineAudio;
+  export let metadata: {
+    [Property in keyof App.AudioMedia["metadata"]]: App.AudioMedia["metadata"][Property];
+  } & { start: number; end: number };
 
   let buffer = metadata.audio.getChannelData(0);
   let containerWidth, containerHeight;
@@ -10,7 +12,7 @@
   let render: Render;
   $: render = ({ context, width, height }) => {
     // recalc on zoom
-    $timeline.zoom;
+    $timeline.zoomScale;
 
     if (!buffer) return console.error("No audio data");
 
@@ -29,8 +31,8 @@
       return;
     }
 
-    const start = (metadata.offsets[0] / metadata.duration) * buffer.length;
-    const end = ((metadata.duration - metadata.offsets[1]) / metadata.duration) * buffer.length;
+    const start = (metadata.start / metadata.duration) * buffer.length;
+    const end = ((metadata.duration - metadata.end) / metadata.duration) * buffer.length;
 
     const offsetBuffer = buffer.slice(start, end);
 
