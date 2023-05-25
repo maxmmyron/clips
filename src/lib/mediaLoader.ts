@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}, {type: "video/x-matroska", name: "MKV"}];
 
-export const loadMediaMetadata = async (file: File): Promise<App.Media<"video"> | App.Media<"audio"> | App.Media<"image">> => {
+export const loadMediaMetadata = async (file: File): Promise<App.Media> => {
   if(disallowedTypes.some(type => file.type.includes(type.type))) {
     const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as {type: string, name: string};
     throw new Error(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
@@ -27,7 +27,7 @@ export const loadMediaMetadata = async (file: File): Promise<App.Media<"video"> 
         duration: await loadMediaDuration(src, "audio"),
         title: file.name,
       }
-    } as App.Media<"audio">;
+    } as App.AudioMedia;
   } else if(file.type.includes("video")) {
     return {
       ...defaultMediaProperties,
@@ -38,7 +38,7 @@ export const loadMediaMetadata = async (file: File): Promise<App.Media<"video"> 
         audio: await loadAudioBuffer(src),
         title: file.name,
       }
-    } as App.Media<"video">;
+    } as App.VideoMedia;
   } else if(file.type.includes("image")) {
     return {
       ...defaultMediaProperties,
@@ -46,7 +46,7 @@ export const loadMediaMetadata = async (file: File): Promise<App.Media<"video"> 
       metadata: {
         title: file.name,
       },
-    } as App.Media<"image">;
+    } as App.ImageMedia;
   } else throw Error("Unsupported file type");
 };
 
