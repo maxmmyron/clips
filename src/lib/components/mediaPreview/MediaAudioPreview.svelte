@@ -1,6 +1,6 @@
 <script lang="ts">
   import { mediaPool, timeline } from "$lib/stores";
-  import { Canvas, Layer, type Render } from "svelte-canvas";
+  import { onMount } from "svelte";
 
   export let mediaUUID: string;
   export let metadata: { start: number; end: number };
@@ -8,14 +8,16 @@
   const media = $mediaPool.media.find((media) => media.uuid === mediaUUID) as App.AudioMedia;
 
   let buffer = media.metadata.audio.getChannelData(0);
-  let containerWidth, containerHeight;
+  let width: number, height: number;
+  let canvas: HTMLCanvasElement;
 
-  let render: Render;
-  $: render = ({ context, width, height }) => {
-    // recalc on zoom
-    $timeline.zoomScale;
+  onMount(() => {
+    canvas.width = width;
+    canvas.height = height;
 
     if (!buffer) return console.error("No audio data");
+
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     context.fillStyle = "black";
     context.fillRect(0, 0, width, height);
@@ -55,11 +57,9 @@
       context.lineTo(i, ((1 + max) * height) / 2);
     }
     context.stroke();
-  };
+  });
 </script>
 
-<div class="h-1/2 flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={containerWidth} bind:clientHeight={containerHeight}>
-  <Canvas class="w-full h-full" width={containerWidth} height={containerHeight}>
-    <Layer {render} />
-  </Canvas>
+<div class="h-1/2 flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={width} bind:clientHeight={height}>
+  <canvas class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height} bind:this={canvas} />
 </div>
