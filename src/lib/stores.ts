@@ -11,6 +11,7 @@ export const studio: App.stores.WritableStudio = writable({
    * If null, no dragging is occurring.
    */
   draggable: {
+    media: null,
     origin: null,
     event: null,
     current: {
