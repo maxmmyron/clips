@@ -25,7 +25,7 @@ declare global {
 			next: Node | null;
 			prev: Node | null;
 			uuid: string;
-			type: T;
+			type: T extends "video" ? "video" : T extends "audio" ? "audio" : T extends "image" ? "image" : never;
 			src: string;
 			metadata: {
 				title: string;
@@ -35,29 +35,43 @@ declare global {
 			}
 		};
 
-		type Media<T = "video" | "audio" | "image"> = {
+		interface Media {
 			uuid: string;
-			type: T extends "video" ? "video" : T extends "audio" ? "audio" : "image";
 			src: string;
+		}
+
+		interface VideoMedia extends Media {
+			type: "video";
 			metadata: {
 				title: string;
-			} & (T extends "video" ? {
 				thumbnails: string[];
 				duration: number;
 				audio: AudioBuffer;
-			} : T extends "audio" ? {
-				duration: number;
-				audio: AudioBuffer;
-			} : {});
+			}
 		}
 
+		interface AudioMedia extends Media {
+			type: "audio";
+			metadata: {
+				title: string;
+				duration: number;
+				audio: AudioBuffer;
+			}
+		}
+
+		interface ImageMedia extends Media {
+			type: "image";
+			metadata: {
+				title: string;
+			}
+		}
 		namespace stores {
 			type WritableStudio = Writable<{
 				resize: "row" | "media_col" | "timeline_col" | null;
 				audioContext: AudioContext | null;
 				mouse: {x: number, y: number};
 				draggable: {
-					media: Media | null;
+					media: VideoMedia | AudioMedia | ImageMedia | null;
 					origin: {
 						pos: {x: number, y: number};
 						region: "timeline" | "media_pool";
@@ -75,7 +89,7 @@ declare global {
 
 			type WritableMediaPool = Writable<{
 				selected: string[];
-				media: Media[];
+				media: Array<VideoMedia | AudioMedia | ImageMedia>;
 			}>;
 
 			type WritableTimeline = Writable<{
