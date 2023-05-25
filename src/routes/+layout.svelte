@@ -105,7 +105,7 @@
       <MediaPool />
       <ResizeStalk resize="media_col" />
       <div class="flex flex-col justify-center items-center gap-8 p-8">
-        <Export />
+        <!-- <Export /> -->
         <Player />
       </div>
     </section>
