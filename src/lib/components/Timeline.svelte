@@ -5,7 +5,7 @@
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
   import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
   import { isAudioMedia, isVideoMedia } from "./util/helpers";
-  import TimelineLinkedList from "./util/TimelineLinkedList";
+  import { onMount } from "svelte";
 
   let timelineScale = 50;
   let timelineContainer: HTMLElement;
@@ -15,6 +15,34 @@
 
   $: $timeline.zoomScale = timelineScale;
   $: scrubberPos = $timeline.runtime * timelineScale;
+  $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
+
+  let lastTimestamp = 0;
+  const renderTimeline = (timestamp: number) => {
+    let curr = $timeline.timeline.head;
+    // find the currently rendering node given the runtime
+    let offset = 0;
+    while (curr && offset + (curr.metadata.duration - curr.metadata.start - curr.metadata.end) < $timeline.runtime) {
+      offset += curr.metadata.duration - curr.metadata.start - curr.metadata.end;
+      curr = curr.next;
+      $timeline.current = curr;
+    }
+
+    if ($player.isPaused) {
+      lastTimestamp = timestamp;
+      requestAnimationFrame(renderTimeline);
+      return;
+    }
+
+    const delta = timestamp - lastTimestamp;
+    lastTimestamp = timestamp;
+
+    $timeline.runtime += delta / 1000;
+
+    requestAnimationFrame(renderTimeline);
+  };
+
+  onMount(() => requestAnimationFrame(renderTimeline));
 
   const handleDrag = (e: MouseEvent) => {
     if ($studio.draggable.event !== "drag" || $studio.draggable.current.region !== "timeline") return;
