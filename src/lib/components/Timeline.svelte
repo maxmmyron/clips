@@ -21,12 +21,13 @@
   const renderTimeline = (timestamp: number) => {
     let curr = $timeline.timeline.head;
     // find the currently rendering node given the runtime
-    let offset = 0;
-    while (curr && offset + (curr.metadata.duration - curr.metadata.start - curr.metadata.end) < $timeline.runtime) {
-      offset += curr.metadata.duration - curr.metadata.start - curr.metadata.end;
+    let previousNodeOffset = 0;
+    while (curr && previousNodeOffset + (curr.metadata.duration - curr.metadata.start - curr.metadata.end) < $timeline.runtime) {
+      previousNodeOffset += curr.metadata.duration - curr.metadata.start - curr.metadata.end;
       curr = curr.next;
-      $timeline.current = curr;
     }
+    let currentNodeRuntime = $timeline.runtime - previousNodeOffset;
+    $timeline.current = curr;
 
     if ($player.isPaused) {
       lastTimestamp = timestamp;
@@ -163,7 +164,7 @@
     on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
     on:mouseleave={() => ($studio.draggable.current.region = null)}
   >
-    <div class="flex h-fit min-h-[50%]" bind:this={timelineContainer}>
+    <div class="relative flex h-fit min-h-[50%]" bind:this={timelineContainer}>
       {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
         <div
           class="draggable overflow-clip"
@@ -194,7 +195,7 @@
           </TimelinePreview>
         </div>
       {/each}
-      <div id="scrubber" style="left: {scrubberPos}px" class="absolute w-0.5 h-32 bg-blue-500 rounded-full pointer-events-none" />
+      <div id="scrubber" style="left: {scrubberPos}px" class="absolute w-0.5 h-full -top-4 bg-blue-500 rounded-full pointer-events-none" />
     </div>
   </div>
   <input class="absolute top-2 right-2" type="range" min="10" max="100" bind:value={timelineScale} />
