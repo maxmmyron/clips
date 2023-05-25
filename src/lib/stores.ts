@@ -1,4 +1,4 @@
-import {spring, type Spring} from "svelte/motion";
+import {spring} from "svelte/motion";
 import { writable } from "svelte/store";
 import TimelineLinkedList from "./components/util/TimelineLinkedList";
 
@@ -32,7 +32,7 @@ export const mediaPool: App.stores.WritableMediaPool = writable({
   /**
    * An array of loaded media. Carries a variety of information that can be used to display media details and preview media.
    */
-  media: new Array<App.Media>(),
+  media: new Array<App.VideoMedia | App.AudioMedia | App.ImageMedia>(),
 });
 
 export const timeline: App.stores.WritableTimeline = writable({
