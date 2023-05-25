@@ -95,6 +95,7 @@ declare global {
 
 			type WritableTimeline = Writable<{
 				runtime: number;
+				duration: number;
 				selected: string[];
 				timeline: Timeline;
 				current: Node | null;
