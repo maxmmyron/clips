@@ -57,6 +57,7 @@ declare global {
 				audioContext: AudioContext | null;
 				mouse: {x: number, y: number};
 				draggable: {
+					media: Media | null;
 					origin: {
 						pos: {x: number, y: number};
 						region: "timeline" | "media_pool";
