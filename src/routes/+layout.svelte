@@ -71,7 +71,7 @@
       },
     };
 
-    // $timeline.dragIndex = -1;
+    $timeline.dragIndex = -1;
   };
 </script>
 

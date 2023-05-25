@@ -41,6 +41,7 @@ export const timeline: App.stores.WritableTimeline = writable({
   current: null,
   sources: new Map(),
   zoomScale: 1,
+  dragIndex: -1,
 });
 
 export const player: App.stores.WritablePlayer = writable({

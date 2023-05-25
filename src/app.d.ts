@@ -90,6 +90,7 @@ declare global {
 					type: "image";
 				}>;
 				zoomScale: number;
+				dragIndex: number;
 			}>;
 
 			type WritablePlayer = Writable<{
