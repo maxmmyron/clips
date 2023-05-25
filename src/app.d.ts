@@ -79,7 +79,7 @@ declare global {
 					} | null;
 					event: "start" | "drag" | "end" | null;
 					current: {
-						region: "timeline" | "media_pool" | null;
+						region: "timeline" | "media_pool" | "player" | null;
 					};
 					ghost: {
 						pos: Spring<{x: number, y: number}>;
@@ -100,11 +100,8 @@ declare global {
 				timeline: Timeline;
 				current: Node | null;
 				sources: Map<string, {
-					video: HTMLVideoElement;
-					type: "video";
-				} | {
-					image: HTMLImageElement;
-					type: "image";
+					source: HTMLVideoElement | HTMLImageElement;
+					type: "video" | "image";
 				}>;
 				zoomScale: number;
 				dragIndex: number;
