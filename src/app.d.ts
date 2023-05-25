@@ -1,3 +1,5 @@
+import { type Writable } from "svelte/store";
+
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare global {
@@ -12,8 +14,8 @@ declare global {
 			remove(uuid: string): Node | null;
 			indexOf(uuid: string): number;
 
-			getNode(uuid: string): Node | null;
-			getNode(index: number): Node | null;
+			getByUUID(uuid: string): Node | null;
+			getByIndex(index: number): Node | null;
 
 			toArray(): Node[];
 			get length(): number;
