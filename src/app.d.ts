@@ -25,6 +25,7 @@ declare global {
 			next: Node | null;
 			prev: Node | null;
 			uuid: string;
+			mediaUUID: string;
 			type: T extends "video" ? "video" : T extends "audio" ? "audio" : T extends "image" ? "image" : never;
 			src: string;
 			metadata: {
@@ -71,7 +72,7 @@ declare global {
 				audioContext: AudioContext | null;
 				mouse: {x: number, y: number};
 				draggable: {
-					media: VideoMedia | AudioMedia | ImageMedia | null;
+					media: VideoMedia | AudioMedia | ImageMedia | Node | null;
 					origin: {
 						pos: {x: number, y: number};
 						region: "timeline" | "media_pool";
