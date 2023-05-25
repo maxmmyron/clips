@@ -1,10 +1,10 @@
 import { get } from "svelte/store";
 import { studio } from "./stores";
-import { MediaType } from "./exports"
+import { v4 as uuidv4 } from "uuid";
 
 const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}, {type: "video/x-matroska", name: "MKV"}];
 
-export const loadMediaMetadata = async (file: File): Promise<UploadedAudio | UploadedImage | UploadedVideo> => {
+export const loadMediaMetadata = async (file: File): Promise<App.Media<"video"> | App.Media<"audio"> | App.Media<"image">> => {
   if(disallowedTypes.some(type => file.type.includes(type.type))) {
     const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as {type: string, name: string};
     throw new Error(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
@@ -12,32 +12,41 @@ export const loadMediaMetadata = async (file: File): Promise<UploadedAudio | Upl
 
   const src = URL.createObjectURL(file);
 
+  const defaultMediaProperties = {
+    uuid: uuidv4(),
+    src,
+    name: file.name,
+  };
+
   if(file.type.includes("audio")) {
     return {
-      type: MediaType.AUDIO,
-      src,
-      name: file.name,
-      duration: await loadMediaDuration(src, "audio"),
-      audio: await loadAudioBuffer(src),
-    } as UploadedAudio;
+      ...defaultMediaProperties,
+      type: "audio",
+      metadata: {
+        audio: await loadAudioBuffer(src),
+        duration: await loadMediaDuration(src, "audio"),
+        title: file.name,
+      }
+    } as App.Media<"audio">;
   } else if(file.type.includes("video")) {
     return {
-      type: MediaType.VIDEO,
-      src,
-      name: file.name,
-      duration: await loadMediaDuration(src, "video"),
-      thumbnails: await loadThumbnails(src),
-      audio: await loadAudioBuffer(src),
-    } as UploadedVideo;
+      ...defaultMediaProperties,
+      type: "video",
+      metadata: {
+        duration: await loadMediaDuration(src, "video"),
+        thumbnails: await loadThumbnails(src),
+        audio: await loadAudioBuffer(src),
+        title: file.name,
+      }
+    } as App.Media<"video">;
   } else if(file.type.includes("image")) {
-    // create video with a default length using ffmpeg
-    // ffmpeg -framerate 1/10 -i DJI_0024.JPG -c:v libx264 -t 10 -pix_fmt yuv420p -vf scale=320:240 out.mp4
-    // see https://stackoverflow.com/a/68876503/9473692
     return {
-      type: MediaType.IMAGE,
-      src,
-      name: file.name,
-    } as UploadedImage;
+      ...defaultMediaProperties,
+      type: "image",
+      metadata: {
+        title: file.name,
+      },
+    } as App.Media<"image">;
   } else throw Error("Unsupported file type");
 };
 
