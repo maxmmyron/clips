@@ -94,6 +94,7 @@ declare global {
 			}>;
 
 			type WritableTimeline = Writable<{
+				runtime: number;
 				selected: string[];
 				timeline: Timeline;
 				current: Node | null;
@@ -112,6 +113,7 @@ declare global {
 				source: string | null;
 				isSinglePreview: boolean;
 				isPaused: boolean;
+				lastPauseState: boolean;
 			}>;
 		}
 	}
