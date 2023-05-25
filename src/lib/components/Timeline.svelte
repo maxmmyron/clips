@@ -1,17 +1,20 @@
 <script lang="ts">
-  import { timeline, studio } from "$lib/stores";
+  import { timeline, studio, player } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
   import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
   import { isAudioMedia, isVideoMedia } from "./util/helpers";
+  import TimelineLinkedList from "./util/TimelineLinkedList";
 
-  let zoomScale = 5;
+  let timelineScale = 50;
   let timelineContainer: HTMLElement;
+  let canMoveScrubber = false;
 
   let dropIndex: number = -1;
 
-  $: $timeline.zoomScale = zoomScale;
+  $: $timeline.zoomScale = timelineScale;
+  $: scrubberPos = $timeline.runtime * timelineScale;
 
   const handleDrag = (e: MouseEvent) => {
     if ($studio.draggable.event !== "drag" || $studio.draggable.current.region !== "timeline") return;
@@ -97,6 +100,24 @@
 
     $timeline.selected = [];
   };
+
+  const startUserScrubberMove = (e: MouseEvent) => {
+    $player.lastPauseState = $player.isPaused;
+    $player.isPaused = true;
+    canMoveScrubber = true;
+    moveUserScrubber(e);
+  };
+
+  const moveUserScrubber = (e: MouseEvent) => {
+    if (!canMoveScrubber) return;
+
+    $timeline.runtime = (e.clientX - timelineContainer.offsetLeft) / timelineScale;
+  };
+
+  const endUserScrubberMove = (e: MouseEvent) => {
+    $player.isPaused = $player.lastPauseState;
+    canMoveScrubber = false;
+  };
 </script>
 
 <svelte:window on:keydown={handleKey} on:click={() => ($timeline.selected = [])} />
@@ -108,6 +129,9 @@
     on:mouseup={handleDragEnd}
     on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
     on:mouseleave={() => ($studio.draggable.current.region = null)}
+    on:mousedown={startUserScrubberMove}
+    on:mousemove={moveUserScrubber}
+    on:mouseup={endUserScrubberMove}
   >
     <div class="flex h-fit min-h-[50%]" bind:this={timelineContainer}>
       {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
@@ -136,7 +160,21 @@
           </TimelinePreview>
         </div>
       {/each}
+      <div id="scrubber" style="left: {scrubberPos}px" class="absolute w-0.5 h-32 bg-blue-500 rounded-full pointer-events-none" />
     </div>
   </div>
-  <input class="absolute top-2 right-2" type="range" min="1" max="10" bind:value={zoomScale} />
+  <input class="absolute top-2 right-2" type="range" min="10" max="100" bind:value={timelineScale} />
 </div>
+
+<style>
+  #scrubber::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: -5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgb(11 113 230 / 1);
+  }
+</style>
