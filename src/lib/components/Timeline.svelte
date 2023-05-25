@@ -67,7 +67,7 @@
     // handle dragging new media into timeline
 
     if (!$studio.draggable.media) return;
-    const draggable = $studio.draggable.media;
+    const draggable = $studio.draggable.media as App.VideoMedia | App.AudioMedia | App.ImageMedia;
 
     let duration = 3;
     if (isVideoMedia(draggable) || isAudioMedia(draggable)) {
@@ -76,6 +76,7 @@
 
     $timeline.timeline.add({
       uuid: uuidv4(),
+      mediaUUID: draggable.uuid,
       type: draggable.type,
       src: draggable.src,
       metadata: {
@@ -117,26 +118,19 @@
         >
           <TimelinePreview {node}>
             {#if node.type === "video"}
-              <MediaVideoPreview metadata={node.metadata} isTimelineElement={true} />
+              <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
               <MediaAudioPreview
+                mediaUUID={node.mediaUUID}
                 metadata={{
-                  ...node.metadata,
-                  type: "audio",
+                  start: node.metadata.start,
+                  end: node.metadata.end,
                 }}
               />
             {:else if node.type === "audio"}
               <div class="h-full" />
-              <MediaAudioPreview metadata={node.metadata} />
+              <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
             {:else if node.type === "image"}
-              <MediaVideoPreview
-                metadata={{
-                  ...node.metadata,
-                  type: "video",
-                  thumbnails: [node.src],
-                  audio: new AudioBuffer({ length: node.metadata.duration, sampleRate: 44100 }),
-                }}
-                isTimelineElement={true}
-              />
+              <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
               <div class="h-full" />
             {/if}
           </TimelinePreview>
