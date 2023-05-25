@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
+  import { mediaPool, timeline } from "$lib/stores";
   import { Canvas, Layer, type Render } from "svelte-canvas";
 
-  export let metadata: {
-    [Property in keyof App.AudioMedia["metadata"]]: App.AudioMedia["metadata"][Property];
-  } & { start: number; end: number };
+  export let mediaUUID: string;
+  export let metadata: { start: number; end: number };
 
-  let buffer = metadata.audio.getChannelData(0);
+  const media = $mediaPool.media.find((media) => media.uuid === mediaUUID) as App.AudioMedia;
+
+  let buffer = media.metadata.audio.getChannelData(0);
   let containerWidth, containerHeight;
 
   let render: Render;
@@ -31,8 +32,8 @@
       return;
     }
 
-    const start = (metadata.start / metadata.duration) * buffer.length;
-    const end = ((metadata.duration - metadata.end) / metadata.duration) * buffer.length;
+    const start = (metadata.start / media.metadata.duration) * buffer.length;
+    const end = ((media.metadata.duration - metadata.end) / media.metadata.duration) * buffer.length;
 
     const offsetBuffer = buffer.slice(start, end);
 
