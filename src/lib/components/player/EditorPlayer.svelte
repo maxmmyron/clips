@@ -7,7 +7,7 @@
   export let width = 640,
     height = 480;
 
-  let audioContext: AudioContext;
+  let audioContext: AudioContext = new AudioContext();
 
   let render: Render;
   $: render = ({ context, width, height }) => {
@@ -41,8 +41,6 @@
     console.log(`skipping to ${front ? "front" : "back"}`);
     $player.isPaused = true;
 
-    audioContext = new AudioContext();
-
     $timeline.runtime = front ? 0 : $timeline.duration;
     $timeline.current = front ? $timeline.timeline.head : $timeline.timeline.tail;
   }
@@ -51,7 +49,7 @@
 <!-- TODO: this *will* filter out audio nodes, but a type error is thrown unless the Buffer.svelte element accepts all node types. Need to investigate and fix (shoddy types) -->
 <!-- TODO: add node type functions to helpers.ts -->
 {#each $timeline.timeline.toArray().filter((node) => node.type !== "audio") as node}
-  <Buffer {audioContext} nodeUUID={node.uuid} />
+  <Buffer nodeUUID={node.uuid} {audioContext} />
 {/each}
 
 <div class="w-full h-full flex justify-center items-center">
