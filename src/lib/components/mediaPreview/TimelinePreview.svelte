@@ -72,7 +72,7 @@
   on:click|capture|stopPropagation={handleClick}
   class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48 bg-black group"
   class:outline={isSelected}
-  on:mousedown={handleReorder}
+  on:mousedown|stopPropagation={handleReorder}
 >
   <button
     class="z-10 absolute h-full left-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
