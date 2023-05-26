@@ -1,6 +1,6 @@
 <script lang="ts">
   import { timeline, player } from "$lib/stores";
-  // import { Canvas, Layer, t, type Render } from "svelte-canvas";
+  import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import { onMount } from "svelte";
   import Buffer from "./Buffer.svelte";
 
@@ -9,26 +9,34 @@
 
   let audioContext: AudioContext;
 
-  // let render: Render;
-  // $: render = ({ context, width, height }) => {
-  //   $t;
-  //   if ($timeline.timeline.length === 0 || !$timeline.current) return;
-  //   const bufferEl = $timeline.sources.get($timeline.current.uuid)?.source;
-  //   if (!bufferEl || !audioContext) return;
+  let currSrc: { source: HTMLImageElement | HTMLVideoElement; type: "video" | "image" } | undefined, bufferWidth: number, bufferHeight: number;
+  $: if ($timeline.current) currSrc = $timeline.sources.get($timeline.current.uuid);
+  $: if (currSrc) bufferWidth = currSrc.type === "video" ? (currSrc.source as HTMLVideoElement).videoWidth : (currSrc.source as HTMLImageElement).width || 0;
+  $: if (currSrc) bufferHeight = currSrc.type === "video" ? (currSrc.source as HTMLVideoElement).videoHeight : (currSrc.source as HTMLImageElement).height || 0;
 
-  //   // TODO: try to remove video width calculations outside of render so we aren't recomputing this every frame
-  //   const bufferWidth = $timeline.current.type === "video" ? (bufferEl as HTMLVideoElement).videoWidth : bufferEl.width;
-  //   const bufferHeight = $timeline.current.type === "video" ? (bufferEl as HTMLVideoElement).videoHeight : bufferEl.height;
+  let render: Render;
+  $: render = ({ context, width, height }) => {
+    $t;
 
-  //   const mediaSize = {
-  //     width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
-  //     height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
-  //   };
+    if (!$timeline.current) return;
 
-  //   const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
+    if ($timeline.current.type === "audio") {
+      context.fillStyle = "black";
+      context.fillRect(0, 0, width, height);
+      return;
+    }
 
-  //   context.drawImage(bufferEl, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
-  // };
+    if (!currSrc) return;
+
+    const mediaSize = {
+      width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
+      height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
+    };
+
+    const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
+
+    context.drawImage(currSrc.source, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
+  };
 
   function setPlayerTime(front: boolean = true): any {
     console.log(`skipping to ${front ? "front" : "back"}`);
@@ -49,16 +57,18 @@
 
 <div class="w-full h-full flex justify-center items-center">
   {#if $timeline.timeline.length}
-    <p class="text-white">{$timeline.current?.uuid} ; {$timeline.current?.metadata.title}</p>
-    <!-- <Canvas {width} {height}>
+    <Canvas {width} {height}>
       <Layer {render} />
-    </Canvas> -->
+    </Canvas>
   {:else}
     <p class="text-neutral-400 font-mono">no clips in timeline （＞人＜；）</p>
   {/if}
 </div>
 
-<p class="w-full text-white text-right">{Math.round($timeline.runtime * 100) / 100 || 0}</p>
+<div class="flex justify-betweem">
+  <p class="text-white min-w-fit">{$timeline.current?.uuid.split("-").pop()} ; {$timeline.current?.metadata.title}</p>
+  <p class="text-white w-full text-right">{Math.round($timeline.runtime * 100) / 100 || 0}</p>
+</div>
 
 <div class="w-full flex justify-center gap-4">
   <button class="text-white border-2 border-neutral-800 px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed" on:click={() => setPlayerTime()}>
