@@ -63,7 +63,7 @@
     ).el;
 
     // get nearest spot to position ghost
-    let dropXPosition = -1;
+    let dropXPosition = 0;
     if (afterElement == null) {
       dropIndex = -1;
       if (timelineContainer.children.length > 0)
@@ -133,6 +133,7 @@
   const startUserScrubberMove = (e: MouseEvent) => {
     $player.lastPauseState = $player.isPaused;
     $player.isPaused = true;
+    if ($timeline.selected.length > 0) return;
     canMoveScrubber = true;
     moveUserScrubber(e);
   };
@@ -195,8 +196,12 @@
           </TimelinePreview>
         </div>
       {/each}
-      <div id="scrubber" style="left: {scrubberPos}px" class="absolute w-0.5 h-full -top-4 bg-blue-500 rounded-full pointer-events-none" />
     </div>
+    <div
+      id="scrubber"
+      style="left: {scrubberPos}px"
+      class="absolute w-0.5 h-3/4 top-1/2 transform -translate-y-1/2 bg-blue-500 rounded-full pointer-events-none"
+    />
   </div>
   <input class="absolute top-2 right-2" type="range" min="10" max="100" bind:value={timelineScale} />
 </div>
