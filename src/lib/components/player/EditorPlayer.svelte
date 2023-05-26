@@ -9,11 +9,6 @@
 
   let audioContext: AudioContext;
 
-  let currSrc: { source: HTMLImageElement | HTMLVideoElement; type: "video" | "image" } | undefined, bufferWidth: number, bufferHeight: number;
-  $: if ($timeline.current) currSrc = $timeline.sources.get($timeline.current.uuid);
-  $: if (currSrc) bufferWidth = currSrc.type === "video" ? (currSrc.source as HTMLVideoElement).videoWidth : (currSrc.source as HTMLImageElement).width || 0;
-  $: if (currSrc) bufferHeight = currSrc.type === "video" ? (currSrc.source as HTMLVideoElement).videoHeight : (currSrc.source as HTMLImageElement).height || 0;
-
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
@@ -26,7 +21,13 @@
       return;
     }
 
-    if (!currSrc) return;
+    let src = $timeline.sources.get($timeline.current.uuid);
+    if (!src) return;
+
+    const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
+    const bufferHeight = src.type === "video" ? (src.source as HTMLVideoElement).videoHeight : (src.source as HTMLImageElement).height || 0;
+
+    console.log(src, bufferWidth, bufferHeight, width, height);
 
     const mediaSize = {
       width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
@@ -35,7 +36,7 @@
 
     const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
 
-    context.drawImage(currSrc.source, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
+    context.drawImage(src.source, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
   };
 
   function setPlayerTime(front: boolean = true): any {
