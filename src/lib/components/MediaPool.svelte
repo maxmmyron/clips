@@ -55,6 +55,7 @@
     console.log($timeline.timeline.head);
     console.log($timeline.timeline.tail);
     console.log($timeline.current);
+    console.log($mediaPool.media);
   };
 </script>
 
