@@ -27,7 +27,7 @@
       curr = curr.next;
     }
     $timeline.currentNodeRuntime = curr !== null ? $timeline.runtime - previousNodeOffset : 0;
-    $timeline.current = curr;
+    if ($timeline.current !== curr) $timeline.current = curr;
 
     if ($player.isPaused) {
       lastTimestamp = timestamp;
