@@ -44,6 +44,7 @@ export const timeline: App.stores.WritableTimeline = writable({
   dragIndex: -1,
   runtime: 0,
   duration: 0,
+  currentNodeRuntime: 0,
 });
 
 export const player: App.stores.WritablePlayer = writable({

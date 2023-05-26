@@ -105,6 +105,7 @@ declare global {
 				}>;
 				zoomScale: number;
 				dragIndex: number;
+				currentNodeRuntime: number;
 			}>;
 
 			type WritablePlayer = Writable<{

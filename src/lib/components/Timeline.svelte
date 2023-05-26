@@ -26,7 +26,7 @@
       previousNodeOffset += curr.metadata.duration - curr.metadata.start - curr.metadata.end;
       curr = curr.next;
     }
-    let currentNodeRuntime = $timeline.runtime - previousNodeOffset;
+    $timeline.currentNodeRuntime = curr !== null ? $timeline.runtime - previousNodeOffset : 0;
     $timeline.current = curr;
 
     if ($player.isPaused) {
