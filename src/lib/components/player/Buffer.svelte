@@ -1,24 +1,15 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
   import { onMount } from "svelte";
-
-  // TODO: fix this so we only accept video and image buffers.
-  export let nodeUUID: string, audioContext: AudioContext;
+  export let nodeUUID: string;
 
   const node = $timeline.timeline.getByUUID(nodeUUID) as App.Node<"video" | "image">;
-  const metadata = node.metadata;
 
   let buffer: HTMLVideoElement | HTMLImageElement;
 
   onMount(() => {
     $timeline.sources.set(nodeUUID, { source: buffer, type: node.type });
   });
-
-  /**
-   * The audioContext timestamp when the player was paused.
-   */
-  // let pauseTimestamp = 0;
-  // let lastPauseState: "paused" | "playing" = "paused";
 </script>
 
 <!-- on:play={handlePlay} -->

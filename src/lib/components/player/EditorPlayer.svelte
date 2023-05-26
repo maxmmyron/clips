@@ -27,8 +27,6 @@
     const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
     const bufferHeight = src.type === "video" ? (src.source as HTMLVideoElement).videoHeight : (src.source as HTMLImageElement).height || 0;
 
-    console.log(src, bufferWidth, bufferHeight, width, height);
-
     const mediaSize = {
       width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
       height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
@@ -67,7 +65,7 @@
 </div>
 
 <div class="flex justify-betweem">
-  <p class="text-white min-w-fit">{$timeline.current?.uuid.split("-").pop()} ; {$timeline.current?.metadata.title}</p>
+  <p class="text-white min-w-fit">{$timeline.current?.uuid.split("-").pop()} ; {$timeline.current?.metadata.title} ; {$timeline.currentNodeRuntime}</p>
   <p class="text-white w-full text-right">{Math.round($timeline.runtime * 100) / 100 || 0}</p>
 </div>
 
