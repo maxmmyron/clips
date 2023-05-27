@@ -10,6 +10,12 @@ export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | Ap
     throw new Error(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
   }
 
+  if (file.type.includes("audio")) {
+    console.warn("Audio files are not yet supported");
+    return null;
+  }
+
+  const uuid = uuidv4();
   const src = URL.createObjectURL(file);
 
   const defaultMediaProperties = {
@@ -102,7 +108,7 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
     }
 
     // one thumbnail every 5 seconds
-    for (let i = 0; i < duration; i+=5) {
+    for (let i = 0; i < duration; i += 5) {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       thumbnails.push(canvas.toDataURL());
@@ -115,12 +121,12 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
 
 export const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
   const audioContext = get(studio).audioContext;
-  if(!audioContext) reject("No audio context");
+  if (!audioContext) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
-  .then(buffer => {
-    audioContext.decodeAudioData(buffer)
-      .then(buffer => resolve(buffer))
-      .catch(err => reject(`Error decoding audio data: ${err}`));
-  })
-  .catch(err => reject(`Error fetching audio data: ${err}`));
+    .then(buffer => {
+      audioContext.decodeAudioData(buffer)
+        .then(buffer => resolve(buffer))
+        .catch(err => reject(`Error decoding audio data: ${err}`));
+    })
+    .catch(err => reject(`Error fetching audio data: ${err}`));
 });

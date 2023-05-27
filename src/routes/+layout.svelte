@@ -34,8 +34,14 @@
     $studio.audioContext = new AudioContext();
 
     preloadMessage = "Checking media queries...";
+
+    preloadMessage = "Checking media queries...";
     sizeQuery = matchMedia("(max-width: 768px), (max-height: 768px)").matches ? 0 : 1;
     touchModeQuery = matchMedia("(hover: none) and (pointer: coarse)").matches ? 0 : 1;
+
+    preloadMessage = "Loading FFmpeg...";
+    await loadFFmpeg();
+    isStudioLoaded = true;
 
     preloadMessage = "Loading FFmpeg...";
     await loadFFmpeg();
@@ -89,7 +95,9 @@
 <svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} />
 
 {#if !isStudioLoaded}
+{#if !isStudioLoaded}
   <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
+    <p class="text-2xl text-white">{preloadMessage}</p>
     <p class="text-2xl text-white">{preloadMessage}</p>
   </div>
 {:else if sizeQuery + touchModeQuery !== 2}
