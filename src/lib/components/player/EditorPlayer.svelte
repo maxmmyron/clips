@@ -62,7 +62,6 @@
 </div>
 
 <div class="flex justify-betweem">
-  <p class="text-white min-w-fit">{$timeline.current?.uuid.split("-").pop()} ; {$timeline.current?.metadata.title} ; {$timeline.currentNodeRuntime}</p>
   <p class="text-white w-full text-right">{Math.round($timeline.runtime * 100) / 100 || 0}</p>
 </div>
 
