@@ -44,7 +44,7 @@
     $timeline.current = front ? $timeline.timeline.head : $timeline.timeline.tail;
   }
 
-  const timingRules = [$timeline.runtime / 3600, ($timeline.runtime % 3600) / 60, $timeline.runtime % 60];
+  const timingRules: ((arg0: number) => number)[] = [(runtime) => runtime / 3600, (runtime) => (runtime % 3600) / 60, (runtime) => runtime % 60];
 </script>
 
 <!-- TODO: this *will* filter out audio nodes, but a type error is thrown unless the Buffer.svelte element accepts all node types. Need to investigate and fix (shoddy types) -->
@@ -66,7 +66,7 @@
 <div class="flex justify-end">
   {#each timingRules as r, i}
     <p class="text-neutral-200 font-mono">
-      {Math.floor(r).toString().padStart(2, "0")}:
+      {Math.floor(r($timeline.runtime)).toString().padStart(2, "0")}:
     </p>
   {/each}
   <p class="text-neutral-200 font-mono">
