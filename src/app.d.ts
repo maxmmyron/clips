@@ -69,6 +69,7 @@ declare global {
 		namespace stores {
 			type WritableStudio = Writable<{
 				resize: "row" | "media_col" | "timeline_col" | null;
+				exportName: string;
 				audioContext: AudioContext | null;
 				mouse: {x: number, y: number};
 				draggable: {
