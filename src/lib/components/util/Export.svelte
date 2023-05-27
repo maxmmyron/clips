@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
+  import { timeline, studio } from "$lib/stores";
   import { ffmpegInstance } from "./FFmpegManager";
   import { fetchFile } from "@ffmpeg/ffmpeg";
 
@@ -21,7 +21,7 @@
       ffmpegInstance.FS("writeFile", `${uuid}.${baseExtensionMap.get(type)}`, await fetchFile(src));
       ffmpegInstance.FS("writeFile", `${uuid}_trimmed.mp4`, "");
     }
-    ffmpegInstance.FS("writeFile", "output.mp4", "");
+    ffmpegInstance.FS("writeFile", `${$studio.exportName}.mp4`, "");
 
     // ****************
     // 1. Trim offsets
@@ -55,17 +55,17 @@
     await ffmpegInstance.run(
       ...nodes.map(({ uuid }) => ["-i", `${uuid}_trimmed.mp4`]).flat(),
       ...filters,
-      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `output.mp4`]
+      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `${$studio.exportName}.mp4`]
     );
 
     // ****************
     // 3. Export
     // ****************
     progressText = "export complete";
-    const exportData = ffmpegInstance.FS("readFile", "output.mp4");
+    const exportData = ffmpegInstance.FS("readFile", `${$studio.exportName}.mp4`);
 
     const link = document.createElement("a");
-    link.download = "output.mp4";
+    link.download = `${$studio.exportName}.mp4`;
     link.href = URL.createObjectURL(new Blob([exportData.buffer], { type: "video/mp4" }));
     document.body.appendChild(link);
     link.dispatchEvent(new MouseEvent("click"));
