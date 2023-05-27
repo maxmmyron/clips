@@ -48,7 +48,7 @@
 
 <!-- TODO: this *will* filter out audio nodes, but a type error is thrown unless the Buffer.svelte element accepts all node types. Need to investigate and fix (shoddy types) -->
 <!-- TODO: add node type functions to helpers.ts -->
-{#each $timeline.timeline.toArray().filter((node) => node.type !== "audio") as node}
+{#each $timeline.timeline.toArray() as node}
   <Buffer nodeUUID={node.uuid} {audioContext} />
 {/each}
 
