@@ -12,6 +12,7 @@
   import { inject } from "@vercel/analytics";
 
   import "../app.css";
+  import { loadFFmpeg } from "$lib/components/util/FFmpegManager";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -25,10 +26,20 @@
   $: ghostPos = $studio.draggable.ghost.pos;
   $: ghostSize = $studio.draggable.ghost.size;
 
-  onMount(() => {
+  let isStudioLoaded = false;
+  let preloadMessage = "loading...";
+
+  onMount(async () => {
+    preloadMessage = "Loading audio context instance...";
     $studio.audioContext = new AudioContext();
+
+    preloadMessage = "Checking media queries...";
     sizeQuery = matchMedia("(max-width: 768px), (max-height: 768px)").matches ? 0 : 1;
     touchModeQuery = matchMedia("(hover: none) and (pointer: coarse)").matches ? 0 : 1;
+
+    preloadMessage = "Loading FFmpeg...";
+    await loadFFmpeg();
+    isStudioLoaded = true;
   });
 
   const handleResize = (e: MouseEvent) => {
@@ -77,9 +88,9 @@
 
 <svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} />
 
-{#if sizeQuery + touchModeQuery === -2}
+{#if !isStudioLoaded}
   <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
-    <p class="text-2xl text-white">Loading...</p>
+    <p class="text-2xl text-white">{preloadMessage}</p>
   </div>
 {:else if sizeQuery + touchModeQuery !== 2}
   <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
@@ -105,7 +116,7 @@
       <MediaPool />
       <ResizeStalk resize="media_col" />
       <div class="flex flex-col justify-center items-center gap-8 p-8">
-        <!-- <Export /> -->
+        <Export />
         <Player />
       </div>
     </section>
