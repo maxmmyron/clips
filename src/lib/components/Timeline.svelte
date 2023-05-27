@@ -185,13 +185,13 @@
                 />
               {/key}
             {:else if node.type === "audio"}
-              <div class="h-full" />
+              <div class="h-1/2" />
               {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
                 <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
               {/key}
             {:else if node.type === "image"}
               <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
-              <div class="h-full" />
+              <div class="h-1/2" />
             {/if}
           </TimelinePreview>
         </div>
