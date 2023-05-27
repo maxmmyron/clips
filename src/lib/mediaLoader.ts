@@ -10,12 +10,6 @@ export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | Ap
     throw new Error(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
   }
 
-  if (file.type.includes("audio")) {
-    console.warn("Audio files are not yet supported");
-    return null;
-  }
-
-  const uuid = uuidv4();
   const src = URL.createObjectURL(file);
 
   const defaultMediaProperties = {

@@ -1,5 +1,3 @@
-
-
 export default class TimelineLinkedList implements App.Timeline {
 
   head: App.Node | null;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mediaPool, timeline } from "$lib/stores";
+  import { mediaPool } from "$lib/stores";
   import { onMount } from "svelte";
 
   export let mediaUUID: string;

@@ -22,7 +22,6 @@
       ffmpegInstance.FS("writeFile", `${uuid}_trimmed.mp4`, "");
     }
     ffmpegInstance.FS("writeFile", "output.mp4", "");
-    ffmpegInstance.FS("writeFile", "output.mp4", "");
 
     // ****************
     // 1. Trim offsets
@@ -47,7 +46,6 @@
     //      https://superuser.com/a/972615
     //      https://ffmpeg.org/ffmpeg-filters.html#concat
     progressText = "concatenating...";
-    progressText = "concatenating...";
 
     const ftr = "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:-1:-1:color=black,setsar=1,fps=30,format=yuv420p";
     const filters = [
@@ -56,10 +54,7 @@
     ];
     await ffmpegInstance.run(
       ...nodes.map(({ uuid }) => ["-i", `${uuid}_trimmed.mp4`]).flat(),
-    await ffmpegInstance.run(
-      ...nodes.map(({ uuid }) => ["-i", `${uuid}_trimmed.mp4`]).flat(),
       ...filters,
-      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `output.mp4`]
       ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `output.mp4`]
     );
 
@@ -77,15 +72,6 @@
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(link.href), 7000);
     progressText = "export complete";
-    const exportData = ffmpegInstance.FS("readFile", "output.mp4");
-
-    const link = document.createElement("a");
-    link.download = "output.mp4";
-    link.href = URL.createObjectURL(new Blob([exportData.buffer], { type: "video/mp4" }));
-    document.body.appendChild(link);
-    link.dispatchEvent(new MouseEvent("click"));
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(link.href), 7000);
   };
 </script>
 

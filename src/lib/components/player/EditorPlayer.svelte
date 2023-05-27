@@ -1,7 +1,6 @@
 <script lang="ts">
   import { timeline, player } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
-  import { onMount } from "svelte";
   import Buffer from "./Buffer.svelte";
 
   export let width = 640,
