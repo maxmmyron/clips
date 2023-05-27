@@ -1,9 +1,7 @@
+export default class TimelineLinkedList implements App.Timeline {
 
-
-export default class TimelineLinkedList {
-
-  head: TimelineNode | null;
-  tail: TimelineNode | null;
+  head: App.Node | null;
+  tail: App.Node | null;
 
   constructor() {
     this.head = null;
@@ -16,7 +14,7 @@ export default class TimelineLinkedList {
    * @param node the node to add
    * @returns the node that was added
    */
-  add = (node: TimelineNode, index: number = -1) => {
+  add = (node: App.Node, index: number = -1) => {
     if(this.getByUUID(node.uuid)) throw new Error(`A node with the uuid ${node.uuid} already exists in the list.`);
 
     if(index === 0) {
@@ -34,7 +32,7 @@ export default class TimelineLinkedList {
     }
 
     else {
-      const curr = this.getAt(index);
+      const curr = this.getByIndex(index);
       if(!curr) throw new Error(`No node exists at index ${index}.`);
 
       node.next = curr;
@@ -67,7 +65,7 @@ export default class TimelineLinkedList {
    * @param index index of the node to get
    * @returns the node at the given index, or null if the node was not found
    */
-  getAt = (index: number) => {
+  getByIndex = (index: number) => {
     if(index < 0 || index >= this.length) throw new Error(`Index ${index} is out of bounds.`);
 
     let curr = this.head;

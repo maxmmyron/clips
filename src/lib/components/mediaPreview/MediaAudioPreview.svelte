@@ -1,18 +1,23 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
-  import { Canvas, Layer, type Render } from "svelte-canvas";
+  import { mediaPool } from "$lib/stores";
+  import { onMount } from "svelte";
 
-  export let metadata: TimelineNodeMetadata;
+  export let mediaUUID: string;
+  export let metadata: { start: number; end: number };
 
-  let buffer = metadata.audio.getChannelData(0);
-  let containerWidth, containerHeight;
+  const media = $mediaPool.media.find((media) => media.uuid === mediaUUID) as App.AudioMedia;
 
-  let render: Render;
-  $: render = ({ context, width, height }) => {
-    // recalc on zoom
-    $timeline.zoom;
+  let buffer = media.metadata.audio.getChannelData(0);
+  let width: number, height: number;
+  let canvas: HTMLCanvasElement;
+
+  onMount(() => {
+    canvas.width = width;
+    canvas.height = height;
 
     if (!buffer) return console.error("No audio data");
+
+    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     context.fillStyle = "black";
     context.fillRect(0, 0, width, height);
@@ -29,8 +34,8 @@
       return;
     }
 
-    const start = (metadata.startOffset / metadata.duration) * buffer.length;
-    const end = ((metadata.duration - metadata.endOffset) / metadata.duration) * buffer.length;
+    const start = (metadata.start / media.metadata.duration) * buffer.length;
+    const end = ((media.metadata.duration - metadata.end) / media.metadata.duration) * buffer.length;
 
     const offsetBuffer = buffer.slice(start, end);
 
@@ -52,11 +57,9 @@
       context.lineTo(i, ((1 + max) * height) / 2);
     }
     context.stroke();
-  };
+  });
 </script>
 
-<div class="h-1/2 flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={containerWidth} bind:clientHeight={containerHeight}>
-  <Canvas class="w-full h-full" width={containerWidth} height={containerHeight}>
-    <Layer {render} />
-  </Canvas>
+<div class="h-1/2 flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={width} bind:clientHeight={height}>
+  <canvas class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height} bind:this={canvas} />
 </div>

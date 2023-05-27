@@ -1,7 +1,7 @@
 <script lang="ts">
   import { player, studio, timeline } from "$lib/stores";
 
-  export let node: TimelineNode;
+  export let node: App.Node;
 
   const metadata = node.metadata;
 
@@ -14,34 +14,39 @@
   let initialOffset = 0;
 
   $: isSelected = $timeline.selected.includes(node.uuid);
-  // duration factor
-  $: scaleFactor = $timeline.zoom ** 1.75;
-  $: width = (duration - metadata.startOffset - metadata.endOffset) * scaleFactor + "px";
+  $: width = (duration - metadata.start - metadata.end) * $timeline.zoomScale + "px";
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
       isAdjustingOffsets = false;
       return;
     }
-    if (e.detail == 2) $player.source = metadata.src;
+    if (e.detail == 2) $player.source = node.src;
     else if (e.shiftKey) $timeline.selected = [...$timeline.selected, node.uuid];
     else $timeline.selected = [node.uuid];
   };
 
   const handleReorder = (e: MouseEvent) => {
-    $studio.dragData = {
-      ...$studio.dragData,
-      media: metadata,
-      originType: "timeline",
-      originPosition: { x: e.clientX, y: e.clientY },
-      dragEvent: "dragstart",
-      currentDragRegion: "timeline",
+    $studio.draggable = {
+      ...$studio.draggable,
+      media: node,
+      origin: {
+        pos: { x: e.clientX, y: e.clientY },
+        region: "timeline",
+      },
+      event: "start",
+      current: {
+        region: "timeline",
+      },
     };
 
-    $studio.dragData.ghost.position.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
-    $studio.dragData.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
+    $studio.draggable.ghost.pos.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
+    $studio.draggable.ghost.size.set(
+      { width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height },
+      { hard: true }
+    );
 
-    $timeline.dragIndex = $timeline.clips.indexOf(node.uuid);
+    $timeline.dragIndex = $timeline.timeline.indexOf(node.uuid);
   };
 
   const handleOffsets = (e: MouseEvent) => {
@@ -50,11 +55,11 @@
     let offset;
 
     if (offsetIndex == 0) {
-      offset = initialOffset + (e.clientX - initialPosition) / scaleFactor;
-      metadata.startOffset = Math.max(0, offset);
+      offset = initialOffset + (e.clientX - initialPosition) / $timeline.zoomScale;
+      metadata.start = Math.max(0, offset);
     } else {
-      offset = initialOffset + (initialPosition - e.clientX) / scaleFactor;
-      metadata.endOffset = Math.max(0, offset);
+      offset = initialOffset + (initialPosition - e.clientX) / $timeline.zoomScale;
+      metadata.end = Math.max(0, offset);
     }
   };
 </script>
@@ -67,14 +72,14 @@
   on:click|capture|stopPropagation={handleClick}
   class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48 bg-black group"
   class:outline={isSelected}
-  on:mousedown={handleReorder}
+  on:mousedown|stopPropagation={handleReorder}
 >
   <button
     class="z-10 absolute h-full left-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 0;
       initialPosition = mediaPreview.getBoundingClientRect().left;
-      initialOffset = metadata.startOffset;
+      initialOffset = metadata.start;
     }}
   />
   <slot {width} />
@@ -83,7 +88,7 @@
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 1;
       initialPosition = mediaPreview.getBoundingClientRect().right;
-      initialOffset = metadata.endOffset;
+      initialOffset = metadata.end;
     }}
   />
 </button>

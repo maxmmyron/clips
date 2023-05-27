@@ -3,15 +3,16 @@
   import Player from "$lib/components/player/Player.svelte";
   import ResizeStalk from "$lib/components/util/ResizeStalk.svelte";
   import Timeline from "$lib/components/Timeline.svelte";
+  import Export from "$lib/components/util/Export.svelte";
+
   import { studio, timeline } from "$lib/stores";
-  import "../app.css";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
-
   import { dev } from "$app/environment";
   import { inject } from "@vercel/analytics";
-  import Export from "$lib/components/util/Export.svelte";
-  import { ffmpegInstance, loadFFmpeg } from "$lib/components/util/FFmpegManager";
+
+  import "../app.css";
+  import { loadFFmpeg } from "$lib/components/util/FFmpegManager";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -22,15 +23,17 @@
   let sizeQuery = -1,
     touchModeQuery = -1;
 
-  $: isStudioLoaded = false;
-  $: preloadMessage = "Loading...";
+  $: ghostPos = $studio.draggable.ghost.pos;
+  $: ghostSize = $studio.draggable.ghost.size;
 
-  $: ghostPos = $studio.dragData.ghost.position;
-  $: ghostSize = $studio.dragData.ghost.size;
+  let isStudioLoaded = false;
+  let preloadMessage = "loading...";
 
   onMount(async () => {
     preloadMessage = "Loading audio context instance...";
     $studio.audioContext = new AudioContext();
+
+    preloadMessage = "Checking media queries...";
 
     preloadMessage = "Checking media queries...";
     sizeQuery = matchMedia("(max-width: 768px), (max-height: 768px)").matches ? 0 : 1;
@@ -39,48 +42,48 @@
     preloadMessage = "Loading FFmpeg...";
     await loadFFmpeg();
     isStudioLoaded = true;
+
+    preloadMessage = "Loading FFmpeg...";
+    await loadFFmpeg();
+    isStudioLoaded = true;
   });
 
   const handleResize = (e: MouseEvent) => {
-    if (!isResizing || !$studio.resizeMode) return;
+    if (!isResizing || !$studio.resize) return;
 
-    if ($studio.resizeMode === "mediaCol") mediaColumnWidth = `${e.clientX}px`;
-    else if ($studio.resizeMode === "timelineCol") timelineColumnWidth = `${e.clientX}px`;
-    else if ($studio.resizeMode === "row") timelineHeight = `calc(100vh - ${e.clientY}px)`;
+    if ($studio.resize === "media_col") mediaColumnWidth = `${e.clientX}px`;
+    else if ($studio.resize === "timeline_col") timelineColumnWidth = `${e.clientX}px`;
+    else if ($studio.resize === "row") timelineHeight = `calc(100vh - ${e.clientY}px)`;
   };
 
   const handleDrag = (e: MouseEvent) => {
     $studio.mouse = { x: e.clientX, y: e.clientY };
 
-    if (!$studio.dragData.originPosition) return;
+    if (!$studio.draggable.origin?.pos) return;
 
-    if ($studio.dragData.dragEvent === "dragstart") {
-      const dist = {
-        x: e.clientX - $studio.dragData.originPosition.x,
-        y: e.clientY - $studio.dragData.originPosition.y,
-      };
-
+    if ($studio.draggable.event === "start") {
+      const dist = { x: e.clientX - $studio.draggable.origin.pos.x, y: e.clientY - $studio.draggable.origin.pos.y };
       if (Math.abs(dist.x) < 30 && Math.abs(dist.y) < 30) return;
-      $studio.dragData.dragEvent = "drag";
+
+      $studio.draggable.event = "drag";
     }
 
-    if ($studio.dragData.currentDragRegion !== null) return;
+    if ($studio.draggable.current.region !== null) return;
 
     ghostPos.set({ x: $studio.mouse.x, y: $studio.mouse.y });
     ghostSize.set({ width: 32, height: 32 });
   };
 
   const handleDrop = () => {
-    if (!$studio.dragData.media) return;
+    if (!$studio.draggable.media) return;
 
-    $studio.dragData = {
+    $studio.draggable = {
       media: null,
-      originType: null,
-      originPosition: null,
-      dragEvent: null,
-      currentDragRegion: null,
+      origin: null,
+      event: null,
+      current: { region: null },
       ghost: {
-        position: spring({ x: 0, y: 0 }),
+        pos: spring({ x: 0, y: 0 }),
         size: spring({ width: 0, height: 0 }),
       },
     };
@@ -109,7 +112,7 @@
     on:mousedown={(e) => e.button === 0 && (isResizing = true)}
     on:mouseup={() => {
       isResizing = false;
-      $studio.resizeMode = null;
+      $studio.resize = null;
     }}
   >
     <section
@@ -117,24 +120,24 @@
       class="grid grid-rows-1 grid-cols-[var(--media-col-width),3px,minmax(0,1fr)] transition-none"
     >
       <MediaPool />
-      <ResizeStalk resizeMode="mediaCol" />
+      <ResizeStalk resize="media_col" />
       <div class="flex flex-col justify-center items-center gap-8 p-8">
         <Export />
         <Player />
       </div>
     </section>
-    <ResizeStalk resizeMode="row" />
+    <ResizeStalk resize="row" />
     <section
       style="--timeline-col-width: minmax(320px, {timelineColumnWidth});"
       class="grid grid-rows-1 grid-cols-[var(--timeline-col-width),3px,minmax(0,1fr)] transition-none"
     >
       <p>tracks</p>
-      <ResizeStalk resizeMode="timelineCol" />
+      <ResizeStalk resize="timeline_col" />
       <Timeline />
     </section>
   </main>
 
-  {#if $studio.dragData.media && $studio.dragData.dragEvent !== "dragstart"}
+  {#if $studio.draggable.media && $studio.draggable.event !== "start"}
     <div
       class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
       style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"

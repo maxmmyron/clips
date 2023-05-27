@@ -1,72 +1,77 @@
 import { get } from "svelte/store";
 import { studio } from "./stores";
-import { fetchFile } from "@ffmpeg/ffmpeg";
 import { v4 as uuidv4 } from "uuid";
-import { ffmpegInstance } from "./components/util/FFmpegManager";
 
-const disallowedTypes = [{ type: "audio/x-m4a", name: "M4A" }, { type: "video/quicktime", name: "Quicktime" }];
+const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}, {type: "video/x-matroska", name: "MKV"}];
 
-export const loadMediaMetadata = async (file: File) => {
-  if (disallowedTypes.some(type => file.type.includes(type.type))) {
-    const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as { type: string, name: string };
-    console.warn(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
-    return null;
+export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | App.AudioMedia | App.ImageMedia> => {
+  if(disallowedTypes.some(type => file.type.includes(type.type))) {
+    const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as {type: string, name: string};
+    throw new Error(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
   }
 
-  if (file.type.includes("audio")) {
-    console.warn("Audio files are not yet supported");
-    return null;
-  }
-
-  const uuid = uuidv4();
   const src = URL.createObjectURL(file);
 
-  if (file.type.includes("video")) {
+  const defaultMediaProperties = {
+    uuid: uuidv4(),
+    src,
+    name: file.name,
+  };
+
+  if(file.type.includes("audio")) {
     return {
-      src,
+      ...defaultMediaProperties,
+      type: "audio",
+      metadata: {
+        audio: await loadAudioBuffer(src),
+        duration: await loadMediaDuration(src, "audio"),
+        title: file.name,
+      }
+    } as App.AudioMedia;
+  } else if(file.type.includes("video")) {
+    return {
+      ...defaultMediaProperties,
       type: "video",
-      uuid,
-      name: file.name,
-      duration: await loadMediaDuration(src),
-      thumbnails: await loadThumbnails(src),
-      audio: await loadAudioBuffer(src),
-    } as UploadedMedia;
-  }
-
-  if (file.type.includes("image")) {
-    ffmpegInstance.FS("writeFile", "input", await fetchFile(src));
-    ffmpegInstance.FS("writeFile", `${uuid}.mp4`, "");
-    await ffmpegInstance.run("-framerate", "30", "-i", "input", "-f", "lavfi", "-i", "anullsrc", "-t", "5", "-c:v", "libx264", "-c:a", "aac", "-pix_fmt", "yuv420p", "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2,loop=-1:1", "-movflags", "faststart", `${uuid}.mp4`);
-
-    const data = ffmpegInstance.FS("readFile", `${uuid}.mp4`);
-    const blob = new Blob([data.buffer], { type: "video/mp4" });
-    const url = URL.createObjectURL(blob);
-
-    ffmpegInstance.FS("unlink", "input");
-    ffmpegInstance.FS("unlink", `${uuid}.mp4`);
-
+      metadata: {
+        duration: await loadMediaDuration(src, "video"),
+        thumbnails: await loadThumbnails(src),
+        audio: await loadAudioBuffer(src),
+        title: file.name,
+      }
+    } as App.VideoMedia;
+  } else if(file.type.includes("image")) {
     return {
-      uuid,
+      ...defaultMediaProperties,
       type: "image",
-      src: url,
-      name: file.name,
-      duration: 5,
-      thumbnails: [src],
-      audio: new AudioBuffer({ length: 5 * 44100, sampleRate: 44100, numberOfChannels: 1})
-    } as UploadedMedia;
-  }
-
-  throw new Error("Unsupported file type");
+      metadata: {
+        title: file.name,
+      },
+    } as App.ImageMedia;
+  } else throw Error("Unsupported file type");
 };
 
-export const loadMediaDuration = (src: string) => new Promise<number>((resolve, reject) => {
-  const video = document.createElement("video");
-  video.src = src;
-  video.preload = "metadata";
-  video.load();
-  video.addEventListener("loadedmetadata", () => {
-    resolve(video.duration);
-  });
+export const loadMediaDuration = (src: string, type: string) => new Promise<number>((resolve, reject) => {
+  if(type === "audio") {
+    const audio = document.createElement("audio");
+    audio.src = src;
+    audio.preload = "metadata";
+    audio.load();
+
+    audio.addEventListener("loadedmetadata", () => {
+      resolve(audio.duration);
+    });
+  }
+  else if(type === "video") {
+    const video = document.createElement("video");
+    video.src = src;
+    video.preload = "metadata";
+    video.load();
+
+    video.addEventListener("loadedmetadata", () => {
+      resolve(video.duration);
+    });
+  }
+  else reject("Unsupported media type");
 });
 
 /**
@@ -77,7 +82,7 @@ export const loadThumbnails = (src: string) => new Promise<string[]>(async (reso
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
-  const duration = await loadMediaDuration(src);
+  const duration = await loadMediaDuration(src, "video");
 
   const video = document.createElement("video");
   video.src = src;

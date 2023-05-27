@@ -1,18 +1,24 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
-  import { ffmpegInstance } from "$lib/components/util/FFmpegManager";
+  import { ffmpegInstance } from "./FFmpegManager";
   import { fetchFile } from "@ffmpeg/ffmpeg";
 
   let progressText = "";
+
+  let baseExtensionMap = new Map([
+    ["image", "png"],
+    ["video", "mp4"],
+    ["audio", "mp3"],
+  ]);
 
   const exportTimeline = async () => {
     // ****************
     // 0. Setup
     // ****************
     if (!ffmpegInstance.isLoaded) throw new Error("ffmpeg.wasm did not load on editor startup. Please refresh the page.");
-    const nodes = $timeline.clips.toArray();
-    for (const { uuid, metadata } of nodes) {
-      ffmpegInstance.FS("writeFile", `${uuid}.mp4`, await fetchFile(metadata.src));
+    const nodes = $timeline.timeline.toArray();
+    for (const { uuid, src, type } of nodes) {
+      ffmpegInstance.FS("writeFile", `${uuid}.${baseExtensionMap.get(type)}`, await fetchFile(src));
       ffmpegInstance.FS("writeFile", `${uuid}_trimmed.mp4`, "");
     }
     ffmpegInstance.FS("writeFile", "output.mp4", "");
@@ -21,10 +27,16 @@
     // 1. Trim offsets
     // ****************
     progressText = "trimming...";
-    for (const { uuid, metadata } of nodes) {
-      const [base, trimmed] = [`${uuid}.mp4`, `${uuid}_trimmed.mp4`];
+    for (const { uuid, type, metadata } of nodes) {
+      const [base, trimmed] = [`${uuid}.${baseExtensionMap.get(type)}`, `${uuid}_trimmed.mp4`];
 
-      await ffmpegInstance.run("-i", base, "-ss", metadata.startOffset.toString(), "-to", (metadata.duration - metadata.endOffset).toString(), trimmed);
+      if (type === "image") {
+        const dur = (metadata.duration - metadata.start - metadata.end).toString();
+        const codec_pad = `-c:v libx264 -c:a aac -pix_fmt yuv420p -vf pad=ceil(iw/2)*2:ceil(ih/2)*2:0:0:black`.split(" ");
+        await ffmpegInstance.run("-framerate", "30", "-i", base, "-f", "lavfi", "-i", "anullsrc", "-t", dur, ...codec_pad, "-movflags", "faststart", trimmed);
+      } else if (type === "audio") {
+        await ffmpegInstance.run("-f", "lavfi", "-i", "color=c=black:s=1280x720", "-i", base, "-shortest", "-fflags", "+shortest", trimmed);
+      } else await ffmpegInstance.run("-i", base, "-ss", metadata.start.toString(), "-to", (metadata.duration - metadata.end).toString(), trimmed);
     }
 
     // ****************
@@ -59,8 +71,10 @@
     link.dispatchEvent(new MouseEvent("click"));
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(link.href), 7000);
+    progressText = "export complete";
   };
 </script>
 
 <button on:click={exportTimeline} class="px-4 py-2 text-white border-[1px] border-neutral-600">export</button>
+<p class="text-white my-4">{progressText}</p>
 <p class="text-white my-4">{progressText}</p>

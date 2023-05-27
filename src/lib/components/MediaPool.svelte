@@ -4,7 +4,7 @@
   import { loadMediaMetadata } from "$lib/mediaLoader";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
-  import { ffmpegInstance } from "./util/FFmpegManager";
+  import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
 
   $: browser && (window.mediaPool = $mediaPool.media);
 
@@ -22,7 +22,7 @@
 
   const updateMediaPool = (uploadedFiles: File[]) => {
     // filter out files that are already in media pool
-    uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.name === file.name));
+    uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.metadata.title === file.name));
 
     uploadedFiles.forEach((file) => {
       loadMediaMetadata(file).then((metadata) => {
@@ -36,15 +36,14 @@
     if (e.key !== "Delete") return;
 
     const timelineConfirm = `Deleting these files will remove their references from the timeline. Are you sure?`;
-    const selectedSources = $mediaPool.selected.map((file) => file.src);
 
     // check if selected files are in timeline; show confirmation if so
-    let selectedTimelineNodes = $timeline.clips.toArray().filter((node) => selectedSources.includes(node.metadata.src));
+    let selectedTimelineNodes = $timeline.timeline.toArray().filter(({ uuid }) => $mediaPool.selected.includes(uuid));
     if (selectedTimelineNodes.length > 0 && confirm(timelineConfirm) === false) return;
 
     // delete files from timeline and media pool, clear selection arr
-    selectedTimelineNodes.forEach((node) => $timeline.clips.remove(node.uuid));
-    $mediaPool.media = $mediaPool.media.filter((file) => !$mediaPool.selected.includes(file));
+    selectedTimelineNodes.forEach(({ uuid }) => $timeline.timeline.remove(uuid));
+    $mediaPool.media = $mediaPool.media.filter(({ uuid }) => !$mediaPool.selected.includes(uuid));
     $mediaPool.selected = [];
   };
 
@@ -61,9 +60,9 @@
     console.log("-----------------------");
     console.log("TIMELINE DATA");
     console.log("-----------------------");
-    console.log($timeline.clips.head);
-    console.log($timeline.clips.tail);
-    console.log($timeline.curr);
+    console.log($timeline.timeline.head);
+    console.log($timeline.timeline.tail);
+    console.log($timeline.current);
   };
 </script>
 
@@ -75,9 +74,17 @@
   </div>
   <div class="w-full flex flex-wrap gap-3">
     {#key $mediaPool.media.length}
-      {#each $mediaPool.media as metadata}
-        <MediaPoolPreview {metadata}>
-          <MediaVideoPreview {metadata} />
+      {#each $mediaPool.media as media}
+        <MediaPoolPreview {media}>
+          {#if media.type === "video"}
+            <MediaVideoPreview mediaUUID={media.uuid} />
+          {:else if media.type === "image"}
+            <div class="w-full h-full bg-neutral-400">
+              <img src={media.src} alt={media.metadata.title} class="w-full h-full object-fit select-none" draggable="false" />
+            </div>
+          {:else if media.type === "audio"}
+            <MediaAudioPreview mediaUUID={media.uuid} metadata={{ start: 0, end: 0 }} />
+          {/if}
         </MediaPoolPreview>
       {/each}
     {/key}
