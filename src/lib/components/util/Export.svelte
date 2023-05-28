@@ -75,6 +75,6 @@
   };
 </script>
 
-<button on:click={exportTimeline} class="px-4 py-2 text-white border-[1px] border-neutral-600">export</button>
+<button on:click={exportTimeline} disabled={$timeline.timeline.length === 0} class="px-4 py-2 text-white border-[1px] border-neutral-600">export</button>
 <p class="text-white my-4">{progressText}</p>
 <p class="text-white my-4">{progressText}</p>
