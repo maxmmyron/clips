@@ -9,7 +9,7 @@ export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | Ap
   console.log("----------------------")
   console.log(`loading ${file.name}`);
   console.log(file.type);
-  logFewBytes(file);
+  console.log(logFewBytes(file));
 
 
   if(disallowedTypes.some(type => file.type.includes(type.type))) {
