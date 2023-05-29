@@ -5,6 +5,11 @@ import { v4 as uuidv4 } from "uuid";
 const disallowedTypes = [{type: "audio/x-m4a", name: "M4A"}, {type: "video/quicktime", name: "Quicktime"}, {type: "video/x-matroska", name: "MKV"}];
 
 export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | App.AudioMedia | App.ImageMedia> => {
+  console.log("----------------------")
+  console.log(`loading ${file.name}`);
+  console.log(file.type);
+
+
   if(disallowedTypes.some(type => file.type.includes(type.type))) {
     const disallowedType = disallowedTypes.find(type => file.type.includes(type.type)) as {type: string, name: string};
     throw new Error(`${file.name} uses the ${disallowedType.type} codec, which is not widely supported. Please use a different codec.`);
