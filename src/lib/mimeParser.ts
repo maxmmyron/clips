@@ -69,18 +69,16 @@ const awaitReader = async (file: File, offset: number, length: number) => {
   });
 }
 
-export async function logFewBytes (file: File): Promise<string> {
+export async function parseMIME (file: File): Promise<string> {
     for (const [mimeType, {offset, magic}] of Object.entries(mimeTypes)) {
       for (const m of magic) {
         const bytes = await awaitReader(file, offset, m.length / 2);
-        console.log(`checking ${mimeType} with magic ${m} against ${bytes}...`);
 
         if (bytes === m.toLowerCase()) {
-          console.log("found", mimeType, m);
           return mimeType;
         }
       }
     }
 
-    return "unknown";
+    return "file/unknown";
 };
