@@ -58,33 +58,22 @@ const mimeTypes: {[key: string]: {offset: number, magic: string[], mask?: string
   // audio
   // *****************
 
-  // 3GP Audio (ISOBMFF)
-  // "audio/3gpp": {},
-
-  // 3GP2 Audio (ISOBMFF)
-  // "audio/3gpp2": {},
-
-  // "audio/aac": {},
+  "audio/aiff": {
+    offset: 0,
+    magic: ["464f524d0000000041494646"],
+    mask: "FFFFFFFF00000000FFFFFFFF",
+  },
 
   "audio/flac": {
     offset: 0,
     magic: ["664c6143"]
   },
 
-  // mp4 (ISOBMFF)
-  // "audio/mp4": {},
-
   // MP3
   "audio/mpeg": {
     offset: 0,
     magic: ["fffb", "fff3", "fff2", "494433"]
   },
-
-  // ogg
-  // "audio/ogg": {
-  //   offset: 0,
-  //   magic: ["4f676753"],
-  // },
 
   // opus
   "audio/opus": {
@@ -99,24 +88,16 @@ const mimeTypes: {[key: string]: {offset: number, magic: string[], mask?: string
     mask: "FFFFFFFF00000000FFFFFFFF"
   },
 
-  // webm
-  // "audio/webm": {
-  //   offset: 0,
-  //   magic: ["1a45dfa3"],
-  // },
-
   // *****************
   // video
   // *****************
 
-  // 3GP Video (ISOBMFF)
-  // "video/3gpp": {},
-
-  // 3GP2 Video (ISOBMFF)
-  // "video/3gpp2": {},
-
-  // AV1
-  // "video/av1": {},
+  // AVI
+  "video/avi": {
+    offset: 0,
+    magic: ["524946460000000041564920"],
+    mask: "FFFFFFFF00000000FFFFFFFF"
+  },
 
   // MP4 (ISOBMFF)
   "video/mp4": {
@@ -135,9 +116,6 @@ const mimeTypes: {[key: string]: {offset: number, magic: string[], mask?: string
     offset: 4,
     magic: ["667479706D703432", " 667479704D345620"],
   },
-
-  // ogg
-  // "video/ogg": {},
 
   // quicktime
   "video/quicktime": {
