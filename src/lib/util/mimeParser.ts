@@ -1,3 +1,5 @@
+import {assertBrowserSupportsContainer} from "./browserParser";
+
 const mimeTypes: {[key: string]: {offset: number, magic: string[], mask?: string}} = {
   // *****************
   // image
@@ -153,7 +155,7 @@ export async function parseMIME (file: File): Promise<string> {
         bytes = mask ? Array.from(mask).map((b, i) => b === "F" ? bytes[i] : b).join("") : bytes;
 
         if (bytes === m.toLowerCase()) {
-          // TODO: check browser support, and return unknown mime type if not supported
+          assertBrowserSupportsContainer(mimeType);
 
           return mimeType;
         }

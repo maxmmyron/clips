@@ -1,6 +1,6 @@
 import {spring} from "svelte/motion";
 import { writable } from "svelte/store";
-import TimelineLinkedList from "./components/util/TimelineLinkedList";
+import TimelineLinkedList from "./util/TimelineLinkedList";
 
 export const studio: App.stores.WritableStudio = writable({
   resize: null,

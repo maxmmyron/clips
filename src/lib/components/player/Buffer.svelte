@@ -1,7 +1,7 @@
 <script lang="ts">
   import { mediaPool, player, timeline } from "$lib/stores";
   import { onMount } from "svelte";
-  import { isNodeAudioMedia, isNodeVideoMedia } from "../util/helpers";
+  import { isNodeAudioMedia, isNodeVideoMedia } from "../../util/helpers";
 
   export let nodeUUID: string, audioContext: AudioContext;
 

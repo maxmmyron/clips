@@ -1,6 +1,6 @@
 <script lang="ts">
   import { mediaPool } from "$lib/stores";
-  import { isImageMedia, isVideoMedia } from "../util/helpers";
+  import { isImageMedia, isVideoMedia } from "../../util/helpers";
 
   export let mediaUUID: string;
   export let isTimelineElement: boolean = false;

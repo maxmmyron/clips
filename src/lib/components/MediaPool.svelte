@@ -1,7 +1,7 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
-  import { loadMediaMetadata } from "$lib/mediaLoader";
+  import { loadMediaMetadata } from "../util/mediaLoader";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";

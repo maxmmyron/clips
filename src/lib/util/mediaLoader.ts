@@ -1,5 +1,5 @@
 import { get } from "svelte/store";
-import { studio } from "./stores";
+import { studio } from "../stores";
 import { v4 as uuidv4 } from "uuid";
 import { parseMIME } from "./mimeParser";
 

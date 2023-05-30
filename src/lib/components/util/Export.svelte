@@ -1,6 +1,6 @@
 <script lang="ts">
   import { timeline, studio } from "$lib/stores";
-  import { ffmpegInstance } from "./FFmpegManager";
+  import { ffmpegInstance } from "../../util/FFmpegManager";
   import { fetchFile } from "@ffmpeg/ffmpeg";
 
   let progressText = "";
