@@ -26,7 +26,6 @@ const mimeTypes: {[key: string]: {offset: number, magic: string[], mask?: string
   // JPG
   "image/jpeg": {
     offset: 0,
-    // TODO: confirm mime types
     magic: ["ffd8ffdb", "ffd8ffe0", "ffd8ffe1", "ffd8ffe2", "ffd8ffe3", "ffd8ffe8"]
   },
 
