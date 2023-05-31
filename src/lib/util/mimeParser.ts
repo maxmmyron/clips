@@ -8,7 +8,7 @@ const mimeTypes: {[key: string]: {offset: number, magic: string[], mask?: string
   // AVIF
   "image/avif": {
     offset: 4,
-    magic: ["66 74 79 70 68 65 69 06", "66 74 79 70 6D 69 66 31", "66 74 79 70 6D 73 66 31"],
+    magic: ["6674797068656906", "667479706D696631", "667479706D736631", "6674797061766966"],
   },
 
   // BMP
