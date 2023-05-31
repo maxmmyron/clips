@@ -2,12 +2,11 @@ import { get } from "svelte/store";
 import { studio } from "../stores";
 import { v4 as uuidv4 } from "uuid";
 import { parseMIME } from "./mimeParser";
+import { assertBrowserSupportsContainer } from "./browserParser";
 
 export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | App.AudioMedia | App.ImageMedia> => {
   const MIME = await parseMIME(file);
-  console.log(MIME);
-
-  if(MIME === "file/unknown") throw new Error("Unsupported file type");
+  if(MIME === "file/unknown" || !assertBrowserSupportsContainer(MIME)) throw new Error(`Unsupported container: ${MIME}`);
 
   const src = URL.createObjectURL(file);
 
