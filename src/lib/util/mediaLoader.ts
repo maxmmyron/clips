@@ -3,12 +3,34 @@ import { studio } from "../stores";
 import { v4 as uuidv4 } from "uuid";
 import { parseMIME } from "./mimeParser";
 import { assertBrowserSupportsContainer } from "./browserParser";
+import { ffmpegInstance } from "./FFmpegManager";
+import { fetchFile } from "@ffmpeg/ffmpeg";
 
 export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | App.AudioMedia | App.ImageMedia> => {
   const MIME = await parseMIME(file);
-  if(MIME === "file/unknown" || !assertBrowserSupportsContainer(MIME)) throw new Error(`Unsupported container: ${MIME}`);
+  if(MIME === "file/unknown") throw new Error(`Unsupported container: ${MIME}`);
 
-  const src = URL.createObjectURL(file);
+  let src: string;
+
+  if (!assertBrowserSupportsContainer(MIME)) {
+    const mimeType = MIME.split("/")[0], conversionExt = mimeType === "video" ? "mp4" : mimeType === "audio" ? "mp3" : "jpg";
+    console.log(`Browser does not support ${MIME} container; converting to ${conversionExt}`);
+
+    ffmpegInstance.FS("writeFile", file.name, await fetchFile(file));
+
+    ffmpegInstance.FS("writeFile", `ffmpeg.${conversionExt}`, "");
+    await ffmpegInstance.run("-i", file.name, `ffmpeg.${conversionExt}`);
+
+    const data = ffmpegInstance.FS("readFile", `ffmpeg.${conversionExt}`);
+    const blob = new Blob([data.buffer], { type: `${mimeType}/${conversionExt}` });
+
+    src = URL.createObjectURL(blob);
+
+    ffmpegInstance.FS("unlink", file.name);
+    ffmpegInstance.FS("unlink", `ffmpeg.${conversionExt}`);
+  } else  {
+    src = URL.createObjectURL(file);
+  }
 
   const defaultMediaProperties = {
     uuid: uuidv4(),
