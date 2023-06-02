@@ -12,14 +12,14 @@ export const loadMediaMetadata = async (file: File): Promise<App.VideoMedia | Ap
 
   let src: string;
 
-  if (!assertBrowserSupportsContainer(MIME)) {
+  if (!await assertBrowserSupportsContainer(MIME)) {
     const mimeType = MIME.split("/")[0], conversionExt = mimeType === "video" ? "mp4" : mimeType === "audio" ? "mp3" : "jpg";
     console.log(`Browser does not support ${MIME} container; converting to ${conversionExt}`);
 
     ffmpegInstance.FS("writeFile", file.name, await fetchFile(file));
 
     ffmpegInstance.FS("writeFile", `ffmpeg.${conversionExt}`, "");
-    await ffmpegInstance.run("-i", file.name, `ffmpeg.${conversionExt}`);
+    await ffmpegInstance.run("-i", file.name, "-codec", "copy", `ffmpeg.${conversionExt}`);
 
     const data = ffmpegInstance.FS("readFile", `ffmpeg.${conversionExt}`);
     const blob = new Blob([data.buffer], { type: `${mimeType}/${conversionExt}` });
