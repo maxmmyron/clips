@@ -17,12 +17,13 @@
 
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
     if (!(e.target as HTMLInputElement).files) return;
+
     updateMediaPool([...((e.target as HTMLInputElement).files as FileList)]);
   };
 
   const updateMediaPool = (uploadedFiles: File[]) => {
     // filter out files that are already in media pool
-    uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.metadata.title === file.name));
+    uploadedFiles = uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.metadata.title === file.name));
 
     uploadedFiles.forEach((file) => {
       loadMediaMetadata(file).then((metadata) => {
