@@ -4,7 +4,7 @@
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
   import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
-  import { isAudioMedia, isVideoMedia } from "./util/helpers";
+  import { isAudioMedia, isVideoMedia } from "../util/helpers";
   import { onMount } from "svelte";
 
   let timelineScale = 50;

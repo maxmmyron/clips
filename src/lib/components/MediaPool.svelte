@@ -1,7 +1,7 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
-  import { loadMediaMetadata } from "$lib/mediaLoader";
+  import { loadMediaMetadata } from "../util/mediaLoader";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
@@ -17,12 +17,14 @@
 
   const handleUpload = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
     if (!(e.target as HTMLInputElement).files) return;
+
     updateMediaPool([...((e.target as HTMLInputElement).files as FileList)]);
   };
 
   const updateMediaPool = (uploadedFiles: File[]) => {
     // filter out files that are already in media pool
-    uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.metadata.title === file.name));
+    // TODO: implement a more robust duplicate check using file metadata as opposed to lazy name check
+    uploadedFiles = uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.metadata.title === file.name));
 
     uploadedFiles.forEach((file) => {
       loadMediaMetadata(file).then((metadata) => {
@@ -70,7 +72,7 @@
 
 <div class="relative pt-4 px-4 h-full overflow-y-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between gap-2">
-    <input type="file" accept="video/*,image/*,audio/*" class="text-white h-8" multiple on:change={handleUpload} />
+    <input type="file" accept="video/*,image/*,audio/*,.avif" class="text-white h-8" multiple on:change={handleUpload} />
   </div>
   <div class="w-full flex flex-wrap gap-3">
     {#key $mediaPool.media.length}

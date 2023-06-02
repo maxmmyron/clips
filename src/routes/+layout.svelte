@@ -12,7 +12,7 @@
   import { inject } from "@vercel/analytics";
 
   import "../app.css";
-  import { loadFFmpeg } from "$lib/components/util/FFmpegManager";
+  import { loadFFmpeg } from "../lib/util/FFmpegManager";
 
   inject({ mode: dev ? "development" : "production" });
 
