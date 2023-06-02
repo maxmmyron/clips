@@ -122,8 +122,8 @@ const mimeTypes: {[key: string]: {offset: number, magic: string[], mask?: string
     magic: ["667479706d703432", "6674797071742020"],
   },
 
-  // webm
-  "video/webm": {
+  // matroska format & WebM
+  "video/x-matroska": {
     offset: 0,
     magic: ["1a45dfa3"],
   },
