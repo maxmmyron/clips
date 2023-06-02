@@ -23,6 +23,7 @@
 
   const updateMediaPool = (uploadedFiles: File[]) => {
     // filter out files that are already in media pool
+    // TODO: implement a more robust duplicate check using file metadata as opposed to lazy name check
     uploadedFiles = uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.metadata.title === file.name));
 
     uploadedFiles.forEach((file) => {
