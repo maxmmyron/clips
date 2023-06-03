@@ -10,12 +10,22 @@
   let timelineScale = 50;
   let timelineContainer: HTMLElement;
   let canMoveScrubber = false;
+  let timelineWidth = 0;
 
   let dropIndex: number = -1;
 
   $: $timeline.zoomScale = timelineScale;
   $: scrubberPos = $timeline.runtime * timelineScale;
   $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
+
+  $: ticks = Array.from({ length: timelineWidth / timelineScale }).map((_, i) => {
+    if (i % 5 === 0) {
+      return 10;
+    } else if (i % 10 === 0) {
+      return 20;
+    }
+    return 5;
+  });
 
   let lastTimestamp = 0;
   const renderTimeline = (timestamp: number) => {
@@ -164,6 +174,7 @@
     on:mouseup={handleDragEnd}
     on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
     on:mouseleave={() => ($studio.draggable.current.region = null)}
+    bind:clientWidth={timelineWidth}
   >
     <div class="relative flex h-fit min-h-[50%]" bind:this={timelineContainer}>
       {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
@@ -202,6 +213,12 @@
       style="left: {scrubberPos}px"
       class="absolute w-0.5 h-3/4 top-1/2 transform -translate-y-1/2 bg-blue-500 rounded-full pointer-events-none"
     />
+
+    {#key $timeline.zoomScale}
+      {#each ticks as height, idx}
+        <div class="absolute top-0 w-[1px] bg-blue-400 opacity-50" style="left: {idx * timelineScale}px; height: {height * 3}px" />
+      {/each}
+    {/key}
   </div>
   <input class="absolute top-2 right-2" type="range" min="10" max="100" bind:value={timelineScale} />
 </div>
