@@ -9,11 +9,9 @@
   import { assertBrowserSupportsContainer } from "$lib/util/browserParser";
   import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
-  $: browser && (window.mediaPool = $mediaPool.media);
-
   let unresolvedMedia: { name: string; msg: string }[] = [];
 
-  $: unresolvedLength = unresolvedMedia.length;
+  $: browser && (window.mediaPool = $mediaPool.media);
 
   const handleDrop = (e: DragEvent) => {
     if (!e.dataTransfer) return;
@@ -139,9 +137,6 @@
        じしˍ,)<span class="absolute origin-bottom-left group-hover:animate-wiggle">ノ</span>
     </pre>
       </button>
-      <p class="text-white">{unresolvedMedia.length}</p>
-      <p class="text-white">{unresolvedLength}</p>
-      <p class="text-white">{$mediaPool.media.length}</p>
     </div>
   </div>
 </div>
