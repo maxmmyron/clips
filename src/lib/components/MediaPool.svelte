@@ -1,10 +1,15 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
-  import { loadMediaMetadata } from "../util/mediaLoader";
+  import { parseMediaMetadata } from "../util/mediaLoader";
   import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
   import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
+  import { parseMIME } from "$lib/util/mimeParser";
+  import { assertBrowserSupportsContainer } from "$lib/util/browserParser";
+  import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
+
+  let unresolvedMedia: { name: string; msg: string }[] = [];
 
   $: browser && (window.mediaPool = $mediaPool.media);
 
@@ -21,17 +26,44 @@
     updateMediaPool([...((e.target as HTMLInputElement).files as FileList)]);
   };
 
-  const updateMediaPool = (uploadedFiles: File[]) => {
+  const updateMediaPool = async (uploadedFiles: File[]) => {
     // filter out files that are already in media pool
     // TODO: implement a more robust duplicate check using file metadata as opposed to lazy name check
     uploadedFiles = uploadedFiles.filter((file) => !$mediaPool.media.some((existingFile) => existingFile.metadata.title === file.name));
+    uploadedFiles.forEach((file) => (unresolvedMedia.push({ name: file.name, msg: "parsing MIME type..." }), console.log(unresolvedMedia)));
 
-    uploadedFiles.forEach((file) => {
-      loadMediaMetadata(file).then((metadata) => {
-        if (metadata === null) return;
-        $mediaPool.media = [...$mediaPool.media, metadata];
-      });
-    });
+    for (const file of uploadedFiles) {
+      const idx = unresolvedMedia.findIndex((media) => media.name === file.name);
+      if (idx === -1) continue;
+      const MIME = await parseMIME(file);
+      if (MIME === "file/unknown") {
+        unresolvedMedia.splice(idx, 1);
+        return;
+      }
+
+      unresolvedMedia[idx].msg = "checking media support...";
+      const browserSupportsContainer = await assertBrowserSupportsContainer(MIME);
+
+      let src: string;
+      if (!browserSupportsContainer) {
+        unresolvedMedia[idx].msg = "converting...";
+
+        src = await convertFileToSupportedContainer(file, MIME);
+      } else src = URL.createObjectURL(file);
+
+      unresolvedMedia[idx].msg = "loading metadata...";
+
+      const metadata = await parseMediaMetadata(file, src);
+      if (metadata === null) {
+        unresolvedMedia.splice(idx, 1);
+        return;
+      }
+
+      unresolvedMedia.splice(idx, 1);
+      $mediaPool.media = [...$mediaPool.media, metadata];
+    }
+
+    unresolvedMedia = [];
   };
 
   const handleKey = (e: KeyboardEvent) => {
@@ -90,6 +122,9 @@
         </MediaPoolPreview>
       {/each}
     {/key}
+    {#each unresolvedMedia as media, i}
+      <MediaPoolPreview hasResolved={false} name={media.name} currentLoadState={unresolvedMedia[i].msg} />
+    {/each}
     <div class="absolute bottom-12 right-16">
       {#each mows as mow (mow)}
         <p class="absolute top-1/4 -left-4 text-neutral-400 animate-notification [animation-fill-mode:both]" style="font-family:'Comic Sans MS';">mow</p>
