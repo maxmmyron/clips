@@ -104,7 +104,21 @@
 
 <div class="relative pt-4 px-4 h-full overflow-y-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between gap-2">
-    <input type="file" accept="video/*,image/*,audio/*,.avif" class="text-white h-8" multiple on:change={handleUpload} />
+    <p class="font-mono text-neutral-500">MEDIA POOL</p>
+    <label class="group">
+      <input
+        type="file"
+        accept="video/*,image/*,audio/*,.avif"
+        class="w-[1px] h-[1px] overflow-hidden [clip:rect(0,0,0,0)] whitespace-nowrap border-none absolute"
+        multiple
+        on:change={handleUpload}
+      />
+      <img
+        src="/icons/upload_dark.svg"
+        alt="Upload media"
+        class="w-6 h-6 p-1 cursor-pointer hover:brightness-200 group-focus-within:brightness-200 transition-all"
+      />
+    </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
     {#key $mediaPool.media.length}
