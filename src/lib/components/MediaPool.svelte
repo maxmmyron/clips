@@ -103,7 +103,7 @@
 <svelte:window on:keydown={handleKey} on:click={() => ($mediaPool.selected = [])} />
 
 <div class="relative pt-4 px-4 h-full overflow-y-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
-  <div class="flex justify-between gap-2">
+  <div class="flex justify-between gap-2 mb-4">
     <p class="font-mono text-neutral-500">MEDIA POOL</p>
     <label class="group">
       <input
