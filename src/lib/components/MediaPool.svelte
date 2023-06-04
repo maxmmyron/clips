@@ -105,7 +105,7 @@
 <div class="relative pt-4 px-4 h-full overflow-y-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
   <div class="flex justify-between items-center gap-2 mb-4">
     <p class="font-mono font-bold text-neutral-500">MEDIA POOL</p>
-    <label class="group">
+    <label class="group/label">
       <input
         type="file"
         accept="video/*,image/*,audio/*,.avif"
@@ -113,11 +113,20 @@
         multiple
         on:change={handleUpload}
       />
-      <img
-        src="/icons/upload_dark.svg"
-        alt="Upload media"
-        class="w-6 h-6 p-1 cursor-pointer hover:brightness-200 group-focus-within:brightness-200 transition-all"
-      />
+      <div
+        class="group/button p-2 border-[1px] border-indigo-900 rounded-md shadow-md transition-all cursor-pointer
+        bg-gradient-to-b from-slate-800 to-slate-900
+        hover:border-indigo-950 hover:from-slate-900 hover:to-slate-800 hover:shadow-sm
+        group-focus-within/label:border-indigo-950 group-focus-within/label:from-slate-900 group-focus-within/label:to-slate-800 group-focus-within/label:shadow-sm"
+      >
+        <img
+          src="/icons/upload_dark.svg"
+          alt="Upload media"
+          class="transition-all w-6 h-6 p-1
+        group-hover/button:brightness-200 group-hover/button:scale-110
+        group-focus-within/label:brightness-200 group-focus-within/label:scale-110"
+        />
+      </div>
     </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
