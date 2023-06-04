@@ -64,7 +64,7 @@
       <slot />
     </button>
     <div class="w-48 overflow-clip grid grid-rows-1 grid-cols-[24px,auto,24px] gap-1 items-center">
-      <img alt="" src="/img/{media.type}-icon_dark.svg" class="w-4 h-4" />
+      <img alt="" src="/icons/{media.type}_dark.svg" class="w-4 h-4" />
       <div class="overflow-clip" bind:clientWidth={containerWidth}>
         <p
           style="--overflow-scroll-pos: {nameOffset}px"
@@ -76,7 +76,7 @@
       </div>
 
       <button class="w-6 h-6 p-1 opacity-0 group-hover:opacity-100 hover:brightness-200 transition-all">
-        <img alt="Open Settings" src="/img/settings-icon_dark.svg" class="w-4 h-4" />
+        <img alt="Open Settings" src="/icons/settings_dark.svg" class="w-4 h-4" />
       </button>
     </div>
   </div>
