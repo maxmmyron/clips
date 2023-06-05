@@ -1,6 +1,6 @@
 <script lang="ts">
   import MediaPool from "$lib/components/MediaPool.svelte";
-  import Player from "$lib/components/player/Player.svelte";
+  import EditorPlayer from "$lib/components/player/EditorPlayer.svelte";
   import Timeline from "$lib/components/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
 
@@ -12,6 +12,8 @@
 
   import "../app.css";
   import { loadFFmpeg } from "../lib/util/FFmpegManager";
+  import Controls from "$lib/components/player/Controls.svelte";
+  import Runtime from "$lib/components/player/Runtime.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -104,18 +106,26 @@
       <MediaPool />
     </div>
     <div id="preview" class="flex flex-col justify-center items-center">
-      <Player />
+      <EditorPlayer />
     </div>
     <div id="timeline-settings" />
-    <div id="player-settings">
-      <!-- The lack of support for subgrid--as well as calc's lack of support for <flex> data types--makes this hack
+    <div id="player-settings" class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1">
+      <div class="col-start-2 flex justify-center items-center">
+        <Controls />
+      </div>
+
+      <div class="flex justify-end items-center">
+        <Runtime />
+      </div>
+    </div>
+
+    <!-- The lack of support for subgrid--as well as calc's lack of support for <flex> data types--makes this hack
       slightly necessary. We use 0.4975fr for the fractional unit since it approximately compensates for the 4px gap
       introduced with the repeated column.-->
-      <div id="timeline-container" class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full">
-        <div id="tracklist" />
-        <div id="timeline" class="col-span-2">
-          <Timeline />
-        </div>
+    <div id="timeline-container" class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full">
+      <div id="tracklist" />
+      <div id="timeline" class="col-span-2">
+        <Timeline />
       </div>
     </div>
   </main>
