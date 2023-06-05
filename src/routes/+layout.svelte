@@ -96,8 +96,8 @@
   </div>
 {:else}
   <main class="w-full h-[100dvh] bg-[#0E0E0E] grid grid-rows-[48px,auto,48px,384px] grid-cols-[1fr,1.618fr] gap-1 p-1">
-    <div id="ribbon" class="bg-neutral-900 rounded-md p-4" />
-    <div id="details" class="bg-neutral-900 rounded-md p-4 flex justify-between items-center">
+    <div class="bg-neutral-900 rounded-md p-4 flex items-center gap-4" />
+    <div class="bg-neutral-900 rounded-md p-4 flex justify-between items-center">
       <div class="flex">
         <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName}>untitled</p>
         <p class="text-neutral-200 font-mono">.mp4</p>
@@ -107,12 +107,14 @@
     <div class="bg-neutral-900 rounded-md p-4">
       <MediaPool />
     </div>
-    <div id="preview" class="flex flex-col justify-center items-center">
+    <div class="flex flex-col justify-center items-center">
       <div class="bg-black w-full aspect-video min-w-[480px] max-w-[calc(95%)]" bind:clientWidth={editorWidth} bind:clientHeight={editorHeight}>
         <EditorPlayer width={editorWidth} height={editorHeight} />
       </div>
     </div>
-    <div id="timeline-settings" />
+    <div class="bg-neutral-900 rounded-md p-4">
+      <input type="range" min="10" max="100" bind:value={$timeline.zoomScale} />
+    </div>
     <div id="player-settings" class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1">
       <div class="col-start-2 flex justify-center items-center">
         <Controls />
