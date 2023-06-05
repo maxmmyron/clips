@@ -3,7 +3,7 @@
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import Buffer from "./Buffer.svelte";
 
-  let width: number, height: number;
+  export let width: number, height: number;
 
   let audioContext: AudioContext = new AudioContext();
 
@@ -46,8 +46,6 @@
   <Buffer nodeUUID={node.uuid} {audioContext} />
 {/each}
 
-<div class="max-w-full aspect-video" bind:clientWidth={width} bind:clientHeight={height}>
-  <Canvas {width} {height}>
-    <Layer {render} />
-  </Canvas>
-</div>
+<Canvas {width} {height}>
+  <Layer {render} />
+</Canvas>

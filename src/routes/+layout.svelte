@@ -20,6 +20,8 @@
   let sizeQuery = -1,
     touchModeQuery = -1;
 
+  let editorWidth: number, editorHeight: number;
+
   $: ghostPos = $studio.draggable.ghost.pos;
   $: ghostSize = $studio.draggable.ghost.size;
 
@@ -106,7 +108,9 @@
       <MediaPool />
     </div>
     <div id="preview" class="flex flex-col justify-center items-center">
-      <EditorPlayer />
+      <div class="bg-black w-full aspect-video min-w-[480px] max-w-[calc(95%)]" bind:clientWidth={editorWidth} bind:clientHeight={editorHeight}>
+        <EditorPlayer width={editorWidth} height={editorHeight} />
+      </div>
     </div>
     <div id="timeline-settings" />
     <div id="player-settings" class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1">
@@ -129,28 +133,6 @@
       </div>
     </div>
   </main>
-
-  <!-- <main
-    style="--row-width: minmax(256px, {timelineHeight});"
-    class="w-full h-[100dvh] bg-neutral-950 grid grid-cols-1 grid-rows-[minmax(0,1fr),3px,var(--row-width)] transition-none"
-    class:select-none={isResizing}
-    on:mousemove={(e) => handleResize(e)}
-    on:mousedown={(e) => e.button === 0 && (isResizing = true)}
-    on:mouseup={() => {
-      isResizing = false;
-      $studio.resize = null;
-    }}
-  >
-    <ResizeStalk resize="row" />
-    <section
-      style="--timeline-col-width: minmax(320px, {timelineColumnWidth});"
-      class="grid grid-rows-1 grid-cols-[var(--timeline-col-width),3px,minmax(0,1fr)] transition-none"
-    >
-      <p>tracks</p>
-      <ResizeStalk resize="timeline_col" />
-
-    </section>
-  </main> -->
 
   {#if $studio.draggable.media && $studio.draggable.event !== "start"}
     <div
