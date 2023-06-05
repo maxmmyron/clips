@@ -48,10 +48,6 @@
 >
   {#key $player.source}
     {#if $player.isSinglePreview === false}
-      <div class="flex">
-        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName}>untitled</p>
-        <p class="text-neutral-200 font-mono">.mp4</p>
-      </div>
       <EditorPlayer width={width || 640} height={height || 480} />
     {:else}
       <!-- TODO: add preview media name -->
