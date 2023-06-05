@@ -1,6 +1,6 @@
 <script lang="ts">
   import MediaPool from "$lib/components/MediaPool.svelte";
-  import EditorPlayer from "$lib/components/player/EditorPlayer.svelte";
+  import Player from "$lib/components/player/Player.svelte";
   import Timeline from "$lib/components/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
 
@@ -96,7 +96,10 @@
   </div>
 {:else}
   <main class="w-full h-[100dvh] bg-[#0E0E0E] grid grid-rows-[48px,auto,48px,384px] grid-cols-[1fr,1.618fr] gap-1 p-1">
+    <!-- Settings Ribbon -->
     <div class="bg-neutral-900 rounded-md p-4 flex items-center gap-4" />
+
+    <!-- Export Settings -->
     <div class="bg-neutral-900 rounded-md p-4 flex justify-between items-center">
       <div class="flex">
         <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName}>untitled</p>
@@ -104,18 +107,26 @@
       </div>
       <Export />
     </div>
+
+    <!-- Media Pool -->
     <div class="bg-neutral-900 rounded-md p-4">
       <MediaPool />
     </div>
+
+    <!-- Player -->
     <div class="flex flex-col justify-center items-center">
       <div class="bg-black w-full aspect-video min-w-[480px] max-w-[calc(95%)]" bind:clientWidth={editorWidth} bind:clientHeight={editorHeight}>
-        <EditorPlayer width={editorWidth} height={editorHeight} />
+        <Player width={editorWidth} height={editorHeight} />
       </div>
     </div>
+
+    <!-- Timeline Controls -->
     <div class="bg-neutral-900 rounded-md p-4">
       <input type="range" min="10" max="100" bind:value={$timeline.zoomScale} />
     </div>
-    <div id="player-settings" class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1">
+
+    <!-- Video Controls -->
+    <div class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1">
       <div class="col-start-2 flex justify-center items-center">
         <Controls />
       </div>
@@ -128,9 +139,12 @@
     <!-- The lack of support for subgrid--as well as calc's lack of support for <flex> data types--makes this hack
       slightly necessary. We use 0.4975fr for the fractional unit since it approximately compensates for the 4px gap
       introduced with the repeated column.-->
-    <div id="timeline-container" class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full">
-      <div id="tracklist" />
-      <div id="timeline" class="col-span-2">
+    <!-- Timeline Container -->
+    <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full">
+      <!-- Timeline Track List -->
+      <div class="bg-neutral-900 rounded-md p-4" />
+      <!-- Timeline Container -->
+      <div class="bg-neutral-900 rounded-md p-4 col-span-2">
         <Timeline />
       </div>
     </div>
