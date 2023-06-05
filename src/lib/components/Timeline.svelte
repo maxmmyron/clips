@@ -7,18 +7,16 @@
   import { isAudioMedia, isVideoMedia } from "../util/helpers";
   import { onMount } from "svelte";
 
-  let timelineScale = 50;
   let timelineContainer: HTMLElement;
   let canMoveScrubber = false;
   let timelineWidth = 0;
 
   let dropIndex: number = -1;
 
-  $: $timeline.zoomScale = timelineScale;
-  $: scrubberPos = $timeline.runtime * timelineScale;
+  $: scrubberPos = $timeline.runtime * $timeline.zoomScale;
   $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
 
-  $: ticks = Array.from({ length: timelineWidth / timelineScale }).map((_, i) => {
+  $: ticks = Array.from({ length: timelineWidth / $timeline.zoomScale }).map((_, i) => {
     if (i % 5 === 0) {
       return 10;
     } else if (i % 10 === 0) {
@@ -151,7 +149,7 @@
   const moveUserScrubber = (e: MouseEvent) => {
     if (!canMoveScrubber) return;
 
-    $timeline.runtime = (e.clientX - timelineContainer.getBoundingClientRect().left) / timelineScale;
+    $timeline.runtime = (e.clientX - timelineContainer.getBoundingClientRect().left) / $timeline.zoomScale;
   };
 
   const endUserScrubberMove = (e: MouseEvent) => {
@@ -216,11 +214,10 @@
 
     {#key $timeline.zoomScale}
       {#each ticks as height, idx}
-        <div class="absolute top-0 w-[1px] bg-blue-400 opacity-50" style="left: {idx * timelineScale}px; height: {height * 3}px" />
+        <div class="absolute top-0 w-[1px] bg-blue-400 opacity-50" style="left: {idx * $timeline.zoomScale}px; height: {height * 3}px" />
       {/each}
     {/key}
   </div>
-  <input class="absolute top-2 right-2" type="range" min="10" max="100" bind:value={timelineScale} />
 </div>
 
 <style>
