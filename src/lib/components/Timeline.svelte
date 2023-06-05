@@ -149,7 +149,7 @@
   const moveUserScrubber = (e: MouseEvent) => {
     if (!canMoveScrubber) return;
 
-    $timeline.runtime = (e.clientX - timelineContainer.getBoundingClientRect().left) / $timeline.zoomScale;
+    $timeline.runtime = Math.max(0, (e.clientX - timelineContainer.getBoundingClientRect().left) / $timeline.zoomScale);
   };
 
   const endUserScrubberMove = (e: MouseEvent) => {
