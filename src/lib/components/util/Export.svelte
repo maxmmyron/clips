@@ -75,4 +75,8 @@
   };
 </script>
 
-<button on:click={exportTimeline} disabled={$timeline.timeline.length === 0} class="px-4 py-2 text-white border-[1px] border-neutral-600">export</button>
+<button
+  on:click={exportTimeline}
+  disabled={$timeline.timeline.length === 0}
+  class="px-3 py-1 text-neutral-200 font-mono border-[1px] border-neutral-600 rounded-sm cursor-pointer disabled:cursor-not-allowed">export</button
+>
