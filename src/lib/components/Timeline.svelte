@@ -214,7 +214,7 @@
 
     {#key $timeline.zoomScale}
       {#each ticks as height, idx}
-        <div class="absolute top-0 w-[1px] bg-blue-400 opacity-50" style="left: {idx * $timeline.zoomScale}px; height: {height * 3}px" />
+        <div class="absolute top-0 w-[2px] bg-neutral-500 opacity-50" style="left: {idx * $timeline.zoomScale}px; height: {height * 3}px" />
       {/each}
     {/key}
   </div>
