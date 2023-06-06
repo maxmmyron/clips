@@ -25,6 +25,9 @@ export default {
           '90%': {transform: 'rotate(8deg) scale(1.005)'},
           '100%': {transform: 'rotate(0deg) scale(1)'},
         }
+      },
+      screens: {
+        '3xl': '1600px',
       }
     },
   },
