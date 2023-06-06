@@ -1,10 +1,10 @@
 <script lang="ts">
-  import MediaPool from "$lib/components/MediaPool.svelte";
+  import MediaPool from "$lib/components/media/MediaPool.svelte";
   import Player from "$lib/components/player/Player.svelte";
-  import Timeline from "$lib/components/Timeline.svelte";
+  import Timeline from "$lib/components/timeline/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
 
-  import { studio, timeline } from "$lib/stores";
+  import { mediaPool, studio, timeline } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
   import { dev } from "$app/environment";
@@ -14,6 +14,7 @@
   import { loadFFmpeg } from "../lib/util/FFmpegManager";
   import Controls from "$lib/components/player/Controls.svelte";
   import Runtime from "$lib/components/player/Runtime.svelte";
+  import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -108,9 +109,17 @@
       <Export />
     </div>
 
-    <!-- Media Pool -->
-    <div class="bg-neutral-900 rounded-md p-4">
-      <MediaPool />
+    <!-- Media Container -->
+    <div class="grid grid-cols-1 grid-rows-[2fr,1fr] 3xl:grid-cols-[1fr,2fr] 3xl:grid-rows-1 gap-1">
+      {#if $mediaPool.selected.length}
+        <!-- Media Inspector -->
+        <div class="bg-neutral-900 rounded-md p-4 row-start-2 3xl:row-start-1">
+          <InspectorWrapper />
+        </div>
+      {/if}
+      <div class="bg-neutral-900 rounded-md p-4 {!$mediaPool.selected.length && 'row-span-full 3xl:col-span-full'}">
+        <MediaPool />
+      </div>
     </div>
 
     <!-- Player -->
