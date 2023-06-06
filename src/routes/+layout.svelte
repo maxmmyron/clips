@@ -15,6 +15,7 @@
   import Controls from "$lib/components/player/Controls.svelte";
   import Runtime from "$lib/components/player/Runtime.svelte";
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
+  import { fly } from "svelte/transition";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -25,6 +26,7 @@
 
   $: ghostPos = $studio.draggable.ghost.pos;
   $: ghostSize = $studio.draggable.ghost.size;
+  $: isInspectorVisible = $mediaPool.selected.length > 0;
 
   let isStudioLoaded = false;
   let preloadMessage = "loading...";
@@ -96,12 +98,12 @@
     <p class="text-2xl text-white">Please use a desktop browser.</p>
   </div>
 {:else}
-  <main class="w-full h-[100dvh] bg-[#0E0E0E] grid grid-rows-[48px,auto,48px,384px] grid-cols-[1fr,1.618fr] gap-1 p-1">
+  <main class="w-full h-[100dvh] bg-[#0E0E0E] grid grid-rows-[48px,auto,48px,384px] grid-cols-[1fr,1fr,0.618fr] gap-1 p-1">
     <!-- Settings Ribbon -->
     <div class="bg-neutral-900 rounded-md p-4 flex items-center gap-4" />
 
     <!-- Export Settings -->
-    <div class="bg-neutral-900 rounded-md p-4 flex justify-between items-center">
+    <div class="bg-neutral-900 rounded-md p-4 flex justify-between items-center col-span-2">
       <div class="flex">
         <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName}>untitled</p>
         <p class="text-neutral-200 font-mono">.mp4</p>
@@ -109,25 +111,25 @@
       <Export />
     </div>
 
-    <!-- Media Container -->
-    <div class="grid grid-cols-1 grid-rows-[2fr,1fr] 3xl:grid-cols-[1fr,2fr] 3xl:grid-rows-1 gap-1">
-      {#if $mediaPool.selected.length}
-        <!-- Media Inspector -->
-        <div class="bg-neutral-900 rounded-md p-4 row-start-2 3xl:row-start-1">
-          <InspectorWrapper />
-        </div>
-      {/if}
-      <div class="bg-neutral-900 rounded-md p-4 {!$mediaPool.selected.length && 'row-span-full 3xl:col-span-full'}">
-        <MediaPool />
-      </div>
+    <!-- Media Pool -->
+    <div class="bg-neutral-900 rounded-md p-4">
+      <MediaPool />
     </div>
 
     <!-- Player -->
-    <div class="flex flex-col justify-center items-center">
-      <div class="bg-black w-full aspect-video min-w-[480px] max-w-[calc(95%)]" bind:clientWidth={editorWidth} bind:clientHeight={editorHeight}>
+    <div class="flex flex-col justify-center items-center col-start-2 row-start-2 col-span-2">
+      <div class="bg-black w-full aspect-video min-w-[480px] max-w-[calc(90%)]" bind:clientWidth={editorWidth} bind:clientHeight={editorHeight}>
         <Player width={editorWidth} height={editorHeight} />
       </div>
     </div>
+
+    <!-- Inspector -->
+    {#if $mediaPool.selected.length}
+      <!-- No padding here as it would interfere with click events at inspector edge -->
+      <div class="relative z-10 bg-neutral-900 rounded-md row-start-2 col-start-3 shadow-inner" transition:fly={{ x: "100%" }}>
+        <InspectorWrapper />
+      </div>
+    {/if}
 
     <!-- Timeline Controls -->
     <div class="bg-neutral-900 rounded-md p-4">
@@ -135,7 +137,7 @@
     </div>
 
     <!-- Video Controls -->
-    <div class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1">
+    <div class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1 row-start-3 col-start-2 col-span-2">
       <div class="col-start-2 flex justify-center items-center">
         <Controls />
       </div>
@@ -149,7 +151,7 @@
       slightly necessary. We use 0.4975fr for the fractional unit since it approximately compensates for the 4px gap
       introduced with the repeated column.-->
     <!-- Timeline Container -->
-    <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full">
+    <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
       <!-- Timeline Track List -->
       <div class="bg-neutral-900 rounded-md p-4" />
       <!-- Timeline Container -->
