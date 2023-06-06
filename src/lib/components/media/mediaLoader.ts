@@ -1,5 +1,5 @@
 import { get } from "svelte/store";
-import { studio } from "../stores";
+import { studio } from "../../stores";
 import { v4 as uuidv4 } from "uuid";
 
 export const parseMediaMetadata = async (file: File, src: string): Promise<App.VideoMedia | App.AudioMedia | App.ImageMedia> => {

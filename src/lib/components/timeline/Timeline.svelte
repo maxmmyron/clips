@@ -1,10 +1,10 @@
 <script lang="ts">
   import { timeline, studio, player } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
-  import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
-  import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
-  import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
-  import { isAudioMedia, isVideoMedia } from "../util/helpers";
+  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
+  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
+  import TimelinePreview from "../preview/TimelinePreview.svelte";
+  import { isAudioMedia, isVideoMedia } from "../../util/helpers";
   import { onMount } from "svelte";
 
   let timelineContainer: HTMLElement;

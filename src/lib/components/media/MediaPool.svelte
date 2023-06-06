@@ -1,12 +1,12 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
-  import { parseMediaMetadata } from "../util/mediaLoader";
-  import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
-  import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
-  import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
-  import { parseMIME } from "$lib/util/mimeParser";
-  import { assertBrowserSupportsContainer } from "$lib/util/browserParser";
+  import { parseMediaMetadata } from "./mediaLoader";
+  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
+  import MediaPoolPreview from "../preview/MediaPoolPreview.svelte";
+  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
+  import { parseMIME } from "$lib/components/media/mimeParser";
+  import { assertBrowserSupportsContainer } from "$lib/components/media/browserParser";
   import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
   let unresolvedMedia: { name: string; msg: string }[] = [];
