@@ -68,7 +68,7 @@
       <div class="overflow-clip" bind:clientWidth={containerWidth}>
         <p
           style="--overflow-scroll-pos: {nameOffset}px"
-          class="relative text-neutral-300 font-mono m-0 w-max {shouldNameAnimate && 'animate'}"
+          class="relative text-neutral-200 font-mono m-0 w-max {shouldNameAnimate && 'animate'}"
           bind:clientWidth={nameWidth}
         >
           {media.metadata.title}
