@@ -31,6 +31,10 @@ export default {
       }
     },
   },
+  safelist: [
+    'after:from-neutral-900',
+    'after:from-gray-800',
+  ],
   plugins: [],
 }
 
