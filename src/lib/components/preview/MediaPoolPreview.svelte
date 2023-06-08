@@ -44,7 +44,7 @@
 
 {#if media === null || hasResolved === false}
   <div class="rounded-lg p-1">
-    <div class="w-48 aspect-video rounded-md bg-gray-500 mb-2 flex justify-center items-center">
+    <div class="w-48 aspect-video rounded-md bg-gray-700 animate-pulse mb-2 flex justify-center items-center">
       <p class="text-gray-200">{currentLoadState}</p>
     </div>
     <div
