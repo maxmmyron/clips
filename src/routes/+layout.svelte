@@ -16,6 +16,7 @@
   import Runtime from "$lib/components/player/Runtime.svelte";
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
   import { fly } from "svelte/transition";
+  import Marquee from "$lib/components/util/Marquee.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -65,7 +66,7 @@
     if ($studio.draggable.current.region !== null) return;
 
     ghostPos.set({ x: $studio.mouse.x, y: $studio.mouse.y });
-    ghostSize.set({ width: 32, height: 32 });
+    ghostSize.set({ width: 80, height: 45 });
   };
 
   const handleDrop = () => {
@@ -163,8 +164,13 @@
 
   {#if $studio.draggable.media && $studio.draggable.event !== "start"}
     <div
-      class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
-      style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"
-    />
+      class="z-10 absolute w-fit max-w-[12rem] h-fit p-1 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none flex gap-4"
+      style="left: {$ghostPos.x}px; top: {$ghostPos.y}px;"
+    >
+      {#if $studio.draggable.current.region === null}
+        <img alt="" src="/icons/{$studio.draggable.media.type}_dark.svg" class="w-4 h-4" />
+        <Marquee>{$studio.draggable.media.metadata.title}</Marquee>
+      {/if}
+    </div>
   {/if}
 {/if}

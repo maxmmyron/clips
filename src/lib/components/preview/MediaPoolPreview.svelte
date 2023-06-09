@@ -1,5 +1,6 @@
 <script lang="ts">
   import { player, studio, mediaPool } from "$lib/stores";
+  import Marquee from "../util/Marquee.svelte";
 
   export let media: App.VideoMedia | App.AudioMedia | App.ImageMedia | null = null;
   export let hasResolved: boolean = true;
@@ -7,11 +8,8 @@
   export let name = "";
 
   let mediaPreview: HTMLButtonElement;
-  let containerWidth: number, nameWidth: number;
 
   $: isSelected = media && $mediaPool.selected.includes(media.uuid);
-  $: shouldNameAnimate = nameWidth > containerWidth;
-  $: nameOffset = containerWidth - nameWidth - 16;
 
   const handleClick = (e: MouseEvent) => {
     if (!media) return;
@@ -52,15 +50,7 @@
         ? 'gray-800'
         : 'neutral-900'} after:to-transparent"
     >
-      <div class="overflow-clip col-start-2" bind:clientWidth={containerWidth}>
-        <p
-          style="--overflow-scroll-pos: {nameOffset}px"
-          class="relative text-neutral-200 font-mono m-0 w-max {shouldNameAnimate && 'animate'}"
-          bind:clientWidth={nameWidth}
-        >
-          {name}
-        </p>
-      </div>
+      <Marquee class="col-start-2">{name}</Marquee>
     </div>
   </div>
 {:else}
@@ -80,37 +70,8 @@
           : 'neutral-900'} after:to-transparent"
       >
         <img alt="" src="/icons/{media.type}_dark.svg" class="w-4 h-4" />
-        <div class="overflow-clip" bind:clientWidth={containerWidth}>
-          <p
-            style="--overflow-scroll-pos: {nameOffset}px"
-            class="relative text-neutral-200 font-mono m-0 w-max {shouldNameAnimate && 'animate'}"
-            bind:clientWidth={nameWidth}
-          >
-            {media.metadata.title}
-          </p>
-        </div>
+        <Marquee>{media.metadata.title}</Marquee>
       </div>
     </div>
   </div>
 {/if}
-
-<style>
-  .animate {
-    animation: name-scroll 7.5s linear infinite alternate;
-  }
-
-  @keyframes name-scroll {
-    0% {
-      left: 0px;
-    }
-    25% {
-      left: 0px;
-    }
-    75% {
-      left: var(--overflow-scroll-pos);
-    }
-    100% {
-      left: var(--overflow-scroll-pos);
-    }
-  }
-</style>
