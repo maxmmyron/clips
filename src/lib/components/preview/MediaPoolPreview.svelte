@@ -58,7 +58,7 @@
     <button
       bind:this={mediaPreview}
       on:click|capture|stopPropagation={handleClick}
-      class="w-48 aspect-video rounded-md overflow-clip mb-2"
+      class="w-48 aspect-video rounded-md overflow-clip mb-2 bg-black"
       on:mousedown={handleDragStart}
     >
       <slot />
