@@ -34,6 +34,8 @@ export default {
   safelist: [
     'after:from-neutral-900',
     'after:from-gray-800',
+    'before:from-neutral-900',
+    'before:from-gray-800',
   ],
   plugins: [],
 }
