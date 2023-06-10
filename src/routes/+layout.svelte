@@ -70,10 +70,10 @@
   };
 
   const handleDrop = () => {
-    if (!$studio.draggable.media) return;
+    if (!$studio.draggable.mediaUUID) return;
 
     $studio.draggable = {
-      media: null,
+      mediaUUID: null,
       origin: null,
       event: null,
       current: { region: null },

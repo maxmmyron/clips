@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { studio } from "$lib/stores";
+  import { mediaPool, studio } from "$lib/stores";
   import { fade } from "svelte/transition";
   import Marquee from "./Marquee.svelte";
 
-  $: media = $studio.draggable.media;
+  $: media = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
   $: pos = $studio.draggable.ghost.pos;
   $: size = $studio.draggable.ghost.size;
   $: region = $studio.draggable.current.region;

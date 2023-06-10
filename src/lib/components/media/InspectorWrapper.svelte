@@ -2,7 +2,6 @@
   import { mediaPool } from "$lib/stores";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
-  import { isVideoMedia } from "$lib/util/helpers";
 
   let current = 0;
   $: current = Math.max(0, Math.min(current, $mediaPool.selected.length - 1));
@@ -37,7 +36,7 @@
       {#key currentMedia}
         <div class="flex justify-between">
           <p class="font-mono text-neutral-200">duration:</p>
-          {#if isVideoMedia(currentMedia)}
+          {#if currentMedia.type === "video" || currentMedia.type === "audio"}
             <p class="font-mono text-neutral-200">{currentMedia.metadata.duration}</p>
           {:else}
             <p class="font-mono text-neutral-200">N/A</p>
