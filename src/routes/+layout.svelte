@@ -16,7 +16,6 @@
   import Runtime from "$lib/components/player/Runtime.svelte";
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
   import { fly } from "svelte/transition";
-  import Marquee from "$lib/components/util/Marquee.svelte";
   import Ghost from "$lib/components/util/Ghost.svelte";
 
   inject({ mode: dev ? "development" : "production" });
