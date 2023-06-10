@@ -81,14 +81,25 @@
       dropXPosition = afterElement.getBoundingClientRect().left;
     }
 
-    let mediaDuration = 3;
+    let duration = 3;
+    if ($studio.draggable.mediaUUID) {
+      const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
+      if (!draggable) return;
+
+      if (draggable.type === "video" || draggable.type === "audio") {
+        duration = draggable.metadata.duration;
+      }
+    } else if ($timeline.dragIndex !== -1) {
+      const clip = $timeline.timeline.getByIndex($timeline.dragIndex) as App.Node;
+      duration = clip.metadata.duration;
+    }
 
     // update ghost position and size
     $studio.draggable.ghost.pos.set({
       x: dropXPosition,
       y: timelineContainer.getBoundingClientRect().top,
     });
-    $studio.draggable.ghost.size.set({ width: 3 * $timeline.zoomScale, height: timelineContainer.getBoundingClientRect().height });
+    $studio.draggable.ghost.size.set({ width: duration * $timeline.zoomScale, height: timelineContainer.getBoundingClientRect().height });
   };
 
   const handleDragEnd = () => {
