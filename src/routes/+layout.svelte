@@ -17,6 +17,7 @@
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
   import { fly } from "svelte/transition";
   import Marquee from "$lib/components/util/Marquee.svelte";
+  import Ghost from "$lib/components/util/Ghost.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -162,15 +163,5 @@
     </div>
   </main>
 
-  {#if $studio.draggable.media && $studio.draggable.event !== "start"}
-    <div
-      class="z-10 absolute w-fit max-w-[12rem] h-fit p-1 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none flex gap-4"
-      style="left: {$ghostPos.x}px; top: {$ghostPos.y}px;"
-    >
-      {#if $studio.draggable.current.region === null}
-        <img alt="" src="/icons/{$studio.draggable.media.type}_dark.svg" class="w-4 h-4" />
-        <Marquee>{$studio.draggable.media.metadata.title}</Marquee>
-      {/if}
-    </div>
-  {/if}
+  <Ghost />
 {/if}
