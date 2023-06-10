@@ -82,12 +82,14 @@
       dropXPosition = afterElement.getBoundingClientRect().left;
     }
 
+    let mediaDuration = 3;
+
     // update ghost position and size
     $studio.draggable.ghost.pos.set({
       x: dropXPosition,
       y: timelineContainer.getBoundingClientRect().top,
     });
-    $studio.draggable.ghost.size.set({ width: 8, height: timelineContainer.getBoundingClientRect().height });
+    $studio.draggable.ghost.size.set({ width: 3 * $timeline.zoomScale, height: timelineContainer.getBoundingClientRect().height });
   };
 
   const handleDragEnd = () => {
