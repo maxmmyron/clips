@@ -2,7 +2,7 @@
   import { player, studio, mediaPool } from "$lib/stores";
   import Marquee from "../util/Marquee.svelte";
 
-  export let media: App.VideoMedia | App.AudioMedia | App.ImageMedia | null = null;
+  export let media: App.Media | null = null;
   export let hasResolved: boolean = true;
   export let currentLoadState: string = "Loading...";
   export let name = "";
@@ -21,7 +21,7 @@
   const handleDragStart = (e: MouseEvent) => {
     $studio.draggable = {
       ...$studio.draggable,
-      media: media,
+      mediaUUID: media ? media.uuid : null,
       origin: {
         pos: { x: e.clientX, y: e.clientY },
         region: "media_pool",

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { timeline, studio, player } from "$lib/stores";
+  import { timeline, studio, player, mediaPool } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
@@ -108,11 +108,12 @@
     }
     // handle dragging new media into timeline
 
-    if (!$studio.draggable.media) return;
-    const draggable = $studio.draggable.media as App.VideoMedia | App.AudioMedia | App.ImageMedia;
+    if (!$studio.draggable.mediaUUID) return;
+    const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
+    if (!draggable) return;
 
     let duration = 3;
-    if (isVideoMedia(draggable) || isAudioMedia(draggable)) {
+    if (draggable.type === "video" || draggable.type === "audio") {
       duration = draggable.metadata.duration;
     }
 
