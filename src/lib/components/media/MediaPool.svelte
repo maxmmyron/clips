@@ -1,7 +1,7 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
-  import { parseMediaMetadata } from "./mediaLoader";
+  import { createMedia } from "./mediaLoader";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "../preview/MediaPoolPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
@@ -53,14 +53,18 @@
 
       unresolvedMedia[idx].msg = "loading metadata...";
 
-      const metadata = await parseMediaMetadata(file, src);
-      if (metadata === null) {
+      let media: App.Media | null = null;
+      if (file.type.includes("video")) media = await createMedia("video", file.name, src);
+      else if (file.type.includes("audio")) media = await createMedia("audio", file.name, src);
+      else media = await createMedia("image", file.name, src);
+
+      if (media === null) {
         unresolvedMedia.splice(idx, 1);
         return;
       }
 
       unresolvedMedia.splice(idx, 1);
-      $mediaPool.media = [...$mediaPool.media, metadata];
+      $mediaPool.media = [...$mediaPool.media, media];
     }
 
     unresolvedMedia = [];
