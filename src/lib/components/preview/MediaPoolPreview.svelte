@@ -9,7 +9,7 @@
 
   let mediaPreview: HTMLButtonElement;
 
-  $: isSelected = media && $mediaPool.selected.includes(media.uuid);
+  $: isSelected = media ? $mediaPool.selected.includes(media.uuid) : false;
 
   const handleClick = (e: MouseEvent) => {
     if (!media) return;
@@ -45,12 +45,8 @@
     <div class="w-48 aspect-video rounded-md bg-gray-700 animate-pulse mb-2 flex justify-center items-center">
       <p class="text-gray-200">{currentLoadState}</p>
     </div>
-    <div
-      class="w-48 overflow-clip grid grid-rows-1 grid-cols-[24px,auto] gap-1 items-center after:content-[''] after:w-5 after:h-full after:absolute after:top-0 after:right-0 after:bg-gradient-to-l after:from-{isSelected
-        ? 'gray-800'
-        : 'neutral-900'} after:to-transparent"
-    >
-      <Marquee class="col-start-2">{name}</Marquee>
+    <div class="w-48 overflow-clip grid grid-rows-1 grid-cols-[24px,auto] gap-1 items-center">
+      <Marquee class="col-start-2" isAlternateColor={isSelected}>{name}</Marquee>
     </div>
   </div>
 {:else}
@@ -70,7 +66,7 @@
           : 'neutral-900'} after:to-transparent"
       >
         <img alt="" src="/icons/{media.type}_dark.svg" class="w-4 h-4" />
-        <Marquee>{media.metadata.title}</Marquee>
+        <Marquee isAlternateColor={isSelected}>{media.metadata.title}</Marquee>
       </div>
     </div>
   </div>
