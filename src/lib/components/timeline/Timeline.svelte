@@ -4,7 +4,6 @@
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import TimelinePreview from "../preview/TimelinePreview.svelte";
-  import { isAudioMedia, isVideoMedia } from "../../util/helpers";
   import { onMount } from "svelte";
 
   let timelineContainer: HTMLElement;
