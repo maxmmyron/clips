@@ -1,11 +1,11 @@
 <script lang="ts">
   let clazz = "";
   export { clazz as class };
-  export let isAlternateColor: boolean = false;
 
-  $: console.log({ isAlternateColor });
+  export let primaryColor: string = "neutral-900";
+  export let secondaryColor: string = "gray-800";
+  export let isSecondaryColor: boolean = false;
 
-  let name: HTMLParagraphElement;
   let containerWidth: number, nameWidth: number;
   $: shouldNameAnimate = nameWidth > containerWidth;
 </script>
@@ -15,20 +15,19 @@
 
   {shouldNameAnimate && "before:content-['']"} before:w-5 before:h-full before:z-10
   before:absolute before:top-0 before:left-0
-  before:bg-gradient-to-r before:from-{isAlternateColor ? 'gray-800' : 'neutral-900'} before:to-transparent before:transition-colors
+  before:bg-gradient-to-r before:from-{isSecondaryColor ? secondaryColor : primaryColor} before:to-transparent before:transition-colors
 
   {shouldNameAnimate && "after:content-['']"} after:w-5 after:h-full after:z-10
   after:absolute after:top-0 after:right-0
-  after:bg-gradient-to-l after:from-{isAlternateColor ? 'gray-800' : 'neutral-900'} after:to-transparent after:transition-colors
+  after:bg-gradient-to-l after:from-{isSecondaryColor ? secondaryColor : primaryColor} after:to-transparent after:transition-colors
 
-  animate-name-pseudo"
+  {shouldNameAnimate && 'animate-name-pseudo'}"
   bind:clientWidth={containerWidth}
 >
   <p
     style="--overflow-scroll-pos: {containerWidth - nameWidth}px"
     class="relative text-neutral-200 font-mono m-0 w-max {shouldNameAnimate && 'animate'}"
     bind:clientWidth={nameWidth}
-    bind:this={name}
   >
     <slot />
   </p>

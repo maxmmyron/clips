@@ -32,7 +32,7 @@
       },
     };
 
-    $studio.draggable.ghost.pos.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
+    $studio.draggable.ghost.pos.set({ x: $studio.mouse.x, y: $studio.mouse.y }, { hard: true });
     $studio.draggable.ghost.size.set(
       { width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height },
       { hard: true }
@@ -46,7 +46,7 @@
       <p class="text-gray-200">{currentLoadState}</p>
     </div>
     <div class="w-48 overflow-clip grid grid-rows-1 grid-cols-[24px,auto] gap-1 items-center">
-      <Marquee class="col-start-2" isAlternateColor={isSelected}>{name}</Marquee>
+      <Marquee class="col-start-2" isSecondaryColor={isSelected}>{name}</Marquee>
     </div>
   </div>
 {:else}
@@ -66,7 +66,7 @@
           : 'neutral-900'} after:to-transparent"
       >
         <img alt="" src="/icons/{media.type}_dark.svg" class="w-4 h-4" />
-        <Marquee isAlternateColor={isSelected}>{media.metadata.title}</Marquee>
+        <Marquee isSecondaryColor={isSelected}>{media.metadata.title}</Marquee>
       </div>
     </div>
   </div>
