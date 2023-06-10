@@ -32,10 +32,10 @@ export default {
     },
   },
   safelist: [
-    'after:from-neutral-900',
-    'after:from-gray-800',
-    'before:from-neutral-900',
-    'before:from-gray-800',
+    {
+      pattern: /from-(neutral|gray)-[0-9]{3}/,
+      variants: ['before', 'after'],
+    }
   ],
   plugins: [],
 }
