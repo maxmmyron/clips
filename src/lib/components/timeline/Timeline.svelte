@@ -5,6 +5,7 @@
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import TimelinePreview from "../preview/TimelinePreview.svelte";
   import { onMount } from "svelte";
+  import Scrubber from "./Scrubber.svelte";
 
   let timelineContainer: HTMLElement;
   let canMoveScrubber = false;
@@ -12,7 +13,6 @@
 
   let dropIndex: number = -1;
 
-  $: scrubberPos = $timeline.runtime * $timeline.zoomScale;
   $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
 
   $: ticks = Array.from({ length: timelineWidth / $timeline.zoomScale }).map((_, i) => {
@@ -163,6 +163,7 @@
     if (!canMoveScrubber) return;
 
     $timeline.runtime = Math.max(0, (e.clientX - timelineContainer.getBoundingClientRect().left) / $timeline.zoomScale);
+    console.log($timeline.current);
   };
 
   const endUserScrubberMove = (e: MouseEvent) => {
@@ -219,11 +220,7 @@
         </div>
       {/each}
     </div>
-    <div
-      id="scrubber"
-      style="left: {scrubberPos}px"
-      class="absolute w-0.5 h-3/4 top-1/2 transform -translate-y-1/2 bg-blue-500 rounded-full pointer-events-none"
-    />
+    <Scrubber />
 
     {#key $timeline.zoomScale}
       {#each ticks as height, idx}
@@ -232,16 +229,3 @@
     {/key}
   </div>
 </div>
-
-<style>
-  #scrubber::before {
-    content: "";
-    position: absolute;
-    top: -8px;
-    left: -5px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgb(11 113 230 / 1);
-  }
-</style>
