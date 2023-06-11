@@ -12,7 +12,7 @@ export const studio: App.stores.WritableStudio = writable({
    * If null, no dragging is occurring.
    */
   draggable: {
-    media: null,
+    mediaUUID: null,
     origin: null,
     event: null,
     current: {
@@ -33,7 +33,7 @@ export const mediaPool: App.stores.WritableMediaPool = writable({
   /**
    * An array of loaded media. Carries a variety of information that can be used to display media details and preview media.
    */
-  media: new Array<App.VideoMedia | App.AudioMedia | App.ImageMedia>(),
+  media: new Array<App.Media>(),
 });
 
 export const timeline: App.stores.WritableTimeline = writable({
