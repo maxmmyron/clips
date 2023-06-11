@@ -8,6 +8,7 @@
   import { parseMIME } from "$lib/components/media/mimeParser";
   import { assertBrowserSupportsContainer } from "$lib/components/media/browserParser";
   import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
+  import Button from "../util/Button.svelte";
 
   let unresolvedMedia: { name: string; msg: string }[] = [];
 
@@ -117,7 +118,7 @@
         multiple
         on:change={handleUpload}
       />
-      <div
+      <!-- <div
         class="group/button p-2 border-[1px] border-indigo-900 rounded-md shadow-md transition-all cursor-pointer
         bg-gradient-to-b from-slate-800 to-slate-900
         hover:border-indigo-950 hover:from-slate-900 hover:to-slate-800 hover:shadow-sm
@@ -130,7 +131,8 @@
         group-hover/button:brightness-200 group-hover/button:scale-110
         group-focus-within/label:brightness-200 group-focus-within/label:scale-110"
         />
-      </div>
+      </div> -->
+      <Button icon="/icons/upload_dark.svg" label="upload" commandKey="U" />
     </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
