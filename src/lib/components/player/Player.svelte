@@ -9,8 +9,6 @@
 
   let render: Render;
   $: render = ({ context, width, height }) => {
-    $t;
-
     if (!$timeline.current) {
       context.fillStyle = "black";
       context.fillRect(0, 0, width, height);
