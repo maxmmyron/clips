@@ -3,10 +3,12 @@
   export let label: string;
   export let commandKey: string;
 
+  export let isFake: boolean = false;
+
   export let onClick: () => void = () => {};
 </script>
 
-<button class="p-[0.1rem] rounded-[0.5rem] min-w-[1.5rem] min-h-[1.5rem] bg-red-500" on:click={onClick}>
+<svelte:element this={isFake ? "div" : "button"} class="p-[0.1rem] rounded-[0.5rem] min-w-[1.5rem] min-h-[1.5rem] bg-red-500 cursor-pointer" on:click={onClick}>
   <div class="p-[0.1rem] rounded-[0.4rem] bg-blue-500">
     <div class="p-[0.1rem] rounded-[0.3rem] flex gap-3 px-3 py-1 bg-green-500">
       {#if icon}
@@ -24,4 +26,4 @@
       {/if}
     </div>
   </div>
-</button>
+</svelte:element>

@@ -132,7 +132,7 @@
         group-focus-within/label:brightness-200 group-focus-within/label:scale-110"
         />
       </div> -->
-      <Button icon="/icons/upload_dark.svg" label="upload" commandKey="U" />
+      <Button icon="/icons/upload_dark.svg" label="upload" commandKey="U" isFake />
     </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
