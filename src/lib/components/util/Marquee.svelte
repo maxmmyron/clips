@@ -13,19 +13,19 @@
 <div
   class="relative marquee overflow-clip {clazz}
 
-  {shouldNameAnimate && "before:content-['']"} before:w-5 before:h-full before:z-10
+  {shouldNameAnimate ? "before:content-[''] before:w-5 before:h-full" : ''} before:z-10
   before:absolute before:top-0 before:left-0
   before:bg-gradient-to-r before:from-{isSecondaryColor ? secondaryColor : primaryColor} before:to-transparent before:transition-colors
 
-  {shouldNameAnimate && "after:content-['']"} after:w-5 after:h-full after:z-10
+  {shouldNameAnimate ? "after:content-[''] after:w-5 after:h-full" : ''} after:z-10
   after:absolute after:top-0 after:right-0
   after:bg-gradient-to-l after:from-{isSecondaryColor ? secondaryColor : primaryColor} after:to-transparent after:transition-colors
 
-  {shouldNameAnimate && 'animate-name-pseudo'}"
+  {shouldNameAnimate ? 'animate-name-pseudo' : ''}"
   bind:clientWidth={containerWidth}
 >
   <p
-    style="--overflow-scroll-pos: {containerWidth - nameWidth}px"
+    style="--overflow-scroll-pos: {containerWidth - nameWidth - 8}px"
     class="relative text-neutral-200 font-mono m-0 w-max {shouldNameAnimate && 'animate'}"
     bind:clientWidth={nameWidth}
   >
