@@ -17,6 +17,7 @@
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
   import { fly } from "svelte/transition";
   import Ghost from "$lib/components/util/Ghost.svelte";
+  import Region from "$lib/components/util/Region.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -101,21 +102,21 @@
 {:else}
   <main class="w-full h-[100dvh] bg-[#0E0E0E] grid grid-rows-[48px,auto,48px,384px] grid-cols-[1fr,1fr,0.618fr] gap-1 p-1">
     <!-- Settings Ribbon -->
-    <div class="bg-neutral-900 rounded-md p-4 flex items-center gap-4" />
+    <Region />
 
     <!-- Export Settings -->
-    <div class="bg-neutral-900 rounded-md p-4 flex justify-between items-center col-span-2">
+    <Region class="col-span-2" innerClass="flex justify-between items-center p-4">
       <div class="flex">
         <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName} />
         <p class="text-neutral-200 font-mono">.mp4</p>
       </div>
       <Export />
-    </div>
+    </Region>
 
     <!-- Media Pool -->
-    <div class="bg-neutral-900 rounded-md p-4">
+    <Region innerClass="p-4">
       <MediaPool />
-    </div>
+    </Region>
 
     <!-- Player -->
     <div class="flex flex-col justify-center items-center col-start-2 row-start-2 col-span-2">
@@ -126,19 +127,20 @@
 
     <!-- Inspector -->
     {#if $mediaPool.selected.length}
-      <!-- No padding here as it would interfere with click events at inspector edge -->
-      <div class="relative z-10 bg-neutral-900 rounded-md row-start-2 col-start-3 shadow-inner" transition:fly={{ x: "100%" }}>
-        <InspectorWrapper />
+      <div class="relative z-10 row-start-2 col-start-3" transition:fly={{ x: "100%" }}>
+        <Region>
+          <InspectorWrapper />
+        </Region>
       </div>
     {/if}
 
     <!-- Timeline Controls -->
-    <div class="bg-neutral-900 rounded-md p-4">
+    <Region innerClass="flex items-center px-4">
       <input type="range" min="10" max="100" bind:value={$timeline.zoomScale} />
-    </div>
+    </Region>
 
     <!-- Video Controls -->
-    <div class="bg-neutral-900 rounded-md p-4 grid grid-cols-3 grid-rows-1 row-start-3 col-start-2 col-span-2">
+    <Region class="row-start-3 col-start-2 col-span-2" innerClass="grid grid-cols-3 grid-rows-1 px-4">
       <div class="col-start-2 flex justify-center items-center">
         <Controls />
       </div>
@@ -146,7 +148,7 @@
       <div class="flex justify-end items-center">
         <Runtime />
       </div>
-    </div>
+    </Region>
 
     <!-- The lack of support for subgrid--as well as calc's lack of support for <flex> data types--makes this hack
       slightly necessary. We use 0.4975fr for the fractional unit since it approximately compensates for the 4px gap
@@ -154,11 +156,11 @@
     <!-- Timeline Container -->
     <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
       <!-- Timeline Track List -->
-      <div class="bg-neutral-900 rounded-md p-4" />
+      <Region />
       <!-- Timeline Container -->
-      <div class="bg-neutral-900 rounded-md p-4 col-span-2">
+      <Region class="col-span-2" innerClass="p-4">
         <Timeline />
-      </div>
+      </Region>
     </div>
   </main>
 
