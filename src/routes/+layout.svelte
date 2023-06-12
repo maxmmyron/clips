@@ -85,13 +85,9 @@
 
     $timeline.dragIndex = -1;
   };
-
-  const addKey = (e: KeyboardEvent) => $studio.keys.add(e.key.toLowerCase());
-
-  const removeKey = (e: KeyboardEvent) => $studio.keys.delete(e.key.toLowerCase());
 </script>
 
-<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} on:keydown|capture|preventDefault={addKey} on:keyup|preventDefault={removeKey} />
+<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} />
 
 {#if !isStudioLoaded}
   <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
@@ -110,7 +106,7 @@
     <!-- Export Settings -->
     <div class="bg-neutral-900 rounded-md p-4 flex justify-between items-center col-span-2">
       <div class="flex">
-        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName}>untitled</p>
+        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName} />
         <p class="text-neutral-200 font-mono">.mp4</p>
       </div>
       <Export />

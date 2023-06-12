@@ -113,7 +113,6 @@ declare global {
 				exportName: string;
 				audioContext: AudioContext | null;
 				mouse: {x: number, y: number};
-				keys: Set<string>;
 				draggable: {
 					// Resolves to the UUID of a Media object.
 					mediaUUID: string | null;

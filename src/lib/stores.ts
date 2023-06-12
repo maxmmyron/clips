@@ -7,7 +7,6 @@ export const studio: App.stores.WritableStudio = writable({
   audioContext: null,
   mouse: { x: 0, y: 0 },
   exportName: "untitled",
-  keys: new Set<string>(),
   /**
    * The drag data. used to determine what media is being dragged, and how to transform it on the screen given certain drag actions.
    * If null, no dragging is occurring.
