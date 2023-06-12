@@ -1,5 +1,6 @@
 <script lang="ts">
   import { player, timeline } from "$lib/stores";
+  import Button from "../util/Button.svelte";
 
   function setPlayerTime(front: boolean = true): any {
     console.log(`skipping to ${front ? "front" : "back"}`);
@@ -11,16 +12,7 @@
 </script>
 
 <div class="flex justify-center gap-4">
-  <button class="text-white border-2 border-neutral-800 px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed" on:click={() => setPlayerTime()}>
-    ⏪
-  </button>
-  <button
-    class="text-white border-2 border-neutral-800 px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-    on:click={() => ($player.isPaused = !$player.isPaused)}
-  >
-    {$player.isPaused ? "▶️" : "⏸️"}
-  </button>
-  <button class="text-white border-2 border-neutral-800 px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed" on:click={() => setPlayerTime(false)}>
-    ⏩
-  </button>
+  <Button onClick={() => setPlayerTime()} disabled={$timeline.runtime === 0}>⏪</Button>
+  <Button onClick={() => ($player.isPaused = !$player.isPaused)}>{$player.isPaused ? "▶️" : "⏸️"}</Button>
+  <Button onClick={() => setPlayerTime(false)} disabled={$timeline.current === null}>⏩</Button>
 </div>
