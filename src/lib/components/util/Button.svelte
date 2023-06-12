@@ -1,13 +1,12 @@
 <script lang="ts">
-  import { studio } from "$lib/stores";
+  import Key from "./Key.svelte";
 
   export let icon: string = "";
-  export let label: string;
 
   /**
    * The key bind that would trigger the click() function on the button.
    */
-  export let keyBind: string = "";
+  export let key: string = "";
 
   export let useCtrl: boolean = false;
   export let useAlt: boolean = false;
@@ -20,6 +19,8 @@
   export let isFake: boolean = false;
   export let onClick: () => void = () => {};
 
+  export let disabled: boolean = false;
+
   let button: HTMLButtonElement | HTMLDivElement;
 
   const handleKeyBind = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
@@ -28,7 +29,7 @@
     if (useAlt && !e.altKey) return;
     if (useShift && !e.shiftKey) return;
 
-    if (keyBind.toLowerCase() !== e.key.toLowerCase()) return;
+    if (key.toLowerCase() !== e.key.toLowerCase()) return;
 
     e.preventDefault();
     button.click();
@@ -40,6 +41,8 @@
 <svelte:element
   this={isFake ? "div" : "button"}
   class="p-[0.1rem] rounded-[0.6rem] min-w-[1.5rem] min-h-[1.5rem] bg-gradient-to-b from-neutral-800 to-black cursor-pointer"
+  {disabled}
+  class:cursor-not-allowed={disabled}
   on:click={onClick}
   bind:this={button}
 >
@@ -49,33 +52,23 @@
         <img src={icon} class="w-3 h-3 bg-yellow brightness-200" alt="" />
       {/if}
 
-      {#if label}
-        <p class="m-0 text-neutral-200 font-mono uppercase">{label}</p>
-      {/if}
+      <p class="m-0 text-neutral-200 font-mono uppercase" class:text-neutral-500={disabled}><slot /></p>
 
-      {#if keyBind}
+      {#if key}
         <div class="flex items-center gap-1">
           {#if useCtrl}
-            <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-              <span class="m-0 text-neutral-300 text-sm font-mono">Ctrl</span>
-            </div>
+            <Key>Ctrl</Key>
             <span class="text-neutral-400 text-xs font-mono">+</span>
           {/if}
           {#if useAlt}
-            <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-              <span class="m-0 text-neutral-300 text-sm font-mono">Alt</span>
-            </div>
+            <Key>⌥</Key>
             <span class="text-neutral-400 text-xs font-mono">+</span>
           {/if}
           {#if useShift}
-            <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-              <span class="m-0 text-neutral-300 text-sm font-mono">Shift</span>
-            </div>
+            <Key>⇑</Key>
             <span class="text-neutral-400 text-xs font-mono">+</span>
           {/if}
-          <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-            <span class="m-0 text-neutral-300 text-sm font-mono">{keyBind.toUpperCase()}</span>
-          </div>
+          <Key>{key.toUpperCase()}</Key>
         </div>
       {/if}
     </div>
