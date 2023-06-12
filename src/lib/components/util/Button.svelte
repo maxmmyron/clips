@@ -1,5 +1,6 @@
 <script lang="ts">
   import { studio } from "$lib/stores";
+  import formatKey from "$lib/util/formatKey";
 
   export let icon: string;
   export let label: string;
@@ -20,21 +21,17 @@
 
   const handleKeyBind = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.repeat) return;
-
-    console.log($studio.keys, keyBind);
+    let isMatch = true;
 
     if (typeof keyBind === "string") {
-      if ($studio.keys.size !== 1 || !$studio.keys.has(keyBind.toLowerCase())) return;
-
-      button.click();
+      if ($studio.keys.size !== 1 || !$studio.keys.has(keyBind.toLowerCase())) isMatch = false;
     } else {
-      if ($studio.keys.size !== keyBind.length) return;
-      keyBind.forEach((key) => {
-        if (!$studio.keys.has(key)) return;
-      });
-
-      button.click();
+      if ($studio.keys.size !== keyBind.length || [...$studio.keys.values()].some((key) => !keyBind.includes(key.toLowerCase()))) isMatch = false;
     }
+
+    if (!isMatch) return;
+    button.click();
+    $studio.keys.clear();
   };
 </script>
 
@@ -57,9 +54,22 @@
       {/if}
 
       {#if keyBind}
-        <div class="w-6 h-6 rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-          <span class="m-0 text-neutral-100 font-mono">{keyBind}</span>
-        </div>
+        {#if typeof keyBind === "string"}
+          <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+            <span class="m-0 text-neutral-300 text-sm font-mono">{formatKey(keyBind)}</span>
+          </div>
+        {:else}
+          <div class="flex gap-1 items-center">
+            {#each keyBind as key, i}
+              <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+                <span class="m-0 text-neutral-300 text-sm font-mono">{formatKey(key)}</span>
+              </div>
+              {#if i !== keyBind.length - 1}
+                <span class="m-0 text-neutral-400 text-xs font-mono">+</span>
+              {/if}
+            {/each}
+          </div>
+        {/if}
       {/if}
     </div>
   </div>
