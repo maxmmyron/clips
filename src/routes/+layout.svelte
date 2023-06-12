@@ -85,9 +85,13 @@
 
     $timeline.dragIndex = -1;
   };
+
+  const addKey = (e: KeyboardEvent) => $studio.keys.add(e.key.toLowerCase());
+
+  const removeKey = (e: KeyboardEvent) => $studio.keys.delete(e.key.toLowerCase());
 </script>
 
-<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} />
+<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} on:keydown|capture={addKey} on:keyup={removeKey} />
 
 {#if !isStudioLoaded}
   <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
