@@ -28,6 +28,9 @@ export default {
       },
       screens: {
         '3xl': '1772px',
+      },
+      boxShadow: {
+        "inner-lg": "inset 0 10px 15px 0 rgba(0, 0, 0, 0.1)",
       }
     },
   },
