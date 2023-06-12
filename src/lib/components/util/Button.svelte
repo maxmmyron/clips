@@ -1,6 +1,5 @@
 <script lang="ts">
   import { studio } from "$lib/stores";
-  import formatKey from "$lib/util/formatKey";
 
   export let icon: string;
   export let label: string;
@@ -8,7 +7,11 @@
   /**
    * The key bind that would trigger the click() function on the button.
    */
-  export let keyBind: string | string[];
+  export let keyBind: string = "";
+
+  export let useCtrl: boolean = false;
+  export let useAlt: boolean = false;
+  export let useShift: boolean = false;
 
   /**
    * Specifies whether or not to render a fake button, which is semantically a div.
@@ -21,17 +24,14 @@
 
   const handleKeyBind = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.repeat) return;
-    let isMatch = true;
+    if (useCtrl && !e.ctrlKey) return;
+    if (useAlt && !e.altKey) return;
+    if (useShift && !e.shiftKey) return;
 
-    if (typeof keyBind === "string") {
-      if ($studio.keys.size !== 1 || !$studio.keys.has(keyBind.toLowerCase())) isMatch = false;
-    } else {
-      if ($studio.keys.size !== keyBind.length || [...$studio.keys.values()].some((key) => !keyBind.includes(key.toLowerCase()))) isMatch = false;
-    }
+    if (keyBind.toLowerCase() !== e.key.toLowerCase()) return;
 
-    if (!isMatch) return;
+    e.preventDefault();
     button.click();
-    $studio.keys.clear();
   };
 </script>
 
@@ -54,22 +54,24 @@
       {/if}
 
       {#if keyBind}
-        {#if typeof keyBind === "string"}
+        {#if useCtrl}
           <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-            <span class="m-0 text-neutral-300 text-sm font-mono">{formatKey(keyBind)}</span>
-          </div>
-        {:else}
-          <div class="flex gap-1 items-center">
-            {#each keyBind as key, i}
-              <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-                <span class="m-0 text-neutral-300 text-sm font-mono">{formatKey(key)}</span>
-              </div>
-              {#if i !== keyBind.length - 1}
-                <span class="m-0 text-neutral-400 text-xs font-mono">+</span>
-              {/if}
-            {/each}
+            <span class="m-0 text-neutral-300 text-sm font-mono">Ctrl</span>
           </div>
         {/if}
+        {#if useAlt}
+          <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+            <span class="m-0 text-neutral-300 text-sm font-mono">Alt</span>
+          </div>
+        {/if}
+        {#if useShift}
+          <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+            <span class="m-0 text-neutral-300 text-sm font-mono">Shift</span>
+          </div>
+        {/if}
+        <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+          <span class="m-0 text-neutral-300 text-sm font-mono">{keyBind.toUpperCase()}</span>
+        </div>
       {/if}
     </div>
   </div>
