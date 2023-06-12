@@ -118,7 +118,7 @@
         multiple
         on:change={handleUpload}
       />
-      <Button icon="/icons/upload_dark.svg" label="upload" keyBind="u" useCtrl isFake />
+      <Button label="upload" keyBind="u" useCtrl isFake />
     </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
