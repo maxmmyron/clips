@@ -1,5 +1,6 @@
 <script lang="ts">
   import { player, studio, mediaPool } from "$lib/stores";
+  import Icon from "../util/Icon.svelte";
   import Marquee from "../util/Marquee.svelte";
 
   export let media: App.Media | null = null;
@@ -65,7 +66,7 @@
           ? 'gray-800'
           : 'neutral-900'} after:to-transparent"
       >
-        <img alt="" src="/icons/{media.type}_dark.svg" class="w-4 h-4" />
+        <Icon src="/icons/{media.type}.svg" />
         <Marquee isSecondaryColor={isSelected}>{media.metadata.title}</Marquee>
       </div>
     </div>

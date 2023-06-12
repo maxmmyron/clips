@@ -2,6 +2,7 @@
   import { mediaPool, studio } from "$lib/stores";
   import { fade } from "svelte/transition";
   import Marquee from "./Marquee.svelte";
+  import Icon from "./Icon.svelte";
 
   $: media = $mediaPool.media.find((m) => m.uuid === $studio.draggable.mediaUUID);
   $: pos = $studio.draggable.ghost.pos;
@@ -19,7 +20,7 @@
     transition:fade={{ duration: 150 }}
   >
     {#if region === null}
-      <img alt="" src="/icons/{media.type}_dark.svg" class="w-4 h-4" />
+      <Icon src="/icons/{media.type}.svg" />
       <div class="overflow-clip flex-1" style="width: calc(100% - 3rem);">
         <Marquee primaryColor={"neutral-800"}>{media.metadata.title}</Marquee>
       </div>
