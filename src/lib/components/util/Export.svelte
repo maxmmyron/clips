@@ -2,6 +2,7 @@
   import { timeline, studio } from "$lib/stores";
   import { ffmpegInstance } from "../../util/FFmpegManager";
   import { fetchFile } from "@ffmpeg/ffmpeg";
+  import Button from "./Button.svelte";
 
   let progressText = "";
 
@@ -75,8 +76,4 @@
   };
 </script>
 
-<button
-  on:click={exportTimeline}
-  disabled={$timeline.timeline.length === 0}
-  class="px-3 py-1 text-neutral-200 font-mono border-[1px] border-neutral-600 rounded-sm cursor-pointer disabled:cursor-not-allowed">export</button
->
+<Button onClick={exportTimeline} disabled={$timeline.timeline.length === 0}>Export</Button>
