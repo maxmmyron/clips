@@ -91,7 +91,7 @@
   const removeKey = (e: KeyboardEvent) => $studio.keys.delete(e.key.toLowerCase());
 </script>
 
-<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} on:keydown|capture={addKey} on:keyup={removeKey} />
+<svelte:window on:mousemove={handleDrag} on:mouseup={handleDrop} on:keydown|capture|preventDefault={addKey} on:keyup|preventDefault={removeKey} />
 
 {#if !isStudioLoaded}
   <div class="w-full h-[100dvh] bg-neutral-950 flex flex-col justify-center items-center gap-8 p-8">
