@@ -1,7 +1,7 @@
 <script lang="ts">
   import { studio } from "$lib/stores";
 
-  export let icon: string;
+  export let icon: string = "";
   export let label: string;
 
   /**
@@ -46,31 +46,36 @@
   <div class="p-[0.1rem] rounded-[0.5rem] bg-gradient-to-b from-zinc-600 to-zinc-800">
     <div class="p-[0.1rem] rounded-[0.4rem] flex items-center gap-3 px-2 py-1 bg-zinc-800">
       {#if icon}
-        <img src={icon} class="w-4 h-4 bg-yellow brightness-200" alt="" />
+        <img src={icon} class="w-3 h-3 bg-yellow brightness-200" alt="" />
       {/if}
 
       {#if label}
-        <p class="m-0 text-white font-mono uppercase">{label}</p>
+        <p class="m-0 text-neutral-200 font-mono uppercase">{label}</p>
       {/if}
 
       {#if keyBind}
-        {#if useCtrl}
+        <div class="flex items-center gap-1">
+          {#if useCtrl}
+            <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+              <span class="m-0 text-neutral-300 text-sm font-mono">Ctrl</span>
+            </div>
+            <span class="text-neutral-400 text-xs font-mono">+</span>
+          {/if}
+          {#if useAlt}
+            <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+              <span class="m-0 text-neutral-300 text-sm font-mono">Alt</span>
+            </div>
+            <span class="text-neutral-400 text-xs font-mono">+</span>
+          {/if}
+          {#if useShift}
+            <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
+              <span class="m-0 text-neutral-300 text-sm font-mono">Shift</span>
+            </div>
+            <span class="text-neutral-400 text-xs font-mono">+</span>
+          {/if}
           <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-            <span class="m-0 text-neutral-300 text-sm font-mono">Ctrl</span>
+            <span class="m-0 text-neutral-300 text-sm font-mono">{keyBind.toUpperCase()}</span>
           </div>
-        {/if}
-        {#if useAlt}
-          <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-            <span class="m-0 text-neutral-300 text-sm font-mono">Alt</span>
-          </div>
-        {/if}
-        {#if useShift}
-          <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-            <span class="m-0 text-neutral-300 text-sm font-mono">Shift</span>
-          </div>
-        {/if}
-        <div class="min-w-[1.5rem] h-6 px-[0.375rem] rounded-md bg-zinc-900 border-[1px] border-neutral-700 flex justify-center items-center">
-          <span class="m-0 text-neutral-300 text-sm font-mono">{keyBind.toUpperCase()}</span>
         </div>
       {/if}
     </div>
