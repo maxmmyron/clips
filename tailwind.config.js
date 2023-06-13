@@ -25,9 +25,21 @@ export default {
           '90%': {transform: 'rotate(8deg) scale(1.005)'},
           '100%': {transform: 'rotate(0deg) scale(1)'},
         }
+      },
+      screens: {
+        '3xl': '1772px',
+      },
+      boxShadow: {
+        "inner-lg": "inset 0 10px 15px 0 rgba(0, 0, 0, 0.1)",
       }
     },
   },
+  safelist: [
+    {
+      pattern: /from-(neutral|gray)-[0-9]{3}/,
+      variants: ['before', 'after'],
+    }
+  ],
   plugins: [],
 }
 

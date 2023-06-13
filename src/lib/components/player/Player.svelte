@@ -1,61 +1,50 @@
 <script lang="ts">
-  import { studio, player } from "$lib/stores";
-  import EditorPlayer from "./EditorPlayer.svelte";
-  import PreviewPlayer from "./PreviewPlayer.svelte";
+  import { timeline } from "$lib/stores";
+  import { Canvas, Layer, t, type Render } from "svelte-canvas";
+  import Buffer from "./Buffer.svelte";
 
-  let videoContainer: HTMLDivElement | null = null;
-  let width: number | null = null;
-  let height: number | null = null;
+  export let width: number, height: number;
 
-  const handleDrag = () => {
-    if ($studio.draggable.event !== "drag" || !videoContainer) return;
+  let audioContext: AudioContext = new AudioContext();
 
-    $studio.draggable.ghost.pos.set({ x: videoContainer.getBoundingClientRect().x, y: videoContainer.getBoundingClientRect().y });
-    $studio.draggable.ghost.size.set({ width: videoContainer.getBoundingClientRect().width, height: videoContainer.getBoundingClientRect().height });
-  };
+  let render: Render;
+  $: render = ({ context, width, height }) => {
+    $t;
+    if (!$timeline.current) {
+      context.fillStyle = "black";
+      context.fillRect(0, 0, width, height);
+      return;
+    }
 
-  const handleDrop = (e: MouseEvent) => {
-    if (!$studio.draggable.media) return;
-    $player.source = $studio.draggable.media.src;
-    $player.isSinglePreview = true;
+    if ($timeline.current.type === "audio") {
+      context.fillStyle = "black";
+      context.fillRect(0, 0, width, height);
+      return;
+    }
+
+    let src = $timeline.sources.get($timeline.current.uuid);
+    if (!src) return;
+
+    const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
+    const bufferHeight = src.type === "video" ? (src.source as HTMLVideoElement).videoHeight : (src.source as HTMLImageElement).height || 0;
+
+    const mediaSize = {
+      width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
+      height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
+    };
+
+    const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
+
+    context.drawImage(src.source, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
   };
 </script>
 
-<div>
-  <button
-    class="text-white border-2 border-neutral-800 px-3 py-1"
-    class:bg-neutral-600={$player.isSinglePreview === false}
-    on:click={() => ($player.isSinglePreview = false)}>editor</button
-  >
-  <button
-    class="text-white border-2 border-neutral-800 px-3 py-1"
-    class:bg-neutral-600={$player.isSinglePreview === true}
-    on:click={() => ($player.isSinglePreview = true)}
-    class:opacity-75={!$player.source}
-    disabled={!$player.source}>preview</button
-  >
-</div>
+{#each $timeline.timeline.toArray() as node}
+  {#if node.type !== "audio"}
+    <Buffer nodeUUID={node.uuid} {audioContext} />
+  {/if}
+{/each}
 
-<div
-  class="aspect-video w-full max-w-[75%]"
-  bind:this={videoContainer}
-  bind:clientWidth={width}
-  bind:clientHeight={height}
-  on:mouseup={handleDrop}
-  on:mousemove={handleDrag}
-  on:mouseenter={() => ($studio.draggable.current.region = "player")}
-  on:mouseleave={() => ($studio.draggable.current.region = null)}
->
-  {#key $player.source}
-    {#if $player.isSinglePreview === false}
-      <div class="flex">
-        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName}>untitled</p>
-        <p class="text-neutral-200 font-mono">.mp4</p>
-      </div>
-      <EditorPlayer width={width || 640} height={height || 480} />
-    {:else}
-      <!-- TODO: add preview media name -->
-      <PreviewPlayer />
-    {/if}
-  {/key}
-</div>
+<Canvas {width} {height}>
+  <Layer {render} />
+</Canvas>

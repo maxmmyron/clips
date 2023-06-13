@@ -5,7 +5,7 @@
   export let mediaUUID: string;
   export let metadata: { start: number; end: number };
 
-  const media = $mediaPool.media.find((media) => media.uuid === mediaUUID) as App.AudioMedia;
+  let media = $mediaPool.media.find((media) => media.uuid === mediaUUID) as App.Audio;
 
   let buffer = media.metadata.audio.getChannelData(0);
   let width: number, height: number;

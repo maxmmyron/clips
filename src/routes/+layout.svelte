@@ -1,11 +1,10 @@
 <script lang="ts">
-  import MediaPool from "$lib/components/MediaPool.svelte";
+  import MediaPool from "$lib/components/media/MediaPool.svelte";
   import Player from "$lib/components/player/Player.svelte";
-  import ResizeStalk from "$lib/components/util/ResizeStalk.svelte";
-  import Timeline from "$lib/components/Timeline.svelte";
+  import Timeline from "$lib/components/timeline/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
 
-  import { studio, timeline } from "$lib/stores";
+  import { mediaPool, studio, timeline } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
   import { dev } from "$app/environment";
@@ -13,18 +12,24 @@
 
   import "../app.css";
   import { loadFFmpeg } from "../lib/util/FFmpegManager";
+  import Controls from "$lib/components/player/Controls.svelte";
+  import Runtime from "$lib/components/player/Runtime.svelte";
+  import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
+  import { fly } from "svelte/transition";
+  import Ghost from "$lib/components/util/Ghost.svelte";
+  import Region from "$lib/components/util/Region.svelte";
+    import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
-  let isResizing = false;
-  let mediaColumnWidth = "40vw";
-  let timelineColumnWidth = "10vw";
-  let timelineHeight = "384px";
   let sizeQuery = -1,
     touchModeQuery = -1;
 
+  let editorWidth: number, editorHeight: number;
+
   $: ghostPos = $studio.draggable.ghost.pos;
   $: ghostSize = $studio.draggable.ghost.size;
+  $: isInspectorVisible = $mediaPool.selected.length > 0;
 
   let isStudioLoaded = false;
   let preloadMessage = "loading...";
@@ -48,14 +53,6 @@
     isStudioLoaded = true;
   });
 
-  const handleResize = (e: MouseEvent) => {
-    if (!isResizing || !$studio.resize) return;
-
-    if ($studio.resize === "media_col") mediaColumnWidth = `${e.clientX}px`;
-    else if ($studio.resize === "timeline_col") timelineColumnWidth = `${e.clientX}px`;
-    else if ($studio.resize === "row") timelineHeight = `calc(100vh - ${e.clientY}px)`;
-  };
-
   const handleDrag = (e: MouseEvent) => {
     $studio.mouse = { x: e.clientX, y: e.clientY };
 
@@ -71,14 +68,14 @@
     if ($studio.draggable.current.region !== null) return;
 
     ghostPos.set({ x: $studio.mouse.x, y: $studio.mouse.y });
-    ghostSize.set({ width: 32, height: 32 });
+    ghostSize.set({ width: 80, height: 45 });
   };
 
   const handleDrop = () => {
-    if (!$studio.draggable.media) return;
+    if (!$studio.draggable.mediaUUID) return;
 
     $studio.draggable = {
-      media: null,
+      mediaUUID: null,
       origin: null,
       event: null,
       current: { region: null },
@@ -104,43 +101,69 @@
     <p class="text-2xl text-white">Please use a desktop browser.</p>
   </div>
 {:else}
-  <main
-    style="--row-width: minmax(256px, {timelineHeight});"
-    class="w-full h-[100dvh] bg-neutral-950 grid grid-cols-1 grid-rows-[minmax(0,1fr),3px,var(--row-width)] transition-none"
-    class:select-none={isResizing}
-    on:mousemove={(e) => handleResize(e)}
-    on:mousedown={(e) => e.button === 0 && (isResizing = true)}
-    on:mouseup={() => {
-      isResizing = false;
-      $studio.resize = null;
-    }}
-  >
-    <section
-      style="--media-col-width: minmax(320px, {mediaColumnWidth});"
-      class="grid grid-rows-1 grid-cols-[var(--media-col-width),3px,minmax(0,1fr)] transition-none"
-    >
-      <MediaPool />
-      <ResizeStalk resize="media_col" />
-      <div class="flex flex-col justify-center items-center gap-8 p-8">
-        <Export />
-        <Player />
+  <main class="w-full h-[100dvh] bg-[#0E0E0E] grid grid-rows-[48px,auto,48px,384px] grid-cols-[1fr,1fr,0.618fr] gap-1 p-1">
+    <!-- Settings Ribbon -->
+    <Region />
+
+    <!-- Export Settings -->
+    <Region class="col-span-2" innerClass="flex justify-between items-center p-4">
+      <div class="flex">
+        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName} />
+        <p class="text-neutral-200 font-mono">.mp4</p>
       </div>
-    </section>
-    <ResizeStalk resize="row" />
-    <section
-      style="--timeline-col-width: minmax(320px, {timelineColumnWidth});"
-      class="grid grid-rows-1 grid-cols-[var(--timeline-col-width),3px,minmax(0,1fr)] transition-none"
-    >
-      <p>tracks</p>
-      <ResizeStalk resize="timeline_col" />
-      <Timeline />
-    </section>
+      <Export />
+    </Region>
+
+    <!-- Media Pool -->
+    <Region innerClass="p-4">
+      <MediaPool />
+    </Region>
+
+    <!-- Player -->
+    <div class="flex flex-col justify-center items-center col-start-2 row-start-2 col-span-2">
+      <div class="bg-black w-full aspect-video min-w-[480px] max-w-[calc(90%)]" bind:clientWidth={editorWidth} bind:clientHeight={editorHeight}>
+        <Player width={editorWidth} height={editorHeight} />
+      </div>
+    </div>
+
+    <!-- Inspector -->
+    {#if $mediaPool.selected.length}
+      <div class="relative z-10 row-start-2 col-start-3" transition:fly={{ x: "100%" }}>
+        <Region>
+          <InspectorWrapper />
+        </Region>
+      </div>
+    {/if}
+
+    <!-- Timeline Controls -->
+    <Region innerClass="flex items-center px-4">
+      <ScaleInput/>
+    </Region>
+
+    <!-- Video Controls -->
+    <Region class="row-start-3 col-start-2 col-span-2" innerClass="grid grid-cols-3 grid-rows-1 px-4">
+      <div class="col-start-2 flex justify-center items-center">
+        <Controls />
+      </div>
+
+      <div class="flex justify-end items-center">
+        <Runtime />
+      </div>
+    </Region>
+
+    <!-- The lack of support for subgrid--as well as calc's lack of support for <flex> data types--makes this hack
+      slightly necessary. We use 0.4975fr for the fractional unit since it approximately compensates for the 4px gap
+      introduced with the repeated column.-->
+    <!-- Timeline Container -->
+    <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
+      <!-- Timeline Track List -->
+      <Region />
+      <!-- Timeline Container -->
+      <Region class="col-span-2" innerClass="p-4">
+        <Timeline />
+      </Region>
+    </div>
   </main>
 
-  {#if $studio.draggable.media && $studio.draggable.event !== "start"}
-    <div
-      class="z-10 absolute w-6 h-6 rounded-md bg-blue-600 opacity-50 transition-none pointer-events-none"
-      style="left: {$ghostPos.x}px; top: {$ghostPos.y}px; width: {$ghostSize.width}px; height: {$ghostSize.height}px;"
-    />
-  {/if}
+  <Ghost />
 {/if}

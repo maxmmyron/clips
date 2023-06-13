@@ -1,13 +1,12 @@
 <script lang="ts">
   import { mediaPool, player, timeline } from "$lib/stores";
   import { onMount } from "svelte";
-  import { isNodeAudioMedia, isNodeVideoMedia } from "../../util/helpers";
 
   export let nodeUUID: string, audioContext: AudioContext;
 
   let buffer: HTMLVideoElement | HTMLImageElement;
 
-  const node = $timeline.timeline.getByUUID(nodeUUID) as App.Node<"video" | "image" | "audio">;
+  $: node = $timeline.timeline.getByUUID(nodeUUID) as App.Node;
   let audioNode: AudioBufferSourceNode;
   let hasAudioNodeStarted = false;
 
@@ -15,11 +14,11 @@
 
   // FIXME: this runs every frame due to $timeline.current === node check. not sure why?
   $: if (buffer && $timeline.current === node) {
-    if (isNodeVideoMedia(node)) {
+    if (node.type === "video") {
       buffer = buffer as HTMLVideoElement;
       if (!$player.isPaused && buffer.paused) {
         audioNode = audioContext.createBufferSource();
-        audioNode.buffer = ($mediaPool.media.find((media) => media.uuid === node.mediaUUID) as App.VideoMedia).metadata.audio;
+        audioNode.buffer = ($mediaPool.media.find((media) => media.uuid === node.mediaUUID) as App.Video).metadata.audio;
         audioNode.connect(audioContext.destination);
         const playTime = $timeline.currentNodeRuntime + $timeline.current.metadata.start;
         const endTime = $timeline.current.metadata.duration - $timeline.current.metadata.start - $timeline.current.metadata.end;
@@ -36,10 +35,10 @@
       }
     }
 
-    if (isNodeAudioMedia(node)) {
+    if (node.type === "audio") {
       if (!$player.isPaused && !hasAudioNodeStarted) {
         audioNode = audioContext.createBufferSource();
-        audioNode.buffer = ($mediaPool.media.find((media) => media.uuid === node.mediaUUID) as App.AudioMedia).metadata.audio;
+        audioNode.buffer = ($mediaPool.media.find((media) => media.uuid === node.mediaUUID) as App.Audio).metadata.audio;
         audioNode.connect(audioContext.destination);
         const playTime = $timeline.currentNodeRuntime + $timeline.current.metadata.start;
         const endTime = $timeline.current.metadata.duration - $timeline.current.metadata.start - $timeline.current.metadata.end;

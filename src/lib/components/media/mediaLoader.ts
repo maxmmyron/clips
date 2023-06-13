@@ -1,44 +1,48 @@
 import { get } from "svelte/store";
-import { studio } from "../stores";
+import { studio } from "../../stores";
 import { v4 as uuidv4 } from "uuid";
 
-export const parseMediaMetadata = async (file: File, src: string): Promise<App.VideoMedia | App.AudioMedia | App.ImageMedia> => {
-  const defaultMediaProperties = {
-    uuid: uuidv4(),
-    src,
-    name: file.name,
-  };
+export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, src: string): Promise<App.MediaObjects<T>> => {
+  switch(type) {
+    case "video":
+      return {
+        uuid: uuidv4(),
+        type: "video",
+        src: src,
+        metadata: {
+          duration: await loadMediaDuration(src, "video"),
+          audio: await loadAudioBuffer(src),
+          thumbnails: await loadThumbnails(src),
+          title: name
+        }
+      } as App.MediaObjects<T>;
 
-  if(file.type.includes("audio")) {
-    return {
-      ...defaultMediaProperties,
-      type: "audio",
-      metadata: {
-        audio: await loadAudioBuffer(src),
-        duration: await loadMediaDuration(src, "audio"),
-        title: file.name,
-      }
-    } as App.AudioMedia;
-  } else if(file.type.includes("video")) {
-    return {
-      ...defaultMediaProperties,
-      type: "video",
-      metadata: {
-        duration: await loadMediaDuration(src, "video"),
-        thumbnails: await loadThumbnails(src),
-        audio: await loadAudioBuffer(src),
-        title: file.name,
-      }
-    } as App.VideoMedia;
-  } else if(file.type.includes("image")) {
-    return {
-      ...defaultMediaProperties,
-      type: "image",
-      metadata: {
-        title: file.name,
-      },
-    } as App.ImageMedia;
-  } else throw Error("Unsupported file type");
+    case "audio":
+      return {
+        uuid: uuidv4(),
+        type: "audio",
+        src: src,
+        metadata: {
+          duration: await loadMediaDuration(src, "audio"),
+          audio: await loadAudioBuffer(src),
+          title: name
+        }
+      } as App.MediaObjects<T>;
+
+    case "image":
+      return {
+        uuid: uuidv4(),
+        type: "image",
+        src: src,
+        metadata: {
+          title: name
+        }
+      } as App.MediaObjects<T>;
+
+    default:
+      throw Error("Unsupported media type");
+
+    };
 };
 
 const loadMediaDuration = (src: string, type: string) => new Promise<number>((resolve, reject) => {

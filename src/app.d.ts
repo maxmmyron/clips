@@ -21,12 +21,16 @@ declare global {
 			get length(): number;
 		}
 
-		interface Node<T = "video" | "audio" | "image"> {
+		type Node = VideoNode | AudioNode | ImageNode;
+		type NodeTypes = "video" | "audio" | "image";
+		type NodeObjects<T> = T extends "video" ? VideoNode : T extends "audio" ? AudioNode : T extends "image" ? ImageNode : never;
+
+		interface VideoNode {
 			next: Node | null;
 			prev: Node | null;
 			uuid: string;
 			mediaUUID: string;
-			type: T extends "video" ? "video" : T extends "audio" ? "audio" : T extends "image" ? "image" : never;
+			type: "video";
 			src: string;
 			metadata: {
 				title: string;
@@ -34,14 +38,46 @@ declare global {
 				start: number;
 				end: number;
 			}
-		};
-
-		interface Media {
-			uuid: string;
-			src: string;
 		}
 
-		interface VideoMedia extends Media {
+		interface AudioNode {
+			next: Node | null;
+			prev: Node | null;
+			uuid: string;
+			mediaUUID: string;
+			type: "audio";
+			src: string;
+			metadata: {
+				title: string;
+				duration: number;
+				start: number;
+				end: number;
+			}
+		}
+
+		interface ImageNode {
+			next: Node | null;
+			prev: Node | null;
+			uuid: string;
+			mediaUUID: string;
+			type: "image";
+			src: string;
+			metadata: {
+				title: string;
+				duration: number;
+				start: number;
+				end: number;
+			}
+		}
+
+		type Media = Video | Audio | Image;
+		type MediaTypes = "video" | "audio" | "image";
+		type MediaObjects<T> = T extends "video" ? Video : T extends "audio" ? Audio : T extends "image" ? Image : never;
+
+
+		interface Video {
+			uuid: string;
+			src: string;
 			type: "video";
 			metadata: {
 				title: string;
@@ -51,7 +87,9 @@ declare global {
 			}
 		}
 
-		interface AudioMedia extends Media {
+		interface Audio {
+			uuid: string;
+			src: string;
 			type: "audio";
 			metadata: {
 				title: string;
@@ -60,12 +98,15 @@ declare global {
 			}
 		}
 
-		interface ImageMedia extends Media {
+		interface Image {
+			uuid: string;
+			src: string;
 			type: "image";
 			metadata: {
 				title: string;
 			}
 		}
+
 		namespace stores {
 			type WritableStudio = Writable<{
 				resize: "row" | "media_col" | "timeline_col" | null;
@@ -73,7 +114,8 @@ declare global {
 				audioContext: AudioContext | null;
 				mouse: {x: number, y: number};
 				draggable: {
-					media: VideoMedia | AudioMedia | ImageMedia | Node | null;
+					// Resolves to the UUID of a Media object.
+					mediaUUID: string | null;
 					origin: {
 						pos: {x: number, y: number};
 						region: "timeline" | "media_pool";
@@ -91,7 +133,7 @@ declare global {
 
 			type WritableMediaPool = Writable<{
 				selected: string[];
-				media: Array<VideoMedia | AudioMedia | ImageMedia>;
+				media: Media[];
 			}>;
 
 			type WritableTimeline = Writable<{

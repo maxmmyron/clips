@@ -1,13 +1,14 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { mediaPool, timeline } from "$lib/stores";
-  import { parseMediaMetadata } from "../util/mediaLoader";
-  import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
-  import MediaPoolPreview from "./mediaPreview/MediaPoolPreview.svelte";
-  import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
-  import { parseMIME } from "$lib/util/mimeParser";
-  import { assertBrowserSupportsContainer } from "$lib/util/browserParser";
+  import { createMedia } from "./mediaLoader";
+  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
+  import MediaPoolPreview from "../preview/MediaPoolPreview.svelte";
+  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
+  import { parseMIME } from "$lib/components/media/mimeParser";
+  import { assertBrowserSupportsContainer } from "$lib/components/media/browserParser";
   import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
+  import Button from "../util/Button.svelte";
 
   let unresolvedMedia: { name: string; msg: string }[] = [];
 
@@ -53,14 +54,18 @@
 
       unresolvedMedia[idx].msg = "loading metadata...";
 
-      const metadata = await parseMediaMetadata(file, src);
-      if (metadata === null) {
+      let media: App.Media | null = null;
+      if (file.type.includes("video")) media = await createMedia("video", file.name, src);
+      else if (file.type.includes("audio")) media = await createMedia("audio", file.name, src);
+      else media = await createMedia("image", file.name, src);
+
+      if (media === null) {
         unresolvedMedia.splice(idx, 1);
         return;
       }
 
       unresolvedMedia.splice(idx, 1);
-      $mediaPool.media = [...$mediaPool.media, metadata];
+      $mediaPool.media = [...$mediaPool.media, media];
     }
 
     unresolvedMedia = [];
@@ -102,9 +107,19 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($mediaPool.selected = [])} />
 
-<div class="relative pt-4 px-4 h-full overflow-y-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
-  <div class="flex justify-between gap-2">
-    <input type="file" accept="video/*,image/*,audio/*,.avif" class="text-white h-8" multiple on:change={handleUpload} />
+<div class="relative h-full overflow-y-scroll" on:dragover|preventDefault on:drop|preventDefault={handleDrop}>
+  <div class="flex justify-between items-center gap-2 mb-4">
+    <p class="font-mono font-bold text-neutral-500">MEDIA POOL</p>
+    <label class="group/label">
+      <input
+        type="file"
+        accept="video/*,image/*,audio/*,.avif"
+        class="w-[1px] h-[1px] overflow-hidden [clip:rect(0,0,0,0)] whitespace-nowrap border-none absolute"
+        multiple
+        on:change={handleUpload}
+      />
+      <Button key="u" useAlt isFake>upload</Button>
+    </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
     {#key $mediaPool.media.length}

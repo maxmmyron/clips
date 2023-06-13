@@ -29,7 +29,7 @@
   const handleReorder = (e: MouseEvent) => {
     $studio.draggable = {
       ...$studio.draggable,
-      media: node,
+      mediaUUID: node.mediaUUID,
       origin: {
         pos: { x: e.clientX, y: e.clientY },
         region: "timeline",

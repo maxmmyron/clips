@@ -1,24 +1,21 @@
 <script lang="ts">
-  import { timeline, studio, player } from "$lib/stores";
+  import { timeline, studio, player, mediaPool } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
-  import MediaVideoPreview from "./mediaPreview/MediaVideoPreview.svelte";
-  import MediaAudioPreview from "./mediaPreview/MediaAudioPreview.svelte";
-  import TimelinePreview from "./mediaPreview/TimelinePreview.svelte";
-  import { isAudioMedia, isVideoMedia } from "../util/helpers";
+  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
+  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
+  import TimelinePreview from "../preview/TimelinePreview.svelte";
   import { onMount } from "svelte";
+  import Scrubber from "./Scrubber.svelte";
 
-  let timelineScale = 50;
   let timelineContainer: HTMLElement;
   let canMoveScrubber = false;
   let timelineWidth = 0;
 
   let dropIndex: number = -1;
 
-  $: $timeline.zoomScale = timelineScale;
-  $: scrubberPos = $timeline.runtime * timelineScale;
   $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
 
-  $: ticks = Array.from({ length: timelineWidth / timelineScale }).map((_, i) => {
+  $: ticks = Array.from({ length: timelineWidth / $timeline.zoomScale }).map((_, i) => {
     if (i % 5 === 0) {
       return 10;
     } else if (i % 10 === 0) {
@@ -84,12 +81,30 @@
       dropXPosition = afterElement.getBoundingClientRect().left;
     }
 
+    let width = 12;
+    if ($studio.draggable.origin?.region === "media_pool") {
+      if ($studio.draggable.mediaUUID) {
+        let duration = 3;
+        const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
+        if (!draggable) return;
+
+        if (draggable.type === "video" || draggable.type === "audio") {
+          duration = draggable.metadata.duration;
+        }
+
+        width = duration * $timeline.zoomScale;
+      } else if ($timeline.dragIndex !== -1) {
+        const clip = $timeline.timeline.getByIndex($timeline.dragIndex) as App.Node;
+        width = clip.metadata.duration * $timeline.zoomScale;
+      }
+    }
+
     // update ghost position and size
     $studio.draggable.ghost.pos.set({
       x: dropXPosition,
       y: timelineContainer.getBoundingClientRect().top,
     });
-    $studio.draggable.ghost.size.set({ width: 8, height: timelineContainer.getBoundingClientRect().height });
+    $studio.draggable.ghost.size.set({ width, height: timelineContainer.getBoundingClientRect().height });
   };
 
   const handleDragEnd = () => {
@@ -108,11 +123,12 @@
     }
     // handle dragging new media into timeline
 
-    if (!$studio.draggable.media) return;
-    const draggable = $studio.draggable.media as App.VideoMedia | App.AudioMedia | App.ImageMedia;
+    if (!$studio.draggable.mediaUUID) return;
+    const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
+    if (!draggable) return;
 
     let duration = 3;
-    if (isVideoMedia(draggable) || isAudioMedia(draggable)) {
+    if (draggable.type === "video" || draggable.type === "audio") {
       duration = draggable.metadata.duration;
     }
 
@@ -151,7 +167,7 @@
   const moveUserScrubber = (e: MouseEvent) => {
     if (!canMoveScrubber) return;
 
-    $timeline.runtime = (e.clientX - timelineContainer.getBoundingClientRect().left) / timelineScale;
+    $timeline.runtime = Math.max(0, (e.clientX - timelineContainer.getBoundingClientRect().left) / $timeline.zoomScale);
   };
 
   const endUserScrubberMove = (e: MouseEvent) => {
@@ -208,30 +224,12 @@
         </div>
       {/each}
     </div>
-    <div
-      id="scrubber"
-      style="left: {scrubberPos}px"
-      class="absolute w-0.5 h-3/4 top-1/2 transform -translate-y-1/2 bg-blue-500 rounded-full pointer-events-none"
-    />
+    <Scrubber />
 
     {#key $timeline.zoomScale}
       {#each ticks as height, idx}
-        <div class="absolute top-0 w-[1px] bg-blue-400 opacity-50" style="left: {idx * timelineScale}px; height: {height * 3}px" />
+        <div class="absolute top-0 w-[2px] bg-neutral-500 opacity-50" style="left: {idx * $timeline.zoomScale}px; height: {height * 3}px" />
       {/each}
     {/key}
   </div>
-  <input class="absolute top-2 right-2" type="range" min="10" max="100" bind:value={timelineScale} />
 </div>
-
-<style>
-  #scrubber::before {
-    content: "";
-    position: absolute;
-    top: -8px;
-    left: -5px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgb(11 113 230 / 1);
-  }
-</style>
