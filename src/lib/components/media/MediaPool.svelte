@@ -9,6 +9,7 @@
   import { assertBrowserSupportsContainer } from "$lib/components/media/browserParser";
   import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
   import Button from "../util/Button.svelte";
+  import { tick } from "svelte";
 
   let unresolvedMedia: { name: string; msg: string }[] = [];
 
@@ -55,20 +56,18 @@
       unresolvedMedia[idx].msg = "loading metadata...";
 
       let media: App.Media | null = null;
-      if (file.type.includes("video")) media = await createMedia("video", file.name, src);
-      else if (file.type.includes("audio")) media = await createMedia("audio", file.name, src);
-      else media = await createMedia("image", file.name, src);
 
-      if (media === null) {
-        unresolvedMedia.splice(idx, 1);
-        return;
+      if (file.type.includes("video")) media = await createMedia("video", file.name, src).catch((e) => null);
+      else if (file.type.includes("audio")) media = await createMedia("audio", file.name, src).catch((e) => null);
+      else media = await createMedia("image", file.name, src).catch((e) => null);
+
+      unresolvedMedia = unresolvedMedia.filter((media) => media.name !== file.name);
+      if (media !== null) {
+        $mediaPool.media = [...$mediaPool.media, media];
+      } else {
+        console.error("Non-fatal error: failed to create media object.");
       }
-
-      unresolvedMedia.splice(idx, 1);
-      $mediaPool.media = [...$mediaPool.media, media];
     }
-
-    unresolvedMedia = [];
   };
 
   const handleKey = (e: KeyboardEvent) => {
