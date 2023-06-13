@@ -40,19 +40,25 @@
 
 <svelte:element
   this={isFake ? "div" : "button"}
-  class="p-[0.1rem] rounded-[0.6rem] min-w-[1.5rem] min-h-[1.5rem] bg-gradient-to-b from-neutral-800 to-black cursor-pointer"
+  class="group p-[0.1rem] rounded-[0.6rem] min-w-[1.5rem] min-h-[1.5rem] transition-all
+  bg-gradient-to-b from-neutral-800 via-black to-neutral-800 bg-[size:1px_200%]
+  {!disabled ? 'hover:shadow-lg active:shadow-none active:bg-[position:bottom]' : ''}
+  {!disabled ? 'cursor-pointer' : 'cursor-not-allowed'}"
   {disabled}
-  class:cursor-not-allowed={disabled}
   on:click={onClick}
   bind:this={button}
 >
-  <div class="p-[0.1rem] rounded-[0.5rem] bg-gradient-to-b from-zinc-600 to-zinc-800">
-    <div class="p-[0.1rem] rounded-[0.4rem] flex items-center gap-3 px-2 py-1 bg-zinc-800">
+  <div
+    class="p-[0.1rem] rounded-[0.5rem] transition-all
+    {!disabled ? 'bg-gradient-to-b from-zinc-600 via-zinc-800 to-zinc-700 bg-[size:1px_200%]' : 'bg-zinc-800'}
+    {!disabled ? 'group-hover:bg-[size:1px_250%] group-active:bg-[position:bottom]' : ''}"
+  >
+    <div class="p-[0.1rem] rounded-[0.4rem] flex items-center gap-3 px-2 py-1 transition-all bg-zinc-800" class:opacity-75={disabled}>
       {#if icon}
         <img src={icon} class="w-3 h-3 bg-yellow brightness-200" alt="" />
       {/if}
 
-      <p class="m-0 text-neutral-200 font-mono uppercase" class:text-neutral-500={disabled}><slot /></p>
+      <p class="m-0 text-neutral-200 font-mono uppercase" class:text-neutral-400={disabled}><slot /></p>
 
       {#if key}
         <div class="flex items-center gap-1">
