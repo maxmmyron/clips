@@ -118,7 +118,7 @@
         multiple
         on:change={handleUpload}
       />
-      <Button key="u" useAlt useShift isFake>upload</Button>
+      <Button key="u" useAlt isFake>upload</Button>
     </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
