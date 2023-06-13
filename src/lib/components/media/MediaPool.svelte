@@ -44,10 +44,9 @@
       }
 
       unresolvedMedia[idx].msg = "checking media support...";
-      const browserSupportsContainer = await assertBrowserSupportsContainer(MIME);
 
       let src: string;
-      if (!browserSupportsContainer) {
+      if (!(await assertBrowserSupportsContainer(MIME))) {
         unresolvedMedia[idx].msg = "converting...";
 
         src = await convertFileToSupportedContainer(file, MIME);
