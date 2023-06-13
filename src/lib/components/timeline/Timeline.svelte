@@ -81,17 +81,22 @@
       dropXPosition = afterElement.getBoundingClientRect().left;
     }
 
-    let duration = 3;
-    if ($studio.draggable.mediaUUID) {
-      const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
-      if (!draggable) return;
+    let width = 12;
+    if ($studio.draggable.origin?.region === "media_pool") {
+      if ($studio.draggable.mediaUUID) {
+        let duration = 3;
+        const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
+        if (!draggable) return;
 
-      if (draggable.type === "video" || draggable.type === "audio") {
-        duration = draggable.metadata.duration;
+        if (draggable.type === "video" || draggable.type === "audio") {
+          duration = draggable.metadata.duration;
+        }
+
+        width = duration * $timeline.zoomScale;
+      } else if ($timeline.dragIndex !== -1) {
+        const clip = $timeline.timeline.getByIndex($timeline.dragIndex) as App.Node;
+        width = clip.metadata.duration * $timeline.zoomScale;
       }
-    } else if ($timeline.dragIndex !== -1) {
-      const clip = $timeline.timeline.getByIndex($timeline.dragIndex) as App.Node;
-      duration = clip.metadata.duration;
     }
 
     // update ghost position and size
@@ -99,7 +104,7 @@
       x: dropXPosition,
       y: timelineContainer.getBoundingClientRect().top,
     });
-    $studio.draggable.ghost.size.set({ width: duration * $timeline.zoomScale, height: timelineContainer.getBoundingClientRect().height });
+    $studio.draggable.ghost.size.set({ width, height: timelineContainer.getBoundingClientRect().height });
   };
 
   const handleDragEnd = () => {
@@ -163,7 +168,6 @@
     if (!canMoveScrubber) return;
 
     $timeline.runtime = Math.max(0, (e.clientX - timelineContainer.getBoundingClientRect().left) / $timeline.zoomScale);
-    console.log($timeline.current);
   };
 
   const endUserScrubberMove = (e: MouseEvent) => {
