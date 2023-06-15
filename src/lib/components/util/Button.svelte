@@ -12,6 +12,8 @@
   export let useAlt: boolean = false;
   export let useShift: boolean = false;
 
+  export let showKeyBind: boolean = true;
+
   /**
    * Specifies whether or not to render a fake button, which is semantically a div.
    * This is useful in instances where the button's default event would otherwise not propagate to the parent.
@@ -29,7 +31,7 @@
     if (useAlt && !e.altKey) return;
     if (useShift && !e.shiftKey) return;
 
-    if (key.toLowerCase() !== e.key.toLowerCase()) return;
+    if (key.toLowerCase() !== e.code.toLowerCase()) return;
 
     e.preventDefault();
     button.click();
@@ -60,7 +62,7 @@
 
       <p class="m-0 text-neutral-200 font-mono uppercase" class:text-neutral-400={disabled}><slot /></p>
 
-      {#if key}
+      {#if key && showKeyBind}
         <div class="flex items-center gap-1">
           {#if useCtrl}
             <Key>Ctrl</Key>
