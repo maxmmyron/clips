@@ -9,10 +9,8 @@
 
 <div class="relative w-full {isTimelineElement ? 'h-1/2' : 'h-full'} flex rounded-md overflow-clip">
   {#if media.type === "video"}
-    {#each media.metadata.thumbnails as thumbnail}
-      <div class="h-full aspect-video bg-no-repeat bg-center bg-black" style="background-image:url({thumbnail}); background-size: auto 100%;" />
-    {/each}
+    <div class="h-full aspect-video bg-no-repeat bg-center bg-black bg-contain" style="background-image:url({media.metadata.thumbnails[0]});" />
   {:else}
-    <div class="h-full aspect-video bg-no-repeat bg-center bg-black" style="background-image:url({media.src}); background-size: auto 100%;" />
+    <div class="h-full aspect-video bg-no-repeat bg-center bg-contain bg-black" style="background-image:url({media.src});" />
   {/if}
 </div>

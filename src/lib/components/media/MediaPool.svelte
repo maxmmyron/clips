@@ -123,12 +123,8 @@
     {#key $mediaPool.media.length}
       {#each $mediaPool.media as media}
         <MediaPoolPreview {media}>
-          {#if media.type === "video"}
+          {#if media.type === "video" || media.type === "image"}
             <MediaVideoPreview mediaUUID={media.uuid} />
-          {:else if media.type === "image"}
-            <div class="w-full h-full bg-neutral-400">
-              <img src={media.src} alt={media.metadata.title} class="w-full h-full object-fit select-none" draggable="false" />
-            </div>
           {:else if media.type === "audio"}
             <MediaAudioPreview mediaUUID={media.uuid} metadata={{ start: 0, end: 0 }} />
           {/if}
