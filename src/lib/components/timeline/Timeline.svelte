@@ -7,22 +7,14 @@
   import { onMount } from "svelte";
   import Scrubber from "./Scrubber.svelte";
 
-  let timelineContainer: HTMLElement;
+  let timelineElementContainer: HTMLDivElement, timelineContainer: HTMLDivElement;
   let canMoveScrubber = false;
   let timelineWidth = 0;
+  let scrollX = 0;
 
   let dropIndex: number = -1;
 
   $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
-
-  $: ticks = Array.from({ length: timelineWidth / $timeline.zoomScale }).map((_, i) => {
-    if (i % 5 === 0) {
-      return 10;
-    } else if (i % 10 === 0) {
-      return 20;
-    }
-    return 5;
-  });
 
   let lastTimestamp = 0;
   const renderTimeline = (timestamp: number) => {
@@ -56,7 +48,7 @@
     if ($studio.draggable.event !== "drag" || $studio.draggable.current.region !== "timeline") return;
 
     // get the element to place our element before
-    const afterElement = [...timelineContainer.querySelectorAll(".draggable:not(.dragging)")].reduce(
+    const afterElement = [...timelineElementContainer.querySelectorAll(".draggable:not(.dragging)")].reduce(
       (accumulator, currChild) => {
         const childBounds = currChild.getBoundingClientRect();
         const offset = e.clientX - childBounds.left - childBounds.width / 2;
@@ -73,11 +65,11 @@
     let dropXPosition = 0;
     if (afterElement == null) {
       dropIndex = -1;
-      if (timelineContainer.children.length > 0)
-        dropXPosition = timelineContainer.children[timelineContainer.children.length - 1].getBoundingClientRect().right;
-      else dropXPosition = timelineContainer.getBoundingClientRect().left;
+      if (timelineElementContainer.children.length > 0)
+        dropXPosition = timelineElementContainer.children[timelineElementContainer.children.length - 1].getBoundingClientRect().right;
+      else dropXPosition = timelineElementContainer.getBoundingClientRect().left;
     } else {
-      dropIndex = [...timelineContainer.querySelectorAll(".draggable:not(.dragging)")].indexOf(afterElement);
+      dropIndex = [...timelineElementContainer.querySelectorAll(".draggable:not(.dragging)")].indexOf(afterElement);
       dropXPosition = afterElement.getBoundingClientRect().left;
     }
 
@@ -102,9 +94,9 @@
     // update ghost position and size
     $studio.draggable.ghost.pos.set({
       x: dropXPosition,
-      y: timelineContainer.getBoundingClientRect().top,
+      y: timelineElementContainer.getBoundingClientRect().top,
     });
-    $studio.draggable.ghost.size.set({ width, height: timelineContainer.getBoundingClientRect().height });
+    $studio.draggable.ghost.size.set({ width, height: timelineElementContainer.getBoundingClientRect().height });
   };
 
   const handleDragEnd = () => {
@@ -167,7 +159,7 @@
   const moveUserScrubber = (e: MouseEvent) => {
     if (!canMoveScrubber) return;
 
-    $timeline.runtime = Math.max(0, (e.clientX - timelineContainer.getBoundingClientRect().left) / $timeline.zoomScale);
+    $timeline.runtime = Math.max(0, (e.clientX - timelineElementContainer.getBoundingClientRect().left) / $timeline.zoomScale);
   };
 
   const endUserScrubberMove = (e: MouseEvent) => {
@@ -179,11 +171,13 @@
 <svelte:window on:keydown={handleKey} on:click={() => ($timeline.selected = [])} />
 
 <div
-  class="relative w-full h-full overflow-x-auto flex items-center"
+  class="relative w-full h-full overflow-x-auto"
   on:mousemove={handleDrag}
   on:mousedown={startUserScrubberMove}
   on:mousemove={moveUserScrubber}
   on:mouseup={endUserScrubberMove}
+  bind:this={timelineContainer}
+  on:scroll={(e) => (scrollX = timelineContainer.scrollLeft)}
 >
   <div
     class="w-full h-full flex items-center"
@@ -192,7 +186,7 @@
     on:mouseleave={() => ($studio.draggable.current.region = null)}
     bind:clientWidth={timelineWidth}
   >
-    <div class="relative flex h-fit min-h-[50%]" bind:this={timelineContainer}>
+    <div class="relative flex h-fit min-h-[50%]" bind:this={timelineElementContainer}>
       {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
         <div
           class="draggable overflow-clip"
@@ -227,8 +221,8 @@
     <Scrubber />
 
     {#key $timeline.zoomScale}
-      {#each ticks as height, idx}
-        <div class="absolute top-0 w-[2px] bg-neutral-500 opacity-50" style="left: {idx * $timeline.zoomScale}px; height: {height * 3}px" />
+      {#each { length: Math.ceil(timelineWidth / $timeline.zoomScale) } as _, idx}
+        <div class="text-white bg-neutral-500 w-[2px] h-2 transform" style="--tw-translate-x: {scrollX + idx * ($timeline.zoomScale - 2)}px">{idx}</div>
       {/each}
     {/key}
   </div>
