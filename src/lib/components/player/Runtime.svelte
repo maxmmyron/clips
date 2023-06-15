@@ -11,9 +11,9 @@
     </p>
   {/each}
   <p class="text-neutral-200 font-mono">
-    <!-- Loving the lack of configurability for chained call new lines!!!! Super happy this line of code is ripped apart onto three separate lines!!!!!! https://github.com/prettier/prettier/issues/1565 -->
     {Math.round(($timeline.runtime % 1) * 1000)
       .toString()
-      .padStart(3, "0")}
+      .padStart(3, "0")
+      .slice(0, 3)}
   </p>
 </div>
