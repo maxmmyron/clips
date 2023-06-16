@@ -222,7 +222,12 @@
 
     {#key $timeline.zoomScale}
       {#each { length: Math.ceil(timelineWidth / $timeline.zoomScale) } as _, idx}
-        <div class="text-white bg-neutral-500 w-[2px] h-2 transform" style="--tw-translate-x: {scrollX + idx * ($timeline.zoomScale - 2)}px">{idx}</div>
+        <div
+          class="absolute top-2 text-neutral-400 bg-neutral-500 w-[2px] h-2 transform"
+          style="--tw-translate-x: {(scrollX % $timeline.zoomScale) + idx * ($timeline.zoomScale - 2)}px;"
+        >
+          {idx}
+        </div>
       {/each}
     {/key}
   </div>
