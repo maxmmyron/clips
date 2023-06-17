@@ -18,7 +18,7 @@
   import { fly } from "svelte/transition";
   import Ghost from "$lib/components/util/Ghost.svelte";
   import Region from "$lib/components/util/Region.svelte";
-    import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
+  import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -137,7 +137,7 @@
 
     <!-- Timeline Controls -->
     <Region innerClass="flex items-center px-4">
-      <ScaleInput/>
+      <ScaleInput />
     </Region>
 
     <!-- Video Controls -->
