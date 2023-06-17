@@ -6,6 +6,7 @@
   import TimelinePreview from "../preview/TimelinePreview.svelte";
   import { onMount } from "svelte";
   import Scrubber from "./Scrubber.svelte";
+  import Ticks from "./Ticks.svelte";
 
   let timelineElementContainer: HTMLDivElement, timelineContainer: HTMLDivElement;
   let canMoveScrubber = false;
@@ -220,15 +221,6 @@
     </div>
     <Scrubber />
 
-    {#key $timeline.zoomScale}
-      {#each { length: Math.ceil(timelineWidth / $timeline.zoomScale) } as _, idx}
-        <div
-          class="absolute top-2 text-neutral-400 bg-neutral-500 w-[2px] h-2 transform"
-          style="--tw-translate-x: {(scrollX % $timeline.zoomScale) + idx * ($timeline.zoomScale - 2)}px;"
-        >
-          {idx}
-        </div>
-      {/each}
-    {/key}
+    <Ticks {scrollX} {timelineWidth} />
   </div>
 </div>
