@@ -1,48 +1,37 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
-  import { onMount } from "svelte";
 
   export let timelineWidth: number;
   export let scrollX: number;
 
-  let canvas: HTMLCanvasElement;
+  $: numTicks = Math.ceil(timelineWidth / $timeline.zoomScale);
 
-  let lastScrollX = 0;
-  let lastZoom = 0;
+  // breakpoints for timing tick scale (i.e. seconds per tick)
+  // $: timingScale = 1;
 
-  $: ctx = canvas?.getContext("2d") ?? null;
-  $: if (ctx) {
-    if (lastScrollX !== scrollX || lastZoom !== $timeline.zoomScale) {
-      lastScrollX = scrollX;
-      lastZoom = $timeline.zoomScale;
-      draw(ctx);
-    }
-  }
-
-  onMount(() => ctx && draw(ctx));
-
-  const draw = (ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = "white";
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let i = 0; i < numTicks; i++) {
-      let x = ((i - scrollX / $timeline.zoomScale) * $timeline.zoomScale) % timelineWidth;
-      // if x <= 0, add i + numTicks * number of wraps
-      if (x < 0) x += timelineWidth;
-
-      const wrap = Math.floor((timelineWidth - (i - (scrollX - 1) / $timeline.zoomScale) * $timeline.zoomScale) / timelineWidth);
-
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, 48);
-      ctx.stroke();
-
-      ctx.font = "16px Arial";
-      ctx.strokeText(`${i + wrap * numTicks}`, x + 4, 16);
-    }
+  // gets the position of a tick given its index.
+  const calculatePos = (idx: number) => {
+    let x = $timeline.zoomScale * idx - scrollX;
+    while (x < 0) x += $timeline.zoomScale * numTicks;
+    return x;
   };
 
-  $: numTicks = Math.ceil(timelineWidth / $timeline.zoomScale);
+  const getTimestamp = (idx: number) => {
+    let x = $timeline.zoomScale * idx - scrollX;
+    let y = idx;
+    // if x <= 0, add i + numTicks * number of wraps
+    while (x < 0) {
+      x += $timeline.zoomScale * numTicks;
+      y += numTicks;
+    }
+    return y;
+  };
 </script>
 
-<canvas class="absolute w-full h-6 top-0 transform" style="--tw-translate-x: {scrollX}px;" bind:this={canvas} width={timelineWidth} height="24" />
+<div class="absolute w-full h-6 top-0 transform" style="--tw-translate-x:{scrollX}px;">
+  {#key scrollX || $timeline.zoomScale || timelineWidth}
+    {#each { length: numTicks } as _, i}
+      <div class="text-white absolute w-px h-6 top-0 left-0 bg-gray-300" style="left:{calculatePos(i)}px;">{getTimestamp(i)}</div>
+    {/each}
+  {/key}
+</div>
