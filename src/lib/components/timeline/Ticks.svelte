@@ -4,24 +4,32 @@
   export let timelineWidth: number;
   export let scrollX: number;
 
+  // exponential factor for the number of ticks to display.
+  const expFactor = 1.4;
+
   $: numTicks = Math.ceil(timelineWidth / $timeline.zoomScale);
 
-  // breakpoints for timing tick scale (i.e. seconds per tick)
-  // $: timingScale = 1;
+  // The zoom scale scaled by the exponential factor.
+  $: scaledZoom = $timeline.zoomScale ** expFactor;
+
+  // A factor determining how many ticks to skip based on the zoom level.
+  $: skipFactor = Math.floor((($timeline.zoomScale - 120) / 40) ** 2);
+
+  const shouldSkip = (idx: number) => (skipFactor > 0 ? idx % skipFactor !== 0 : false);
 
   // gets the position of a tick given its index.
-  const calculatePos = (idx: number) => {
-    let x = $timeline.zoomScale * idx - scrollX;
-    while (x < 0) x += $timeline.zoomScale * numTicks;
+  const calcPos = (idx: number) => {
+    let x = scaledZoom * idx - scrollX;
+    while (x < 0) x += scaledZoom * numTicks;
     return x;
   };
 
-  const getTimestamp = (idx: number) => {
-    let x = $timeline.zoomScale * idx - scrollX;
+  const calcTime = (idx: number) => {
+    let x = scaledZoom * idx - scrollX;
     let y = idx;
     // if x <= 0, add i + numTicks * number of wraps
     while (x < 0) {
-      x += $timeline.zoomScale * numTicks;
+      x += scaledZoom * numTicks;
       y += numTicks;
     }
     return y;
@@ -31,7 +39,9 @@
 <div class="absolute w-full h-6 top-0 transform" style="--tw-translate-x:{scrollX}px;">
   {#key scrollX || $timeline.zoomScale || timelineWidth}
     {#each { length: numTicks } as _, i}
-      <div class="text-white absolute w-px h-6 top-0 left-0 bg-gray-300" style="left:{calculatePos(i)}px;">{getTimestamp(i)}</div>
+      {#if !shouldSkip(i)}
+        <div class="text-white absolute w-px h-6 top-0 left-0 bg-gray-300" style="left:{calcPos(i)}px;">{calcTime(i)}</div>
+      {/if}
     {/each}
   {/key}
 </div>
