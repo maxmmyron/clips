@@ -1,47 +1,25 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
 
-  export let timelineWidth: number;
   export let scrollX: number;
 
-  // exponential factor for the number of ticks to display.
-  const expFactor = 1.4;
+  const tickHeights = [1, 1, 1, 2, 1, 1];
 
-  $: numTicks = Math.ceil(timelineWidth / $timeline.zoomScale);
+  let width: number;
 
-  // The zoom scale scaled by the exponential factor.
-  $: scaledZoom = $timeline.zoomScale ** expFactor;
-
-  // A factor determining how many ticks to skip based on the zoom level.
-  $: skipFactor = Math.floor((($timeline.zoomScale - 120) / 40) ** 2);
-
-  const shouldSkip = (idx: number) => (skipFactor > 0 ? idx % skipFactor !== 0 : false);
-
-  // gets the position of a tick given its index.
-  const calcPos = (idx: number) => {
-    let x = scaledZoom * idx - scrollX;
-    while (x < 0) x += scaledZoom * numTicks;
-    return x;
-  };
-
-  const calcTime = (idx: number) => {
-    let x = scaledZoom * idx - scrollX;
-    let y = idx;
-    // if x <= 0, add i + numTicks * number of wraps
-    while (x < 0) {
-      x += scaledZoom * numTicks;
-      y += numTicks;
-    }
-    return y;
-  };
+  $: offset = Math.floor(scrollX / (width / 6));
+  $: secondScale = Math.floor(($timeline.zoomScale - 50) / 10);
 </script>
 
-<div class="absolute w-full h-6 top-0 transform" style="--tw-translate-x:{scrollX}px;">
-  {#key scrollX || $timeline.zoomScale || timelineWidth}
-    {#each { length: numTicks } as _, i}
-      {#if !shouldSkip(i)}
-        <div class="text-white absolute w-px h-6 top-0 left-0 bg-gray-300" style="left:{calcPos(i)}px;">{calcTime(i)}</div>
-      {/if}
+<div class="absolute w-full h-6 top-0 overflow-clip">
+  <div class="w-[120%] h-full flex transform" bind:clientWidth={width} style="--tw-translate-x:-{scrollX % (width / 6)}px;">
+    {#each { length: 6 } as _, i}
+      <div class="relative flex w-1/5 h-full border-l-2 border-l-white">
+        <p style="absolute text-white">{(i + offset) * 2 ** -secondScale}</p>
+        {#each tickHeights as h}
+          <div class="w-full border-l-2 border-l-white" style="height: {h * 12}px" />
+        {/each}
+      </div>
     {/each}
-  {/key}
+  </div>
 </div>

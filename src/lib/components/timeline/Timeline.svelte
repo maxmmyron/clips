@@ -10,7 +10,6 @@
 
   let timelineElementContainer: HTMLDivElement, timelineContainer: HTMLDivElement;
   let canMoveScrubber = false;
-  let timelineWidth = 0;
   let scrollX = 0;
 
   let dropIndex: number = -1;
@@ -185,7 +184,6 @@
     on:mouseup={handleDragEnd}
     on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
     on:mouseleave={() => ($studio.draggable.current.region = null)}
-    bind:clientWidth={timelineWidth}
   >
     <div class="relative flex h-fit min-h-[50%]" bind:this={timelineElementContainer}>
       {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
@@ -221,6 +219,6 @@
     </div>
     <Scrubber />
 
-    <Ticks {scrollX} {timelineWidth} />
+    <Ticks {scrollX} />
   </div>
 </div>
