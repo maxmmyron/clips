@@ -14,7 +14,11 @@
   let initialOffset = 0;
 
   $: isSelected = $timeline.selected.includes(node.uuid);
-  $: width = (duration - metadata.start - metadata.end) * $timeline.zoomScale + "px";
+
+  // n such that 2^n = duration of a 20% segment of the timeline.
+  $: secondScale = Math.floor(($timeline.zoomScale - 50) / 10);
+
+  $: width = (duration - metadata.start - metadata.end) * 2 ** secondScale * $timeline.zoomScale;
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
