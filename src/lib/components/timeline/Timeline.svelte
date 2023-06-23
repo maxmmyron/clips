@@ -170,55 +170,56 @@
 
 <svelte:window on:keydown={handleKey} on:click={() => ($timeline.selected = [])} />
 
-<div
-  class="relative w-full h-full overflow-x-auto"
-  on:mousemove={handleDrag}
-  on:mousedown={startUserScrubberMove}
-  on:mousemove={moveUserScrubber}
-  on:mouseup={endUserScrubberMove}
-  bind:this={timelineContainer}
-  on:scroll={(e) => (scrollX = timelineContainer.scrollLeft)}
->
+<div class="relative w-full h-full">
+  <Ticks {scrollX} />
   <div
-    class="w-full h-full flex items-center"
-    on:mouseup={handleDragEnd}
-    on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
-    on:mouseleave={() => ($studio.draggable.current.region = null)}
+    class="relative w-full h-full overflow-x-auto"
+    on:mousemove={handleDrag}
+    on:mousedown={startUserScrubberMove}
+    on:mousemove={moveUserScrubber}
+    on:mouseup={endUserScrubberMove}
+    bind:this={timelineContainer}
+    on:scroll={(e) => (scrollX = timelineContainer.scrollLeft)}
   >
-    <div class="relative flex h-fit min-h-[50%]" bind:this={timelineElementContainer}>
-      {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
-        <div
-          class="draggable overflow-clip"
-          class:dragging={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
-          class:w-0={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
-        >
-          <TimelinePreview {node}>
-            {#if node.type === "video"}
-              <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
-              {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-                <MediaAudioPreview
-                  mediaUUID={node.mediaUUID}
-                  metadata={{
-                    start: node.metadata.start,
-                    end: node.metadata.end,
-                  }}
-                />
-              {/key}
-            {:else if node.type === "audio"}
-              <div class="h-1/2" />
-              {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-                <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
-              {/key}
-            {:else if node.type === "image"}
-              <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
-              <div class="h-1/2" />
-            {/if}
-          </TimelinePreview>
-        </div>
-      {/each}
+    <div
+      class="w-full h-full flex items-center"
+      on:mouseup={handleDragEnd}
+      on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
+      on:mouseleave={() => ($studio.draggable.current.region = null)}
+    >
+      <div class="relative flex h-fit min-h-[50%]" bind:this={timelineElementContainer}>
+        {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
+          <div
+            class="draggable overflow-clip"
+            class:dragging={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
+            class:w-0={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
+          >
+            <TimelinePreview {node}>
+              {#if node.type === "video"}
+                <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
+                {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+                  <MediaAudioPreview
+                    mediaUUID={node.mediaUUID}
+                    metadata={{
+                      start: node.metadata.start,
+                      end: node.metadata.end,
+                    }}
+                  />
+                {/key}
+              {:else if node.type === "audio"}
+                <div class="h-1/2" />
+                {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+                  <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
+                {/key}
+              {:else if node.type === "image"}
+                <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
+                <div class="h-1/2" />
+              {/if}
+            </TimelinePreview>
+          </div>
+        {/each}
+      </div>
     </div>
-    <Scrubber />
-
-    <Ticks {scrollX} />
   </div>
+  <Scrubber {scrollX} />
 </div>

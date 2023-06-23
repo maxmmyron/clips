@@ -1,7 +1,9 @@
 <script lang="ts">
   import { timeline } from "$lib/stores";
 
-  $: scrubberPos = $timeline.runtime * $timeline.zoomScale;
+  export let scrollX: number;
+
+  $: scrubberPos = $timeline.runtime * $timeline.zoomScale - scrollX;
 </script>
 
 <div
