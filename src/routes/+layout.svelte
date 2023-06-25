@@ -3,22 +3,20 @@
   import Player from "$lib/components/player/Player.svelte";
   import Timeline from "$lib/components/timeline/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
-
+  import Controls from "$lib/components/player/Controls.svelte";
+  import Runtime from "$lib/components/player/Runtime.svelte";
+  import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
+  import Ghost from "$lib/components/util/Ghost.svelte";
+  import Region from "$lib/components/util/Region.svelte";
+  import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import { mediaPool, studio, timeline } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
   import { dev } from "$app/environment";
   import { inject } from "@vercel/analytics";
-
-  import "../app.css";
   import { loadFFmpeg } from "../lib/util/FFmpegManager";
-  import Controls from "$lib/components/player/Controls.svelte";
-  import Runtime from "$lib/components/player/Runtime.svelte";
-  import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
   import { fly } from "svelte/transition";
-  import Ghost from "$lib/components/util/Ghost.svelte";
-  import Region from "$lib/components/util/Region.svelte";
-    import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
+  import "../app.css";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -166,4 +164,7 @@
   </main>
 
   <Ghost />
+
+  <!-- Toast container -->
+  <div class="absolute bottom-4 right-4">
 {/if}
