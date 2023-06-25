@@ -194,7 +194,7 @@
             class:dragging={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
             class:w-0={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
           >
-            <TimelinePreview {node}>
+            <TimelinePreview {node} timelineSecondWidth={timelineContainer.getBoundingClientRect().width / 5}>
               {#if node.type === "video"}
                 <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
                 {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
