@@ -9,6 +9,7 @@
   import Ghost from "$lib/components/util/Ghost.svelte";
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
+  import Toast from "$lib/components/util/Toast.svelte";
   import { mediaPool, studio, timeline } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
@@ -167,4 +168,8 @@
 
   <!-- Toast container -->
   <div class="absolute z-20 bottom-4 right-4">
+    {#each $studio.toasts as toast}
+      <Toast {toast} />
+    {/each}
+  </div>
 {/if}
