@@ -43,7 +43,7 @@ export const timeline: App.stores.WritableTimeline = writable({
   timeline: new TimelineLinkedList(),
   current: null,
   sources: new Map(),
-  zoomScale: 50,
+  zoomScale: 5,
   dragIndex: -1,
   runtime: 0,
   duration: 0,
