@@ -166,5 +166,5 @@
   <Ghost />
 
   <!-- Toast container -->
-  <div class="absolute bottom-4 right-4">
+  <div class="absolute z-20 bottom-4 right-4">
 {/if}
