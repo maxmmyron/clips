@@ -11,12 +11,12 @@
   </button>
   <div class="flex items-center" bind:clientWidth={rangeWidth}>
     <div
-      class="z-10 absolute rounded-l-full w-[--width] h-1 bg-gradient-to-l from-neutral-400 to-neutral-700 bg-[size:var(--width)px_1px]"
-      style="--width: {rangeWidth * (($timeline.zoomScale - 5) / 125)}px"
+      class="z-10 absolute rounded-full w-[--width] h-1 bg-gradient-to-l from-neutral-400 to-neutral-700 bg-[size:var(--width)px_1px]"
+      style="--width: {rangeWidth * (($timeline.zoomScale - 1) / 9)}px"
     />
-    <input type="range" min="5" max="120" bind:value={$timeline.zoomScale} />
+    <input type="range" min="1" max="10" bind:value={$timeline.zoomScale} />
   </div>
-  <button on:click={() => ($timeline.zoomScale = Math.min(120, $timeline.zoomScale + 5))} class="transition-transform hover:scale-105 active:scale-95">
+  <button on:click={() => ($timeline.zoomScale = Math.min(10, $timeline.zoomScale + 1))} class="transition-transform hover:scale-105 active:scale-95">
     <Icon src="icons/zoom_in.svg" />
   </button>
 </div>

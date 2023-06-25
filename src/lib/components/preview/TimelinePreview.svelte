@@ -2,6 +2,7 @@
   import { player, studio, timeline } from "$lib/stores";
 
   export let node: App.Node;
+  export let timelineSecondWidth: number;
 
   const metadata = node.metadata;
 
@@ -16,9 +17,10 @@
   $: isSelected = $timeline.selected.includes(node.uuid);
 
   // n such that 2^n = duration of a 20% segment of the timeline.
-  $: secondScale = Math.floor(($timeline.zoomScale - 50) / 10);
+  $: secondScale = 2 ** (5 - $timeline.zoomScale);
 
-  $: width = (duration - metadata.start - metadata.end) * 2 ** secondScale * $timeline.zoomScale;
+  $: width = ((duration - metadata.start - metadata.end) / secondScale) * timelineSecondWidth;
+  $: console.log(width);
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
@@ -72,7 +74,7 @@
 
 <button
   bind:this={mediaPreview}
-  style="width: {width};"
+  style="width: {width}px;"
   on:click|capture|stopPropagation={handleClick}
   class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48 bg-black group"
   class:outline={isSelected}
