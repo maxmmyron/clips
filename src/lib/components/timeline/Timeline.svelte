@@ -15,6 +15,7 @@
   let dropIndex: number = -1;
 
   $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
+  $: secondWidth = (timelineContainer?.clientWidth ?? 0) / 5;
 
   let lastTimestamp = 0;
   const renderTimeline = (timestamp: number) => {
@@ -194,7 +195,7 @@
             class:dragging={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
             class:w-0={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
           >
-            <TimelinePreview {node} timelineSecondWidth={timelineContainer.getBoundingClientRect().width / 5}>
+            <TimelinePreview {node} timelineSecondWidth={secondWidth}>
               {#if node.type === "video"}
                 <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
                 {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
@@ -221,5 +222,5 @@
       </div>
     </div>
   </div>
-  <Scrubber {scrollX} />
+  <Scrubber {scrollX} timelineSecondWidth={secondWidth} />
 </div>
