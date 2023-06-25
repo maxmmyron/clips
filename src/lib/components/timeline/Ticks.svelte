@@ -3,7 +3,7 @@
 
   export let scrollX: number;
 
-  const tickHeights = [1, 1, 1, 2, 1, 1];
+  const tickHeights = [1, 1, 2, 1, 1, 1];
 
   let width: number;
 
@@ -16,8 +16,8 @@
     {#each { length: 6 } as _, i}
       <div class="relative flex w-1/5 h-full border-l-2 border-l-neutral-400">
         <p class="absolute text-neutral-300 -left-0.5 -top-6">{(i + offset) * 2 ** -secondScale}</p>
-        {#each tickHeights as h}
-          <div class="w-full border-l-2 border-l-neutral-400" style="height: {h * 12}px" />
+        {#each tickHeights as h, tickIdx}
+          <div class="w-full {tickIdx !== tickHeights.length - 1 ? 'border-r-2 border-r-neutral-400' : ''}" style="height: {h * 12}px" />
         {/each}
       </div>
     {/each}
