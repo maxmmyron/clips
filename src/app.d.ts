@@ -129,6 +129,7 @@ declare global {
 						size: Spring<{width: number, height: number}>;
 					};
 				};
+				toasts: Toast[];
 			}>;
 
 			type WritableMediaPool = Writable<{
@@ -157,6 +158,13 @@ declare global {
 				isPaused: boolean;
 				lastPauseState: boolean;
 			}>;
+		}
+
+		type Toast = {
+			uuid: string;
+			message: string;
+			level: "info" | "warning" | "error";
+			timeoutID: number;
 		}
 	}
 }
