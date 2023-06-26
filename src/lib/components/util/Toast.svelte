@@ -1,4 +1,6 @@
 <script lang=ts>
+    import {studio} from "$lib/stores";
+
     export let toast: Toast;
 
     const removeToast = () => {
