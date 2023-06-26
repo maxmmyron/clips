@@ -11,11 +11,12 @@
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
   import { mediaPool, studio, timeline } from "$lib/stores";
+  import { createToast } from "$lib/util/ToastManager";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
   import { dev } from "$app/environment";
   import { inject } from "@vercel/analytics";
-  import { loadFFmpeg } from "../lib/util/FFmpegManager";
+  import { loadFFmpeg } from "$lib/util/FFmpegManager";
   import { fly } from "svelte/transition";
   import "../app.css";
 
@@ -167,9 +168,10 @@
   <Ghost />
 
   <!-- Toast container -->
-  <div class="absolute z-20 bottom-4 right-4">
+  <div class="absolute z-20 bottom-4 right-4 flex flex-col gap-4">
     {#each $studio.toasts as toast}
       <Toast {toast} />
     {/each}
   </div>
+  <Button onClick={()=>createToast(1, 1000, "Example Toast")}>Add</Button>
 {/if}
