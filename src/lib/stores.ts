@@ -22,8 +22,7 @@ export const studio: App.stores.WritableStudio = writable({
       pos: spring({x: 0, y: 0}),
       size: spring({width: 0, height: 0}),
     }
-  },
-  toasts: []
+  }
 });
 
 export const mediaPool: App.stores.WritableMediaPool = writable({

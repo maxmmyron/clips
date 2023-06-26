@@ -129,7 +129,6 @@ declare global {
 						size: Spring<{width: number, height: number}>;
 					};
 				};
-				toasts: Toast[];
 			}>;
 
 			type WritableMediaPool = Writable<{
