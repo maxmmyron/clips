@@ -1,5 +1,6 @@
 <script lang=ts>
-    import {studio} from "$lib/stores";
+    import { studio } from "$lib/stores";
+    import { fly } from "svelte/transition";
 
     export let toast: Toast;
 
