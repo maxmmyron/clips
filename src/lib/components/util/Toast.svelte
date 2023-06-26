@@ -1,4 +1,4 @@
-<script lang=ts type=module>
+<script lang=ts context=module>
     export let toasts: Toast[];
 
     export const createToast = createToast = (level, duration, message) => {
