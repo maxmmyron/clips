@@ -173,6 +173,6 @@
     {#each $studio.toasts as toast}
       <Toast {toast} />
     {/each}
+    <Button onClick={()=>createToast(1, 1000, "Example Toast")}>Add</Button>
   </div>
-  <Button onClick={()=>createToast(1, 1000, "Example Toast")}>Add</Button>
 {/if}
