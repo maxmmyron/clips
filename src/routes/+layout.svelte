@@ -10,6 +10,7 @@
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
+  import Button from "$lib/components/util/Button.svelte";
   import { mediaPool, studio, timeline } from "$lib/stores";
   import { createToast } from "$lib/util/ToastManager";
   import { spring } from "svelte/motion";
