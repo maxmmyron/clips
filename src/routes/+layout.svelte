@@ -9,10 +9,9 @@
   import Ghost from "$lib/components/util/Ghost.svelte";
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
-  import Toast from "$lib/components/util/Toast.svelte";
+  import Toast, {toasts, createToast} from "$lib/components/util/Toast.svelte";
   import Button from "$lib/components/util/Button.svelte";
   import { mediaPool, studio, timeline } from "$lib/stores";
-  import { createToast } from "$lib/util/ToastManager";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
   import { dev } from "$app/environment";
@@ -170,7 +169,7 @@
 
   <!-- Toast container -->
   <div class="absolute z-20 bottom-4 right-4 flex flex-col gap-4">
-    {#each $studio.toasts as toast (toast.uuid)}
+    {#each toasts as toast (toast.uuid)}
       <Toast {toast} />
     {/each}
     <Button onClick={()=>createToast(1, 5000, "Example Toast")}>Add</Button>

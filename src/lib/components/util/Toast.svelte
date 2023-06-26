@@ -1,5 +1,22 @@
+<script lang=ts type=module>
+    export let toasts: Toast[];
+
+    export const createToast = createToast = (level, duration, message) => {
+    const uuid = new uuidv4();
+
+    toasts.push({
+        uuid,
+        level,
+        message,
+        timeoutID: setTimeout(() => {
+            const idx = toasts.findIndex(el => el.uuid === uuid);
+            toasts.splice(idx, 1);
+        }, duration) 
+    });
+}; 
+</script>
+
 <script lang=ts>
-    import { studio } from "$lib/stores";
     import { fly } from "svelte/transition";
 
     export let toast: Toast;
@@ -8,8 +25,8 @@
         // remove timeout before expiration
         clearTimeout(toast.timeoutID);
 
-        const idx = $studio.toasts.findIndex(t => t.uuid === toast.uuid);
-        $studio.toasts.splice(idx, 1);
+        const idx = toasts.findIndex(t => t.uuid === toast.uuid);
+        toasts.splice(idx, 1);
     };
 </script>
 
