@@ -9,15 +9,16 @@
   import Ghost from "$lib/components/util/Ghost.svelte";
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
-  import Toast, {toasts, createToast} from "$lib/components/util/Toast.svelte";
+  import Toast from "$lib/components/util/Toast.svelte";
   import Button from "$lib/components/util/Button.svelte";
-  import { mediaPool, studio, timeline } from "$lib/stores";
+  import { mediaPool, studio, timeline, toasts } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { onMount } from "svelte";
   import { dev } from "$app/environment";
   import { inject } from "@vercel/analytics";
   import { loadFFmpeg } from "$lib/util/FFmpegManager";
   import { fly } from "svelte/transition";
+  import { v4 as uuidv4 } from "uuid";
   import "../app.css";
 
   inject({ mode: dev ? "development" : "production" });
@@ -137,7 +138,7 @@
 
     <!-- Timeline Controls -->
     <Region innerClass="flex items-center px-4">
-      <ScaleInput/>
+      <ScaleInput />
     </Region>
 
     <!-- Video Controls -->
@@ -169,9 +170,26 @@
 
   <!-- Toast container -->
   <div class="absolute z-20 bottom-4 right-4 flex flex-col gap-4">
-    {#each toasts as toast (toast.uuid)}
+    {#each $toasts as toast}
       <Toast {toast} />
     {/each}
-    <Button onClick={()=>createToast(1, 5000, "Example Toast")}>Add</Button>
+    <Button
+      onClick={() => {
+        const uuid = uuidv4();
+
+        $toasts = [
+          ...$toasts,
+          {
+            uuid,
+            level: "info",
+            message: "Example toast",
+            timeoutID: setTimeout(() => {
+              const idx = $toasts.findIndex((el) => el.uuid === uuid);
+              $toasts.splice(idx, 1);
+            }, 5000),
+          },
+        ];
+      }}>Add</Button
+    >
   </div>
 {/if}
