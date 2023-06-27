@@ -196,20 +196,5 @@
         <Toast {toast} />
       </div>
     {/each}
-    <Button
-      onClick={() => {
-        const uuid = uuidv4();
-
-        $toasts = [
-          ...$toasts,
-          {
-            uuid,
-            level: "info",
-            message: "Example toast",
-            timeoutID: setTimeout(() => ($toasts = $toasts.filter((el) => el.uuid !== uuid)), 5000),
-          },
-        ];
-      }}>Add</Button
-    >
   </div>
 {/if}
