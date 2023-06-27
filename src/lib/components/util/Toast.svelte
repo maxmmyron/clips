@@ -14,7 +14,9 @@
     };
 </script>
 
-<div class="min-w-[24rem] w-fit max-w-lg min-h-[4rem] bg-gradient-to-b from-neutral-800 to-{neutral}-900 border-2 border-neutral-700 rounded-md p-4 shadow-lg">
+<div
+    class="min-w-[24rem] w-fit max-w-lg min-h-[4rem] bg-gradient-to-b from-neutral-800/70 to-neutral-900/70 backdrop-blur-sm border-2 border-neutral-800 rounded-md p-4 shadow-lg"
+>
     <div class="w-full h-5 flex justify-between items-center mb-4">
         <!-- This doesn't have to be in an img wrapper el because toast level color not light/dark dependent -->
         <Icon src="/icons/{toast.level}.svg" />
