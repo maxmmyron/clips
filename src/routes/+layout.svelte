@@ -186,6 +186,7 @@
             timeoutID: setTimeout(() => {
               const idx = $toasts.findIndex((el) => el.uuid === uuid);
               $toasts.splice(idx, 1);
+              $toasts = [...$toasts];
             }, 5000),
           },
         ];
