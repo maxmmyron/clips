@@ -1,6 +1,7 @@
 <script lang="ts">
   import { mediaPool } from "$lib/stores";
   import { onMount } from "svelte";
+  import { addToast } from "$lib/util/toastManager";
 
   export let mediaUUID: string;
   export let metadata: { start: number; end: number };
@@ -15,7 +16,10 @@
     canvas.width = width;
     canvas.height = height;
 
-    if (!buffer) return console.error("No audio data");
+    if (!buffer) {
+      addToast("error", "Error loading audio preview: no audio buffer found.");
+      return;
+    }
 
     const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
