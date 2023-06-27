@@ -1,6 +1,8 @@
 <script lang="ts">
   export let src: string;
 
+  // TODO: add alt tag that works with screen readers
+
   export let fill: string = "";
 </script>
 
