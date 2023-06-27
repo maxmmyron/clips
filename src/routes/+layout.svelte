@@ -13,6 +13,9 @@
   import Button from "$lib/components/util/Button.svelte";
   import { mediaPool, studio, timeline, toasts } from "$lib/stores";
   import { spring } from "svelte/motion";
+  import { flip } from "svelte/animate";
+  import { crossfade } from "svelte/transition";
+  import { quintOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { dev } from "$app/environment";
   import { inject } from "@vercel/analytics";
@@ -52,6 +55,24 @@
     preloadMessage = "Loading FFmpeg...";
     await loadFFmpeg();
     isStudioLoaded = true;
+  });
+
+  const [send, receive] = crossfade({
+    duration: (d) => Math.sqrt(d * 200),
+
+    fallback(node, params) {
+      const style = getComputedStyle(node);
+      const transform = style.transform === "none" ? "" : style.transform;
+
+      return {
+        duration: 400,
+        easing: quintOut,
+        css: (t) => `
+          transform: ${transform} translateX(${(1 - t) * 100}%);
+          opacity: ${t}
+        `,
+      };
+    },
   });
 
   const handleDrag = (e: MouseEvent) => {
@@ -170,8 +191,10 @@
 
   <!-- Toast container -->
   <div class="absolute z-20 bottom-4 right-4 flex flex-col gap-4">
-    {#each $toasts as toast}
-      <Toast {toast} />
+    {#each $toasts as toast (toast.uuid)}
+      <div in:receive={{ key: toast.uuid, ...receive }} out:send={{ key: toast.uuid, ...send }} animate:flip={{ duration: 200 }}>
+        <Toast {toast} />
+      </div>
     {/each}
     <Button
       onClick={() => {
@@ -183,11 +206,7 @@
             uuid,
             level: "info",
             message: "Example toast",
-            timeoutID: setTimeout(() => {
-              const idx = $toasts.findIndex((el) => el.uuid === uuid);
-              $toasts.splice(idx, 1);
-              $toasts = [...$toasts];
-            }, 5000),
+            timeoutID: setTimeout(() => ($toasts = $toasts.filter((el) => el.uuid !== uuid)), 5000),
           },
         ];
       }}>Add</Button
