@@ -1,10 +1,11 @@
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import { addToast } from './toastManager';
 
 export const ffmpegInstance = createFFmpeg({ log: true });
 
 export const loadFFmpeg = async () => {
   if (!ffmpegInstance.isLoaded()) await ffmpegInstance.load();
-  else console.warn("FFmpeg already loaded");
+  else addToast("warning", "FFmpeg already loaded");
 };
 
 export const convertFileToSupportedContainer = async (file: File, mime: string) => {
