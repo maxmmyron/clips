@@ -1,6 +1,7 @@
 import { get } from "svelte/store";
 import { studio } from "../../stores";
 import { v4 as uuidv4 } from "uuid";
+import { addToast } from "$lib/util/toastManager";
 
 export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, src: string): Promise<App.MediaObjects<T>> => {
   switch(type) {
@@ -40,6 +41,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
       } as App.MediaObjects<T>;
 
     default:
+      addToast("error", `Error loading media: ${type} is not a valid media type.`);
       throw Error("Unsupported media type");
 
     };
