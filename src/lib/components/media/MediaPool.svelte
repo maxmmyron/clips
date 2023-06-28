@@ -10,6 +10,7 @@
   import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
   import Button from "../util/Button.svelte";
   import { tick } from "svelte";
+  import { addToast } from "$lib/util/toastManager";
 
   let unresolvedMedia: { name: string; msg: string }[] = [];
 
@@ -64,7 +65,7 @@
       if (media !== null) {
         $mediaPool.media = [...$mediaPool.media, media];
       } else {
-        console.error("Non-fatal error: failed to create media object.");
+        addToast("error", `Failed to create media object for ${file.name}.`);
       }
     }
   };

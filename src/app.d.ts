@@ -158,6 +158,13 @@ declare global {
 				lastPauseState: boolean;
 			}>;
 		}
+
+		type Toast = {
+			uuid: string;
+			message: string;
+			level: "info" | "warning" | "error";
+			timeoutID: number;
+		}
 	}
 }
 

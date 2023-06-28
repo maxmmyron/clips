@@ -3,22 +3,26 @@
   import Player from "$lib/components/player/Player.svelte";
   import Timeline from "$lib/components/timeline/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
-
-  import { mediaPool, studio, timeline } from "$lib/stores";
-  import { spring } from "svelte/motion";
-  import { onMount } from "svelte";
-  import { dev } from "$app/environment";
-  import { inject } from "@vercel/analytics";
-
-  import "../app.css";
-  import { loadFFmpeg } from "../lib/util/FFmpegManager";
   import Controls from "$lib/components/player/Controls.svelte";
   import Runtime from "$lib/components/player/Runtime.svelte";
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
-  import { fly } from "svelte/transition";
   import Ghost from "$lib/components/util/Ghost.svelte";
   import Region from "$lib/components/util/Region.svelte";
-    import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
+  import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
+  import Toast from "$lib/components/util/Toast.svelte";
+  import Button from "$lib/components/util/Button.svelte";
+  import { mediaPool, studio, timeline, toasts } from "$lib/stores";
+  import { spring } from "svelte/motion";
+  import { flip } from "svelte/animate";
+  import { crossfade } from "svelte/transition";
+  import { quintOut } from "svelte/easing";
+  import { onMount } from "svelte";
+  import { dev } from "$app/environment";
+  import { inject } from "@vercel/analytics";
+  import { loadFFmpeg } from "$lib/util/FFmpegManager";
+  import { fly } from "svelte/transition";
+  import { v4 as uuidv4 } from "uuid";
+  import "../app.css";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -51,6 +55,24 @@
     preloadMessage = "Loading FFmpeg...";
     await loadFFmpeg();
     isStudioLoaded = true;
+  });
+
+  const [send, receive] = crossfade({
+    duration: (d) => Math.sqrt(d * 200),
+
+    fallback(node, params) {
+      const style = getComputedStyle(node);
+      const transform = style.transform === "none" ? "" : style.transform;
+
+      return {
+        duration: 400,
+        easing: quintOut,
+        css: (t) => `
+          transform: ${transform} translateX(${(1 - t) * 100}%);
+          opacity: ${t}
+        `,
+      };
+    },
   });
 
   const handleDrag = (e: MouseEvent) => {
@@ -137,7 +159,7 @@
 
     <!-- Timeline Controls -->
     <Region innerClass="flex items-center px-4">
-      <ScaleInput/>
+      <ScaleInput />
     </Region>
 
     <!-- Video Controls -->
@@ -166,4 +188,13 @@
   </main>
 
   <Ghost />
+
+  <!-- Toast container -->
+  <div class="absolute z-20 bottom-4 right-4 flex flex-col gap-4">
+    {#each $toasts as toast (toast.uuid)}
+      <div in:receive={{ key: toast.uuid, ...receive }} out:send={{ key: toast.uuid, ...send }} animate:flip={{ duration: 200 }}>
+        <Toast {toast} />
+      </div>
+    {/each}
+  </div>
 {/if}

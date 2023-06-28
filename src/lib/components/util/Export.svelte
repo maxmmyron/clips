@@ -3,6 +3,7 @@
   import { ffmpegInstance } from "../../util/FFmpegManager";
   import { fetchFile } from "@ffmpeg/ffmpeg";
   import Button from "./Button.svelte";
+  import { addToast } from "$lib/util/toastManager";
 
   let progressText = "";
 
@@ -16,7 +17,10 @@
     // ****************
     // 0. Setup
     // ****************
-    if (!ffmpegInstance.isLoaded) throw new Error("ffmpeg.wasm did not load on editor startup. Please refresh the page.");
+    if (!ffmpegInstance.isLoaded) {
+      addToast("error", "FFmpeg failed to load. Please refresh the page.");
+      throw new Error("ffmpeg.wasm did not load on editor startup. Please refresh the page.");
+    }
     const nodes = $timeline.timeline.toArray();
     for (const { uuid, src, type } of nodes) {
       ffmpegInstance.FS("writeFile", `${uuid}.${baseExtensionMap.get(type)}`, await fetchFile(src));

@@ -3,7 +3,6 @@
   import Button from "../util/Button.svelte";
 
   function setPlayerTime(front: boolean = true): any {
-    console.log(`skipping to ${front ? "front" : "back"}`);
     $player.isPaused = true;
 
     $timeline.runtime = front ? 0 : $timeline.duration;
