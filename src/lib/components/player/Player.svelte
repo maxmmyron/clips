@@ -40,7 +40,7 @@
 </script>
 
 {#each $timeline.timeline.toArray() as node}
-  {#if node.type !== "audio"}
+  {#if node.type !== "image"}
     <Buffer nodeUUID={node.uuid} {audioContext} />
   {/if}
 {/each}
