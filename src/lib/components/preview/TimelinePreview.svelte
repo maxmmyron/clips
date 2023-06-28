@@ -20,7 +20,6 @@
   $: secondScale = 2 ** (5 - $timeline.zoomScale);
 
   $: width = ((duration - metadata.start - metadata.end) / secondScale) * timelineSecondWidth;
-  $: console.log(width);
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
