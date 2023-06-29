@@ -10,7 +10,6 @@
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
-  import Button from "$lib/components/util/Button.svelte";
   import { mediaPool, studio, timeline, toasts } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
@@ -21,7 +20,6 @@
   import { inject } from "@vercel/analytics";
   import { loadFFmpeg } from "$lib/util/FFmpegManager";
   import { fly } from "svelte/transition";
-  import { v4 as uuidv4 } from "uuid";
   import "../app.css";
 
   inject({ mode: dev ? "development" : "production" });
@@ -33,7 +31,6 @@
 
   $: ghostPos = $studio.draggable.ghost.pos;
   $: ghostSize = $studio.draggable.ghost.size;
-  $: isInspectorVisible = $mediaPool.selected.length > 0;
 
   let isStudioLoaded = false;
   let preloadMessage = "loading...";
