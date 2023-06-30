@@ -2,15 +2,18 @@
   import { mediaPool, player, timeline } from "$lib/stores";
   import { onMount } from "svelte";
 
-  export let nodeUUID: string, audioContext: AudioContext;
+  export let audioContext: AudioContext;
+  export let node: App.Node;
 
   let buffer: HTMLVideoElement | HTMLImageElement;
 
-  $: node = $timeline.timeline.getByUUID(nodeUUID) as App.Node;
   let audioNode: AudioBufferSourceNode;
   let hasAudioNodeStarted = false;
 
-  onMount(() => node.type !== "audio" && $timeline.sources.set(nodeUUID, { source: buffer, type: node.type }));
+  onMount(() => {
+    if (node.type === "audio") return;
+    $timeline.sources.set(node.mediaUUID, { source: buffer, type: node.type });
+  });
 
   // FIXME: this runs every frame due to $timeline.current === node check. not sure why?
   $: if (buffer && $timeline.current === node) {
