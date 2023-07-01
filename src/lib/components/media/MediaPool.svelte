@@ -43,7 +43,7 @@
       else unresolvedMedia = createMedia("image", file.name, file);
 
       $media.unresolved = [...$media.unresolved, unresolvedMedia];
-      unresolvedMedia.then({uuid, media} => $media.resolved = [...$media.resolved, media]);
+      unresolvedMedia.then(({uuid, media}) => $media.resolved = [...$media.resolved, media]);
     }
   };
 
