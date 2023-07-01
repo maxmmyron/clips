@@ -2,43 +2,68 @@ import { get } from "svelte/store";
 import { studio } from "../../stores";
 import { v4 as uuidv4 } from "uuid";
 import { addToast } from "$lib/util/toastManager";
+import { parseMIME } from "./mimeParser";
+import { assertBrowserSupportsContainer } from "./browserParser";
+import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
-export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, src: string): Promise<App.MediaObjects<T>> => {
+export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, media: App.MediaObjects<T>}> => {
+
+  const MIME = await parseMIME(file);
+  if (MIME === "file/unknown") {
+    addToast("error", "Error loading media: MIME type could not be parsed.");
+    throw Error("MIME type could not be parsed");
+  }
+
+  if (!(await assertBrowserSupportsContainer(MIME))) {
+    src = await convertFileToSupportedContainer(file, MIME);
+  } else src = URL.createObjectURL(file);
+
+  const uuid: string = uuidv4();
+
   switch(type) {
     case "video":
       return {
-        uuid: uuidv4(),
-        type: "video",
-        src: src,
-        metadata: {
-          duration: await loadMediaDuration(src, "video"),
-          audio: await loadAudioBuffer(src),
-          thumbnails: await loadThumbnails(src),
-          title: name
+        uuid,
+        media: {
+          uuid,
+          type: "video",
+          src: src,
+          metadata: {
+            duration: await loadMediaDuration(src, "video"),
+            audio: await loadAudioBuffer(src),
+            thumbnails: await loadThumbnails(src),
+            title: name
+          }
         }
-      } as App.MediaObjects<T>;
+      } as {uuid: string, media: App.MediaObjects<T>};
 
     case "audio":
       return {
-        uuid: uuidv4(),
-        type: "audio",
-        src: src,
-        metadata: {
-          duration: await loadMediaDuration(src, "audio"),
-          audio: await loadAudioBuffer(src),
-          title: name
+        uuid,
+        media: {
+          uuid,
+          type: "audio",
+          src: src,
+          metadata: {
+            duration: await loadMediaDuration(src, "audio"),
+            audio: await loadAudioBuffer(src),
+            title: name
+          }
         }
-      } as App.MediaObjects<T>;
+      } as {uuid: string, media: App.MediaObjects<T>};
 
     case "image":
       return {
-        uuid: uuidv4(),
-        type: "image",
-        src: src,
-        metadata: {
-          title: name
+        uuid,
+        media: {
+          uuid,
+          type: "image",
+          src: src,
+          metadata: {
+            title: name
+          }
         }
-      } as App.MediaObjects<T>;
+      } as {uuid: string, media: App.MediaObjects<T>};
 
     default:
       addToast("error", `Error loading media: ${type} is not a valid media type.`);
