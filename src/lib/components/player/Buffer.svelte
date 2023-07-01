@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { mediaPool, player, timeline } from "$lib/stores";
+  import { buffers, media, player, timeline } from "$lib/stores";
   import { onMount } from "svelte";
 
   export let nodeUUID: string, audioContext: AudioContext;
 
   let buffer: HTMLVideoElement | HTMLImageElement;
 
-  $: node = $timeline.timeline.getByUUID(nodeUUID) as App.Node;
+  $: node = $timeline.clips.getByUUID(nodeUUID) as App.Node;
   let audioNode: AudioBufferSourceNode;
   let hasAudioNodeStarted = false;
 
-  onMount(() => node.type !== "audio" && $timeline.sources.set(nodeUUID, { source: buffer, type: node.type }));
+  onMount(() => node.type !== "audio" && $buffers.set(nodeUUID, { source: buffer, type: node.type }));
 
   // FIXME: this runs every frame due to $timeline.current === node check. not sure why?
   $: if (buffer && $timeline.current === node) {
@@ -18,7 +18,7 @@
       buffer = buffer as HTMLVideoElement;
       if (!$player.isPaused && buffer.paused) {
         audioNode = audioContext.createBufferSource();
-        audioNode.buffer = ($mediaPool.media.find((media) => media.uuid === node.mediaUUID) as App.Video).metadata.audio;
+        audioNode.buffer = ($media.resolved.find((media) => media.uuid === node.mediaUUID) as App.Video).metadata.audio;
         audioNode.connect(audioContext.destination);
         const playTime = $timeline.currentNodeRuntime + $timeline.current.metadata.start;
         const endTime = $timeline.current.metadata.duration - $timeline.current.metadata.start - $timeline.current.metadata.end;
@@ -38,7 +38,7 @@
     if (node.type === "audio") {
       if (!$player.isPaused && !hasAudioNodeStarted) {
         audioNode = audioContext.createBufferSource();
-        audioNode.buffer = ($mediaPool.media.find((media) => media.uuid === node.mediaUUID) as App.Audio).metadata.audio;
+        audioNode.buffer = ($media.resolved.find((media) => media.uuid === node.mediaUUID) as App.Audio).metadata.audio;
         audioNode.connect(audioContext.destination);
         const playTime = $timeline.currentNodeRuntime + $timeline.current.metadata.start;
         const endTime = $timeline.current.metadata.duration - $timeline.current.metadata.start - $timeline.current.metadata.end;

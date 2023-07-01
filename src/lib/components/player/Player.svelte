@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
+  import { timeline, buffers } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import Buffer from "./Buffer.svelte";
 
@@ -22,7 +22,7 @@
       return;
     }
 
-    let src = $timeline.sources.get($timeline.current.uuid);
+    let src = $buffers.get($timeline.current.uuid);
     if (!src) return;
 
     const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
@@ -39,7 +39,7 @@
   };
 </script>
 
-{#each $timeline.timeline.toArray() as node}
+{#each $timeline.clips.toArray() as node}
   {#if node.type !== "image"}
     <Buffer nodeUUID={node.uuid} {audioContext} />
   {/if}
