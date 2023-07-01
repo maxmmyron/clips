@@ -10,7 +10,7 @@
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
-  import { media, studio, timeline, draggable, toasts } from "$lib/stores";
+  import { media, studio, timeline, draggable, toasts, audioContext } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
   import { crossfade } from "svelte/transition";
@@ -40,7 +40,7 @@
 
   onMount(async () => {
     preloadMessage = "Loading audio context instance...";
-    $studio.audioContext = new AudioContext();
+    $audioContext = new AudioContext();
 
     preloadMessage = "Checking media queries...";
 
@@ -130,7 +130,7 @@
     <!-- Export Settings -->
     <Region class="col-span-2" innerClass="flex justify-between items-center p-4">
       <div class="flex">
-        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName} />
+        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.name} />
         <p class="text-neutral-200 font-mono">.mp4</p>
       </div>
       <Export />

@@ -1,5 +1,5 @@
 import { get } from "svelte/store";
-import { studio } from "../../stores";
+import { audioContext } from "../../stores";
 import { v4 as uuidv4 } from "uuid";
 import { addToast } from "$lib/util/toastManager";
 import { parseMIME } from "./mimeParser";
@@ -137,7 +137,7 @@ const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, re
 });
 
 const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
-  const audioContext = get(studio).audioContext;
+  const audioContext = get(AudioContext);
   if (!audioContext) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
     .then(buffer => {
