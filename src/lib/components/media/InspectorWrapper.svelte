@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { media } from "$lib/stores";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
