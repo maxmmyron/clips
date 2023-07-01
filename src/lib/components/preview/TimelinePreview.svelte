@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { player, studio, timeline } from "$lib/stores";
+  import { player, studio, timeline, draggable, media } from "$lib/stores";
 
   export let node: App.Node;
   export let timelineSecondWidth: number;
+  export let selected: string[];
+  export let dragIndex: number;
 
   const metadata = node.metadata;
 
@@ -14,7 +16,7 @@
   let initialPosition = 0;
   let initialOffset = 0;
 
-  $: isSelected = $timeline.selected.includes(node.uuid);
+  $: isSelected = selected.includes(node.uuid);
 
   // n such that 2^n = duration of a 20% segment of the timeline.
   $: secondScale = 2 ** (5 - $timeline.zoomScale);
@@ -27,31 +29,26 @@
       return;
     }
     if (e.detail == 2) $player.source = node.src;
-    else if (e.shiftKey) $timeline.selected = [...$timeline.selected, node.uuid];
-    else $timeline.selected = [node.uuid];
+    else if (e.shiftKey) selected = [...selected, node.uuid];
+    else selected = [node.uuid];
   };
 
   const handleReorder = (e: MouseEvent) => {
-    $studio.draggable = {
-      ...$studio.draggable,
-      mediaUUID: node.mediaUUID,
+    $draggable = {
+      ...$draggable,
+      media: <App.Media>$media.resolved.find((m) => m.uuid == node.uuid),
       origin: {
         pos: { x: e.clientX, y: e.clientY },
         region: "timeline",
       },
       event: "start",
-      current: {
-        region: "timeline",
-      },
+      region: "timeline",
     };
 
-    $studio.draggable.ghost.pos.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
-    $studio.draggable.ghost.size.set(
-      { width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height },
-      { hard: true }
-    );
+    $draggable.ghost.pos.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
+    $draggable.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
 
-    $timeline.dragIndex = $timeline.timeline.indexOf(node.uuid);
+    dragIndex = $timeline.clips.indexOf(node.uuid);
   };
 
   const handleOffsets = (e: MouseEvent) => {

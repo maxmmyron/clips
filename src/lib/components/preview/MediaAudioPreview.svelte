@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { mediaPool } from "$lib/stores";
+  import { media } from "$lib/stores";
   import { onMount } from "svelte";
   import { addToast } from "$lib/util/toastManager";
 
   export let mediaUUID: string;
   export let metadata: { start: number; end: number };
 
-  let media = $mediaPool.media.find((media) => media.uuid === mediaUUID) as App.Audio;
+  let resolved = $media.resolved.find((m) => m.uuid === mediaUUID) as App.Video | App.Audio;
+  let buffer = resolved.metadata.audio.getChannelData(0);
 
-  let buffer = media.metadata.audio.getChannelData(0);
   let width: number, height: number;
   let canvas: HTMLCanvasElement;
 
@@ -38,8 +38,8 @@
       return;
     }
 
-    const start = (metadata.start / media.metadata.duration) * buffer.length;
-    const end = ((media.metadata.duration - metadata.end) / media.metadata.duration) * buffer.length;
+    const start = (metadata.start / resolved.metadata.duration) * buffer.length;
+    const end = ((resolved.metadata.duration - metadata.end) / resolved.metadata.duration) * buffer.length;
 
     const offsetBuffer = buffer.slice(start, end);
 
