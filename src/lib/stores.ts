@@ -27,12 +27,15 @@ export const timeline: App.stores.timeline = writable({
   zoomScale: 5,
 })
 
-export const media = writable(new Array<{ uuid: string, media: Promise<App.Media> }>());
+export const media: App.stores.media = writable({
+  unresolved: [],
+  resolved: [],
+});
 export const buffers = writable(new Set<string>());
 export const audioContext: App.stores.audioContext = writable();
 export const toasts = writable(new Array<App.Toast>());
 
-export const player = writable({
+export const player: App.stores.player = writable({
   source: null,
   isPaused: true,
 });

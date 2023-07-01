@@ -50,7 +50,7 @@ declare global {
 			metadata: {
 				title: string;
 				duration: number;
-				start: number;
+				start: number
 				end: number;
 			}
 		}
@@ -117,6 +117,11 @@ declare global {
 		namespace stores {
 			type audioContext = Writable<AudioContext>;
 
+			type media = Writable<{
+				unresolved: Array<{uuid: string, media: Promise<App.Media>}>;
+				resolved: App.Media[];
+			}>
+
 			type draggable = Writable<{
 				media: App.Media | null;
 				event: "start" | "drag" | "end" | null;
@@ -138,6 +143,11 @@ declare global {
 				duration: number;
 				runtime: number;
 				zoomScale: number;
+			}>;
+
+			type player = Writable<{
+				source: string | null;
+				isPaused: boolean;
 			}>;
 		}
 	}
