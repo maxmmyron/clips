@@ -107,63 +107,38 @@ declare global {
 			}
 		}
 
-		namespace stores {
-			type WritableStudio = Writable<{
-				resize: "row" | "media_col" | "timeline_col" | null;
-				exportName: string;
-				audioContext: AudioContext | null;
-				mouse: {x: number, y: number};
-				draggable: {
-					// Resolves to the UUID of a Media object.
-					mediaUUID: string | null;
-					origin: {
-						pos: {x: number, y: number};
-						region: "timeline" | "media_pool";
-					} | null;
-					event: "start" | "drag" | "end" | null;
-					current: {
-						region: "timeline" | "media_pool" | "player" | null;
-					};
-					ghost: {
-						pos: Spring<{x: number, y: number}>;
-						size: Spring<{width: number, height: number}>;
-					};
-				};
-			}>;
-
-			type WritableMediaPool = Writable<{
-				selected: string[];
-				media: Media[];
-			}>;
-
-			type WritableTimeline = Writable<{
-				runtime: number;
-				duration: number;
-				selected: string[];
-				timeline: Timeline;
-				current: Node | null;
-				sources: Map<string, {
-					source: HTMLVideoElement | HTMLImageElement;
-					type: "video" | "image";
-				}>;
-				zoomScale: number;
-				dragIndex: number;
-				currentNodeRuntime: number;
-			}>;
-
-			type WritablePlayer = Writable<{
-				source: string | null;
-				isSinglePreview: boolean;
-				isPaused: boolean;
-				lastPauseState: boolean;
-			}>;
-		}
-
 		type Toast = {
 			uuid: string;
 			message: string;
 			level: "info" | "warning" | "error";
 			timeoutID: number;
+		}
+
+		namespace stores {
+			type audioContext = Writable<AudioContext>;
+
+			type draggable = Writable<{
+				media: App.Media | null;
+				event: "start" | "drag" | "end" | null;
+				origin: {
+					pos: {x: number, y: number};
+					region: "timeline" | "media_pool";
+				} | null;
+				region: "timeline" | "media_pool" | null;
+				ghost: {
+					pos: Spring<{x: number, y: number}>;
+					size: Spring<{width: number, height: number}>;
+				}
+			}>;
+
+			type timeline = Writable<{
+				clips: Timeline;
+				current: Node | null;
+				currentNodeRuntime: number;
+				duration: number;
+				runtime: number;
+				zoomScale: number;
+			}>;
 		}
 	}
 }
