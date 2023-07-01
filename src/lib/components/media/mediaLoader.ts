@@ -14,6 +14,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
     throw Error("MIME type could not be parsed");
   }
 
+  let src: string = "";
   if (!(await assertBrowserSupportsContainer(MIME))) {
     src = await convertFileToSupportedContainer(file, MIME);
   } else src = URL.createObjectURL(file);
