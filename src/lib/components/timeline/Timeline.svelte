@@ -13,7 +13,7 @@
   let scrollX = 0;
 
   let dropIndex: number = -1;
-  let dragIndex: number = -1;
+  export let dragIndex: number = -1;
 
   /**
    * an array of selected clip UUIDs

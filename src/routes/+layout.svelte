@@ -10,7 +10,7 @@
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
-  import { mediaPool, studio, timeline, toasts } from "$lib/stores";
+  import { media, studio, timeline, draggable, toasts } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
   import { crossfade } from "svelte/transition";
@@ -30,9 +30,10 @@
   let editorWidth: number, editorHeight: number;
 
   let selectedMedia: string[] = [];
+  let dragIndex = -1;
 
-  $: ghostPos = $studio.draggable.ghost.pos;
-  $: ghostSize = $studio.draggable.ghost.size;
+  $: ghostPos = $draggable.ghost.pos;
+  $: ghostSize = $draggable.ghost.size;
 
   let isStudioLoaded = false;
   let preloadMessage = "loading...";
@@ -77,36 +78,36 @@
   const handleDrag = (e: MouseEvent) => {
     $studio.mouse = { x: e.clientX, y: e.clientY };
 
-    if (!$studio.draggable.origin?.pos) return;
+    if (!$draggable.origin?.pos) return;
 
-    if ($studio.draggable.event === "start") {
-      const dist = { x: e.clientX - $studio.draggable.origin.pos.x, y: e.clientY - $studio.draggable.origin.pos.y };
+    if ($draggable.event === "start") {
+      const dist = { x: e.clientX - $draggable.origin.pos.x, y: e.clientY - $draggable.origin.pos.y };
       if (Math.abs(dist.x) < 30 && Math.abs(dist.y) < 30) return;
 
-      $studio.draggable.event = "drag";
+      $draggable.event = "drag";
     }
 
-    if ($studio.draggable.current.region !== null) return;
+    if ($draggable.region !== null) return;
 
     ghostPos.set({ x: $studio.mouse.x, y: $studio.mouse.y });
     ghostSize.set({ width: 80, height: 45 });
   };
 
   const handleDrop = () => {
-    if (!$studio.draggable.mediaUUID) return;
+    if (!$draggable.mediaUUID) return;
 
-    $studio.draggable = {
+    $draggable = {
       mediaUUID: null,
       origin: null,
       event: null,
-      current: { region: null },
+      region: null,
       ghost: {
         pos: spring({ x: 0, y: 0 }),
         size: spring({ width: 0, height: 0 }),
       },
     };
 
-    $timeline.dragIndex = -1;
+    dragIndex = -1;
   };
 </script>
 
@@ -181,7 +182,7 @@
       <Region />
       <!-- Timeline Container -->
       <Region class="col-span-2" innerClass="p-4">
-        <Timeline />
+        <Timeline bind:dragIndex />
       </Region>
     </div>
   </main>
