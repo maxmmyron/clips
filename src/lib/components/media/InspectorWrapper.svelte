@@ -1,5 +1,5 @@
 <script>
-  import { mediaPool } from "$lib/stores";
+  import { media } from "$lib/stores";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
 
@@ -7,7 +7,7 @@
 
   let current = 0;
   $: current = Math.max(0, Math.min(current, selected.length - 1));
-  $: currentMedia = $mediaPool.media.find((m) => m.uuid === selected[current]);
+  $: currentMedia = $media.resolved.find((m) => m.uuid === selected[current]);
 </script>
 
 {#if currentMedia}
