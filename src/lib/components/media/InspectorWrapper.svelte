@@ -3,9 +3,11 @@
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
 
+  export let selected: string[];
+
   let current = 0;
-  $: current = Math.max(0, Math.min(current, $mediaPool.selected.length - 1));
-  $: currentMedia = $mediaPool.media.find((m) => m.uuid === $mediaPool.selected[current]);
+  $: current = Math.max(0, Math.min(current, selected.length - 1));
+  $: currentMedia = $mediaPool.media.find((m) => m.uuid === selected[current]);
 </script>
 
 {#if currentMedia}
@@ -14,7 +16,7 @@
     <header>
       <div class="flex justify-between">
         <button class="font-mono text-neutral-200" on:click={() => (current -= 1)}>{"<"}</button>
-        <p class="font-mono text-neutral-200">{current + 1} / {$mediaPool.selected.length}</p>
+        <p class="font-mono text-neutral-200">{current + 1} / {selected.length}</p>
         <button class="font-mono text-neutral-200" on:click={() => (current += 1)}>{">"}</button>
       </div>
       {#key currentMedia}

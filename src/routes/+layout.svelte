@@ -29,6 +29,8 @@
 
   let editorWidth: number, editorHeight: number;
 
+  let selectedMedia: string[] = [];
+
   $: ghostPos = $studio.draggable.ghost.pos;
   $: ghostSize = $studio.draggable.ghost.size;
 
@@ -135,7 +137,7 @@
 
     <!-- Media Pool -->
     <Region innerClass="p-4">
-      <MediaPool />
+      <MediaPool bind:selected={selectedMedia} />
     </Region>
 
     <!-- Player -->
@@ -146,10 +148,10 @@
     </div>
 
     <!-- Inspector -->
-    {#if $mediaPool.selected.length}
+    {#if selectedMedia.length}
       <div class="relative z-10 row-start-2 col-start-3" transition:fly={{ x: "100%" }}>
         <Region>
-          <InspectorWrapper />
+          <InspectorWrapper selected={selectedMedia}/>
         </Region>
       </div>
     {/if}
