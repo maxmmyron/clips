@@ -1,7 +1,6 @@
 import { get } from "svelte/store";
 import { audioContext } from "../../stores";
 import { v4 as uuidv4 } from "uuid";
-import { addToast } from "$lib/util/toastManager";
 import { parseMIME } from "./mimeParser";
 import { assertBrowserSupportsContainer } from "./browserParser";
 import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
@@ -11,10 +10,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
 
   const MIME = await parseMIME(file);
   console.log(`${name} MIME: ${MIME}`);
-  if (MIME === "file/unknown") {
-    addToast("error", "Error loading media: MIME type could not be parsed.");
-    throw Error("MIME type could not be parsed");
-  }
+  if (MIME === "file/unknown") throw new Error("MIME type could not be parsed.");
 
   let src: string = "";
   if (!(await assertBrowserSupportsContainer(MIME))) {
@@ -85,9 +81,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
       }
 
     default:
-      addToast("error", `Error loading media: ${type} is not a valid media type.`);
-      throw Error("Unsupported media type");
-
+      throw new Error("Unsupported media type.");
     };
 };
 
