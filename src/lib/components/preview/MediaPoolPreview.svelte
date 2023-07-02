@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { player, draggable } from "$lib/stores";
+  import { studio, player, draggable } from "$lib/stores";
   import Icon from "../util/Icon.svelte";
   import Marquee from "../util/Marquee.svelte";
 
   export let media: App.Media;
-  export let selected = [];
+  export let selected: string[] = [];
 
   let mediaPreview: HTMLButtonElement;
 
@@ -20,7 +20,7 @@
   const handleDragStart = (e: MouseEvent) => {
     $draggable = {
       ...$draggable,
-      mediaUUID: media.uuid,
+      media,
       origin: {
         pos: { x: e.clientX, y: e.clientY },
         region: "media_pool",
@@ -30,10 +30,7 @@
     };
 
     $draggable.ghost.pos.set({ x: $studio.mouse.x, y: $studio.mouse.y }, { hard: true });
-    $draggable.ghost.size.set(
-      { width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height },
-      { hard: true }
-    );
+    $draggable.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
   };
 </script>
 
