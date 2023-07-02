@@ -6,7 +6,7 @@ import { parseMIME } from "./mimeParser";
 import { assertBrowserSupportsContainer } from "./browserParser";
 import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
-export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, media: App.MediaObjects<T>}> => {
+export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, media: Promise<App.MediaObjects<T>>}> => {
 
   const MIME = await parseMIME(file);
   if (MIME === "file/unknown") {
@@ -25,46 +25,52 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
     case "video":
       return {
         uuid,
-        media: {
-          uuid,
-          type: "video",
-          src: src,
-          metadata: {
-            duration: await loadMediaDuration(src, "video"),
-            audio: await loadAudioBuffer(src),
-            thumbnails: await loadThumbnails(src),
-            title: name
+        media: new Promise(async (resolve, reject) => {
+          return {
+            uuid,
+            type: "video",
+            src: src,
+            metadata: {
+              duration: await loadMediaDuration(src, "video"),
+              audio: await loadAudioBuffer(src),
+              thumbnails: await loadThumbnails(src),
+              title: name
+            }
           }
-        }
-      } as {uuid: string, media: App.MediaObjects<T>};
+        })
+      }
 
     case "audio":
       return {
         uuid,
-        media: {
-          uuid,
-          type: "audio",
-          src: src,
-          metadata: {
-            duration: await loadMediaDuration(src, "audio"),
-            audio: await loadAudioBuffer(src),
-            title: name
+        media: new Promise(async (resolve, reject) => {
+          return {
+            uuid,
+            type: "audio",
+            src: src,
+            metadata: {
+              duration: await loadMediaDuration(src, "audio"),
+              audio: await loadAudioBuffer(src),
+              title: name
+            }
           }
-        }
-      } as {uuid: string, media: App.MediaObjects<T>};
+        })
+      }
 
     case "image":
       return {
         uuid,
-        media: {
-          uuid,
-          type: "image",
-          src: src,
-          metadata: {
-            title: name
+        media: new Promise(async (resolve, reject) => {
+          return {
+            uuid,
+            type: "image",
+            src: src,
+            metadata: {
+              title: name
+            }
           }
-        }
-      } as {uuid: string, media: App.MediaObjects<T>};
+        })
+      }
 
     default:
       addToast("error", `Error loading media: ${type} is not a valid media type.`);
@@ -137,11 +143,11 @@ const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, re
 });
 
 const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
-  const audioContext = get(AudioContext);
-  if (!audioContext) reject("No audio context");
+  const aCtx = get(audioContext);
+  if (!aCtx) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
     .then(buffer => {
-      audioContext.decodeAudioData(buffer)
+      aCtx.decodeAudioData(buffer)
         .then(buffer => resolve(buffer))
         .catch(err => reject(`Error decoding audio data: ${err}`));
     })
