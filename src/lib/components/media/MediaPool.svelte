@@ -37,12 +37,12 @@
     for (const file of uploadedFiles) {
       let unresolvedMedia;
 
-      if (file.type.includes("video")) unresolvedMedia = createMedia("video", file.name, file);
-      else if (file.type.includes("audio")) unresolvedMedia = createMedia("audio", file.name, file);
-      else unresolvedMedia = createMedia("image", file.name, file);
+      if (file.type.includes("video")) unresolvedMedia = await createMedia("video", file.name, file);
+      else if (file.type.includes("audio")) unresolvedMedia = await createMedia("audio", file.name, file);
+      else unresolvedMedia = await createMedia("image", file.name, file);
 
       $media.unresolved = [...$media.unresolved, unresolvedMedia];
-      unresolvedMedia.then(({ uuid, media }) => ($media.resolved = [...$media.resolved, media]));
+      unresolvedMedia.media.then((media) => ($media.resolved = [...$media.resolved, media]));
     }
   };
 
@@ -101,16 +101,16 @@
     </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
-    {#each $media.unresolved as unresolved}
-      {#await unresolved}
+    {#each $media.unresolved as { uuid, media }}
+      {#await media}
         <!-- TODO: implement loading card -->
         <p>unresolved</p>
-      {:then { uuid, media }}
-        <MediaPoolPreview {media} bind:selected>
-          {#if media.type === "video" || media.type === "image"}
-            <MediaVideoPreview mediaUUID={media.uuid} />
-          {:else if media.type === "audio"}
-            <MediaAudioPreview mediaUUID={media.uuid} metadata={{ start: 0, end: 0 }} />
+      {:then resolved}
+        <MediaPoolPreview media={resolved} bind:selected>
+          {#if resolved.type === "video" || resolved.type === "image"}
+            <MediaVideoPreview mediaUUID={resolved.uuid} />
+          {:else if resolved.type === "audio"}
+            <MediaAudioPreview mediaUUID={resolved.uuid} metadata={{ start: 0, end: 0 }} />
           {/if}
         </MediaPoolPreview>
       {:catch error}
