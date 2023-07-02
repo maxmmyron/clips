@@ -1,6 +1,6 @@
 export async function assertBrowserSupportsContainer(mimeType: string): Promise<boolean> {
     if(mimeType.includes("video") || mimeType.includes("audio")) return assertMediaContainerSupport(mimeType);
-    if(mimeType.includes("image")) return await assertImageContainerSupport(mimeType);
+    if(mimeType.includes("image")) return mimeType.includes("avif") ? await assertAVIFSupport : true;
     return false;
 }
 
@@ -9,10 +9,8 @@ const assertMediaContainerSupport = (mimeType: string) => {
     return canPlayMIME === 'maybe' || canPlayMIME === 'probably';
 }
 
+// AVIF support shaky; manually check support here
 const assertImageContainerSupport = async (mimeType: string) => {
-    // just check for avif because support is still a little shaky (<90%)
-    if(mimeType.includes("avif")) {
-        const avif = "data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUEAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAABYAAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgSAAAAAAABNjb2xybmNseAACAAIABoAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAAB5tZGF0EgAKBzgADlAgIGkyCR/wAABAAACvcA==";
-        return await fetch(avif).then(res => res.blob()).then(blob => createImageBitmap(blob).then(() => true)).catch(() => false);
-    } else return true;
+    const avif = "data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUEAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAABYAAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAEAAAABAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgSAAAAAAABNjb2xybmNseAACAAIABoAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAAB5tZGF0EgAKBzgADlAgIGkyCR/wAABAAACvcA==";
+    return await fetch(avif).then(res => res.blob()).then(blob => createImageBitmap(blob).then(() => true)).catch(() => false);
 }
