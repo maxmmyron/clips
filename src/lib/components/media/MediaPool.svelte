@@ -35,14 +35,11 @@
 
     // TODO: rewrite currently doesn't have current conversion status support
     for (const file of uploadedFiles) {
-      let unresolvedMedia;
-
-      if (file.type.includes("video")) unresolvedMedia = await createMedia("video", file.name, file);
-      else if (file.type.includes("audio")) unresolvedMedia = await createMedia("audio", file.name, file);
-      else unresolvedMedia = await createMedia("image", file.name, file);
-
-      $media.unresolved = [...$media.unresolved, unresolvedMedia];
-      unresolvedMedia.media.then((media) => ($media.resolved = [...$media.resolved, media]));
+      const type = file.type.includes("video") ? "video" : file.type.includes("audio") ? "audio" : "image";
+      createMedia(type, file.name, file).then(res => {
+        $media.unresolved = [...$media.unresolved, res];
+        res.media.then((media) => ($media.resolved = [...$media.resolved, media]));
+      }).catch(e => addToast("error", e))
     }
   };
 
