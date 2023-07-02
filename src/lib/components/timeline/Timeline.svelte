@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { timeline, studio, player, media, draggable } from "$lib/stores";
+  import { timeline, player, draggable } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
@@ -13,7 +13,7 @@
   let scrollX = 0;
 
   let dropIndex: number = -1;
-  export let dragIndex: number = -1;
+  export let dragIndex: number;
 
   /**
    * an array of selected clip UUIDs

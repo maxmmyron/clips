@@ -6,15 +6,14 @@
   import MediaPoolPreview from "../preview/MediaPoolPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import Button from "../util/Button.svelte";
-  import { tick } from "svelte";
-  import { addToast } from "$lib/util/toastManager";
 
   export let selected: string[] = [];
 
-  $: browser && (window.media = {
-    unresolved: $media.unresolved,
-    resolved: $media.resolved,
-  });
+  $: browser &&
+    (window.media = {
+      unresolved: $media.unresolved,
+      resolved: $media.resolved,
+    });
 
   const handleDrop = (e: DragEvent) => {
     if (!e.dataTransfer) return;
@@ -43,7 +42,7 @@
       else unresolvedMedia = createMedia("image", file.name, file);
 
       $media.unresolved = [...$media.unresolved, unresolvedMedia];
-      unresolvedMedia.then(({uuid, media}) => $media.resolved = [...$media.resolved, media]);
+      unresolvedMedia.then(({ uuid, media }) => ($media.resolved = [...$media.resolved, media]));
     }
   };
 
@@ -53,12 +52,12 @@
     const timelineConfirm = `Deleting these files will remove their references from the timeline. Do you want to continue?`;
 
     // check if selected files are in timeline; show confirmation if so
-    let selectedTimelineNodes = $timeline.clips.toArray().filter(({mediaUUID}) => $media.resolved.some((resolvedMedia) => resolvedMedia.uuid === mediaUUID));
+    let selectedTimelineNodes = $timeline.clips.toArray().filter(({ mediaUUID }) => $media.resolved.some((resolvedMedia) => resolvedMedia.uuid === mediaUUID));
     if (selectedTimelineNodes.length > 0 && confirm(timelineConfirm) === false) return;
 
     // delete files from timeline and media pool, clear selection arr
     selectedTimelineNodes.forEach(({ uuid }) => $timeline.clips.remove(uuid));
-    $media.unresolved = $media.unresolved.filter(({uuid}) => !selected.includes(uuid));
+    $media.unresolved = $media.unresolved.filter(({ uuid }) => !selected.includes(uuid));
     $media.resolved = $media.resolved.filter(({ uuid }) => !selected.includes(uuid));
 
     selected = [];
@@ -106,7 +105,7 @@
       {#await unresolved}
         <!-- TODO: implement loading card -->
         <p>unresolved</p>
-      {:then {uuid, media}}
+      {:then { uuid, media }}
         <MediaPoolPreview {media} bind:selected>
           {#if media.type === "video" || media.type === "image"}
             <MediaVideoPreview mediaUUID={media.uuid} />

@@ -10,7 +10,7 @@
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
-  import { media, studio, timeline, draggable, toasts, audioContext } from "$lib/stores";
+  import { studio, draggable, toasts, audioContext } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
   import { crossfade } from "svelte/transition";
@@ -30,7 +30,7 @@
   let editorWidth: number, editorHeight: number;
 
   let selectedMedia: string[] = [];
-  let dragIndex = -1;
+  let dragIndex: number = -1;
 
   $: ghostPos = $draggable.ghost.pos;
   $: ghostSize = $draggable.ghost.size;
@@ -94,10 +94,10 @@
   };
 
   const handleDrop = () => {
-    if (!$draggable.mediaUUID) return;
+    if (!$draggable.media) return;
 
     $draggable = {
-      mediaUUID: null,
+      media: null,
       origin: null,
       event: null,
       region: null,
@@ -152,7 +152,7 @@
     {#if selectedMedia.length}
       <div class="relative z-10 row-start-2 col-start-3" transition:fly={{ x: "100%" }}>
         <Region>
-          <InspectorWrapper selected={selectedMedia}/>
+          <InspectorWrapper selected={selectedMedia} />
         </Region>
       </div>
     {/if}

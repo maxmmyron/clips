@@ -3,7 +3,7 @@
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
 
-  export let selected: string[];
+  export let selected: string[] = [];
 
   let current = 0;
   $: current = Math.max(0, Math.min(current, selected.length - 1));
