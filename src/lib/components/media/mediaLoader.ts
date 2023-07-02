@@ -7,10 +7,10 @@ import { assertBrowserSupportsContainer } from "./browserParser";
 import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
 export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, media: Promise<App.MediaObjects<T>>}> => {
-  console.log(`loading ${file.name} as ${type}...`);
+  console.log(`loading ${name} as ${type}...`);
 
   const MIME = await parseMIME(file);
-  console.log(`${file.name} MIME: ${MIME}`);
+  console.log(`${name} MIME: ${MIME}`);
   if (MIME === "file/unknown") {
     addToast("error", "Error loading media: MIME type could not be parsed.");
     throw Error("MIME type could not be parsed");
@@ -18,11 +18,11 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
 
   let src: string = "";
   if (!(await assertBrowserSupportsContainer(MIME))) {
-    console.log(`${MIME} type isn't natively supported... converting ${file.name}`)
+    console.log(`${MIME} type isn't natively supported... converting ${name}`)
     src = await convertFileToSupportedContainer(file, MIME);
   } else src = URL.createObjectURL(file);
 
-  console.log(`${file.name} src: ${src}`);
+  console.log(`${name} src: ${src}`);
 
   const uuid: string = uuidv4();
 
@@ -31,14 +31,18 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
       return {
         uuid,
         media: new Promise(async (resolve, reject) => {
+          let duration = await loadMediaDuration(src, "video").catch(e => reject(e));
+          let audio = await loadAudioBuffer(src).catch(e => reject(e));
+          let thumbnails = await loadThumbnails(src).catch(e => reject(e))
+
           return {
             uuid,
             type: "video",
             src: src,
             metadata: {
-              duration: await loadMediaDuration(src, "video"),
-              audio: await loadAudioBuffer(src),
-              thumbnails: await loadThumbnails(src),
+              duration,
+              audio,
+              thumbnails,
               title: name
             }
           }
@@ -49,16 +53,19 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
       return {
         uuid,
         media: new Promise(async (resolve, reject) => {
-          return {
+          let duration = await loadMediaDuration(src, "video").catch(e => reject(e));
+          let audio = await loadAudioBuffer(src).catch(e => reject(e));
+
+          resolve({
             uuid,
             type: "audio",
             src: src,
             metadata: {
-              duration: await loadMediaDuration(src, "audio"),
-              audio: await loadAudioBuffer(src),
+              duration,
+              audio,
               title: name
             }
-          }
+          })
         })
       }
 
@@ -66,14 +73,14 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
       return {
         uuid,
         media: new Promise(async (resolve, reject) => {
-          return {
+          resolve({
             uuid,
             type: "image",
             src: src,
             metadata: {
               title: name
             }
-          }
+          })
         })
       }
 
@@ -135,10 +142,7 @@ const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, re
     canvas.width = 480;
     canvas.height = 480 / aspectRatio;
 
-    if (!context) {
-      reject("Could not create canvas context");
-      return;
-    }
+    if (!context) reject("Could not create canvas context");
 
     // one thumbnail every 5 seconds
     for (let i = 0; i < duration; i += 5) {
