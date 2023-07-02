@@ -7,8 +7,10 @@ import { assertBrowserSupportsContainer } from "./browserParser";
 import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
 export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, media: Promise<App.MediaObjects<T>>}> => {
+  console.log(`loading ${file.name} as ${type}...`);
 
   const MIME = await parseMIME(file);
+  console.log(`${file.name} MIME: ${MIME}`);
   if (MIME === "file/unknown") {
     addToast("error", "Error loading media: MIME type could not be parsed.");
     throw Error("MIME type could not be parsed");
@@ -16,8 +18,11 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
 
   let src: string = "";
   if (!(await assertBrowserSupportsContainer(MIME))) {
+    console.log(`${MIME} type isn't natively supported... converting ${file.name}`)
     src = await convertFileToSupportedContainer(file, MIME);
   } else src = URL.createObjectURL(file);
+
+  console.log(`${file.name} src: ${src}`);
 
   const uuid: string = uuidv4();
 
@@ -80,6 +85,8 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
 };
 
 const loadMediaDuration = (src: string, type: string) => new Promise<number>((resolve, reject) => {
+  console.log("loading media duration...")
+
   if(type === "audio") {
     const audio = document.createElement("audio");
     audio.src = src;
@@ -87,6 +94,7 @@ const loadMediaDuration = (src: string, type: string) => new Promise<number>((re
     audio.load();
 
     audio.addEventListener("loadedmetadata", () => {
+      console.log("finished loading media duration");
       resolve(audio.duration);
     });
   }
@@ -97,6 +105,7 @@ const loadMediaDuration = (src: string, type: string) => new Promise<number>((re
     video.load();
 
     video.addEventListener("loadedmetadata", () => {
+      console.log("finished loading media duration");
       resolve(video.duration);
     });
   }
@@ -108,6 +117,7 @@ const loadMediaDuration = (src: string, type: string) => new Promise<number>((re
  * TODO: implement zoomScale as factor in determining how many thumbnails to generate.
  */
 const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, reject) => {
+  console.log("loading thumbnails...");
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -138,17 +148,22 @@ const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, re
       video.currentTime += 5;
     }
 
+    console.log("finished loading thumbanils")
     resolve(thumbnails);
   });
 });
 
 const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
+  console.log("loading audio buffer...")
   const aCtx = get(audioContext);
   if (!aCtx) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
     .then(buffer => {
       aCtx.decodeAudioData(buffer)
-        .then(buffer => resolve(buffer))
+        .then(buffer => {
+          console.log("finished loading audio buffer.");
+          resolve(buffer)
+        })
         .catch(err => reject(`Error decoding audio data: ${err}`));
     })
     .catch(err => reject(`Error fetching audio data: ${err}`));
