@@ -160,6 +160,7 @@ const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve
   if (!aCtx) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
     .then(buffer => {
+      console.log(`buffer: ${buffer}`)
       aCtx.decodeAudioData(buffer)
         .then(buffer => {
           console.log("finished loading audio buffer.");
