@@ -7,18 +7,12 @@
 
   let audioContext: AudioContext = new AudioContext();
 
-  $: console.log($timeline.current.uuid);
+  $: console.log($timeline.current?.uuid ?? null);
 
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
-    if (!$timeline.current) {
-      context.fillStyle = "black";
-      context.fillRect(0, 0, width, height);
-      return;
-    }
-
-    if ($timeline.current.type === "audio") {
+    if (!$timeline.current || $timeline.current.type === "audio") {
       context.fillStyle = "black";
       context.fillRect(0, 0, width, height);
       return;
