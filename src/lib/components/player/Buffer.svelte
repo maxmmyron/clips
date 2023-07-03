@@ -9,10 +9,7 @@
   let audioNode: AudioBufferSourceNode;
   let hasAudioNodeStarted = false;
 
-  onMount(() => {
-    console.log("creating buffer");
-    node.type !== "audio" && $buffers.set(node.uuid, { source: buffer, type: node.type });
-  });
+  onMount(() => node.type !== "audio" && $buffers.set(node.uuid, { source: buffer, type: node.type }));
 
   // FIXME: this runs every frame due to $timeline.current === node check. not sure why?
   $: if (buffer && $timeline.current === node) {
