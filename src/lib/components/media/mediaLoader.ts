@@ -6,19 +6,14 @@ import { assertBrowserSupportsContainer } from "./browserParser";
 import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
 export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, media: Promise<App.MediaObjects<T>>}> => {
-  console.log(`loading ${name} as ${type}...`);
 
   const MIME = await parseMIME(file);
-  console.log(`${name} MIME: ${MIME}`);
   if (MIME === "file/unknown") throw new Error("MIME type could not be parsed.");
 
   let src: string = "";
   if (!(await assertBrowserSupportsContainer(MIME))) {
-    console.log(`${MIME} type isn't natively supported... converting ${name}`)
     src = await convertFileToSupportedContainer(file, MIME);
   } else src = URL.createObjectURL(file);
-
-  console.log(`${name} src: ${src}`);
 
   const uuid: string = uuidv4();
 
@@ -86,8 +81,6 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
 };
 
 const loadMediaDuration = (src: string, type: string) => new Promise<number>((resolve, reject) => {
-  console.log("loading media duration...")
-
   if(type === "audio") {
     const audio = document.createElement("audio");
     audio.src = src;
@@ -105,10 +98,7 @@ const loadMediaDuration = (src: string, type: string) => new Promise<number>((re
     video.preload = "metadata";
     video.load();
 
-    video.addEventListener("loadedmetadata", () => {
-      console.log("finished loading media duration");
-      resolve(video.duration);
-    });
+    video.addEventListener("loadedmetadata", () => resolve(video.duration));
   }
   else reject("Unsupported media type");
 });
@@ -118,7 +108,6 @@ const loadMediaDuration = (src: string, type: string) => new Promise<number>((re
  * TODO: implement zoomScale as factor in determining how many thumbnails to generate.
  */
 const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, reject) => {
-  console.log("loading thumbnails...");
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -149,23 +138,17 @@ const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, re
       video.currentTime += 5;
     }
 
-    console.log("finished loading thumbanils")
     resolve(thumbnails);
   });
 });
 
 const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
-  console.log("loading audio buffer...")
   const aCtx = get(audioContext);
   if (!aCtx) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
     .then(buffer => {
-      console.log(`buffer: ${buffer}`)
       aCtx.decodeAudioData(buffer)
-        .then(buffer => {
-          console.log("finished loading audio buffer.");
-          resolve(buffer)
-        })
+        .then(buffer =>resolve(buffer))
         .catch(err => reject(`Error decoding audio data: ${err}`));
     })
     .catch(err => reject(`Error fetching audio data: ${err}`));
