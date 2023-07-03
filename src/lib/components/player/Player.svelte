@@ -5,8 +5,6 @@
 
   export let width: number, height: number;
 
-  let audioContext: AudioContext = new AudioContext();
-
   $: console.log($timeline.current?.uuid ?? null);
 
   let render: Render;
@@ -43,9 +41,7 @@
 </script>
 
 {#each $timeline.clips.toArray() as node}
-  {#if node.type !== "image"}
-    <Buffer nodeUUID={node.uuid} {audioContext} />
-  {/if}
+  <Buffer {node}/>
 {/each}
 
 <Canvas {width} {height}>
