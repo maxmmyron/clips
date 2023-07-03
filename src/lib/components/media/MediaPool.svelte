@@ -2,6 +2,7 @@
   import { browser } from "$app/environment";
   import { media, timeline } from "$lib/stores";
   import { createMedia } from "./mediaLoader";
+  import { addToast } from "$lib/util/toastManager";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "../preview/MediaPoolPreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
@@ -36,10 +37,12 @@
     // TODO: rewrite currently doesn't have current conversion status support
     for (const file of uploadedFiles) {
       const type = file.type.includes("video") ? "video" : file.type.includes("audio") ? "audio" : "image";
-      createMedia(type, file.name, file).then(res => {
-        $media.unresolved = [...$media.unresolved, res];
-        res.media.then((media) => ($media.resolved = [...$media.resolved, media]));
-      }).catch(e => addToast("error", e))
+      createMedia(type, file.name, file)
+        .then((res) => {
+          $media.unresolved = [...$media.unresolved, res];
+          res.media.then((media) => ($media.resolved = [...$media.resolved, media]));
+        })
+        .catch((e) => addToast("error", e));
     }
   };
 
