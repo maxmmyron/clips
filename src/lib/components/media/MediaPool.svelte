@@ -40,12 +40,7 @@
       let unresolved = await createMedia(type, file.name, file);
 
       $media.unresolved = [...$media.unresolved, unresolved];
-      unresolved.media
-        .then((media) => ($media.resolved = [...$media.resolved, media]))
-        .catch((e) => {
-          $media.unresolved = $media.unresolved.filter(({ uuid }) => uuid !== unresolved.uuid);
-          addToast("error", `Failed to load ${file.name}: ${e}`);
-        });
+      unresolved.media.then((media) => ($media.resolved = [...$media.resolved, media])).catch((e) => addToast("error", `Failed to load ${file.name}: ${e}`));
     }
   };
 
