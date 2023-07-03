@@ -19,6 +19,7 @@
     }
 
     let src = $buffers.get($timeline.current.uuid);
+    console.log($buffers, [...$buffers]);
     if (!src) return;
 
     const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
