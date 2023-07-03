@@ -24,12 +24,18 @@
     const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
     const bufferHeight = src.type === "video" ? (src.source as HTMLVideoElement).videoHeight : (src.source as HTMLImageElement).height || 0;
 
+    console.log(`buffer width/height: ${bufferWidth}, ${bufferHeight}`);
+
     const mediaSize = {
       width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
       height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
     };
 
+    console.log(`mediaSize: ${mediaSize}`);
+
     const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
+
+    console.log(`mediaPos: ${mediaPosition}`);
 
     context.drawImage(src.source, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
   };
