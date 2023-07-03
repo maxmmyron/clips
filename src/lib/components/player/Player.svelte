@@ -7,6 +7,8 @@
 
   let audioContext: AudioContext = new AudioContext();
 
+  $: console.log($timeline.current.uuid);
+
   let render: Render;
   $: render = ({ context, width, height }) => {
     $t;
