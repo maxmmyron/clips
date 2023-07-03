@@ -31,7 +31,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
           let audio = await loadAudioBuffer(src).catch(e => reject(e));
           let thumbnails = await loadThumbnails(src).catch(e => reject(e))
 
-          return {
+          resolve({
             uuid,
             type: "video",
             src: src,
@@ -41,7 +41,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
               thumbnails,
               title: name
             }
-          }
+          } as App.MediaObjects<T>);
         })
       }
 
@@ -61,7 +61,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
               audio,
               title: name
             }
-          })
+          } as App.MediaObjects<T>);
         })
       }
 
@@ -76,7 +76,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
             metadata: {
               title: name
             }
-          })
+          } as App.MediaObjects<T>);
         })
       }
 
@@ -136,7 +136,10 @@ const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, re
     canvas.width = 480;
     canvas.height = 480 / aspectRatio;
 
-    if (!context) reject("Could not create canvas context");
+    if (!context) {
+      reject("Could not create canvas context");
+      return;
+    }
 
     // one thumbnail every 5 seconds
     for (let i = 0; i < duration; i += 5) {
