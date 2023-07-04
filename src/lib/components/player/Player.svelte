@@ -41,7 +41,7 @@
 </script>
 
 {#each $timeline.clips.toArray() as node}
-  <Buffer {node}/>
+  <Buffer {node} />
 {/each}
 
 <Canvas {width} {height}>
