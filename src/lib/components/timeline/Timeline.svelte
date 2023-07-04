@@ -7,6 +7,9 @@
   import { onMount } from "svelte";
   import Scrubber from "./Scrubber.svelte";
   import Ticks from "./Ticks.svelte";
+  import { browser } from "$app/environment";
+
+  $: browser && (window.timeline = $timeline.clips);
 
   let timelineElementContainer: HTMLDivElement, timelineContainer: HTMLDivElement;
   let canMoveScrubber = false;
@@ -107,6 +110,7 @@
   };
 
   const handleDragEnd = () => {
+    console.log(`ending drag: ${$draggable.event}, ${$draggable.region}`);
     if ($draggable.event === "start") return;
     if ($draggable.origin?.region === "timeline") {
       if (dragIndex === -1) return;
@@ -117,18 +121,14 @@
       if (dropIndex === -1) $timeline.clips.add(clip);
       else $timeline.clips.add(clip, dropIndex);
 
-      dragIndex = -1;
       return;
     }
     // handle dragging new media into timeline
 
+    console.log(draggable);
+
     if (!$draggable.media) return;
     const media = $draggable.media;
-
-    let duration = 3;
-    if (media.type === "video" || media.type === "audio") {
-      duration = media.metadata.duration;
-    }
 
     $timeline.clips.add({
       uuid: uuidv4(),
@@ -137,7 +137,7 @@
       src: media.src,
       metadata: {
         title: media.metadata.title,
-        duration: duration,
+        duration: media.type === "video" || media.type === "audio" ? media.metadata.duration : 3,
         start: 0,
         end: 0,
       },

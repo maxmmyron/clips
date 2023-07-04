@@ -78,7 +78,7 @@
   const handleDrag = (e: MouseEvent) => {
     $studio.mouse = { x: e.clientX, y: e.clientY };
 
-    if (!$draggable.origin?.pos) return;
+    if (!$draggable.origin) return;
 
     if ($draggable.event === "start") {
       const dist = { x: e.clientX - $draggable.origin.pos.x, y: e.clientY - $draggable.origin.pos.y };
@@ -94,8 +94,6 @@
   };
 
   const handleDrop = () => {
-    if (!$draggable.media) return;
-
     $draggable = {
       media: null,
       origin: null,

@@ -2,10 +2,24 @@
   import { timeline, buffers } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
   import Buffer from "./Buffer.svelte";
+  import { browser } from "$app/environment";
+
+  $: browser && (window.buffers = $buffers);
 
   export let width: number, height: number;
 
-  $: console.log($timeline.current?.uuid ?? null);
+  $: src = $timeline.current && $buffers.get($timeline.current.uuid);
+
+  let sourceDim: [number, number], mediaDim: [number, number], mediaPos: [number, number];
+
+  $: if (src) {
+    if (src.type === "video") sourceDim = [(src.source as HTMLVideoElement).videoWidth, (src.source as HTMLVideoElement).videoHeight];
+    else sourceDim = [src.source.width, src.source.height];
+
+    mediaDim = [sourceDim[0] * Math.min(width / sourceDim[0], height / sourceDim[1]), sourceDim[1] * Math.min(width / sourceDim[0], height / sourceDim[1])];
+
+    mediaPos = [Math.max(0, (width - mediaDim[0]) / 2), Math.max(0, (height - mediaDim[1]) / 2)];
+  }
 
   let render: Render;
   $: render = ({ context, width, height }) => {
@@ -16,27 +30,8 @@
       return;
     }
 
-    let src = $buffers.get($timeline.current.uuid);
-    console.log($buffers, [...$buffers]);
     if (!src) return;
-
-    const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
-    const bufferHeight = src.type === "video" ? (src.source as HTMLVideoElement).videoHeight : (src.source as HTMLImageElement).height || 0;
-
-    console.log(`buffer width/height: ${bufferWidth}, ${bufferHeight}`);
-
-    const mediaSize = {
-      width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
-      height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
-    };
-
-    console.log(`mediaSize: ${mediaSize}`);
-
-    const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
-
-    console.log(`mediaPos: ${mediaPosition}`);
-
-    context.drawImage(src.source, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
+    context.drawImage(src.source, 0, 0, ...sourceDim, ...mediaPos, ...mediaDim);
   };
 </script>
 

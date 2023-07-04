@@ -1,6 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
-  import { media, timeline } from "$lib/stores";
+  import { media, timeline, buffers } from "$lib/stores";
   import { createMedia } from "./mediaLoader";
   import { addToast } from "$lib/util/toastManager";
   import MediaPoolPreview from "../preview/MediaPoolPreview.svelte";
@@ -77,6 +77,11 @@
     console.log($timeline.clips.head);
     console.log($timeline.clips.tail);
     console.log($timeline.current);
+
+    console.log("-----------------------");
+    console.log("BUFFER DATA");
+    console.log("-----------------------");
+    console.log($buffers);
   };
 </script>
 
