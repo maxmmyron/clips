@@ -3,9 +3,7 @@
   import { media, timeline } from "$lib/stores";
   import { createMedia } from "./mediaLoader";
   import { addToast } from "$lib/util/toastManager";
-  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import MediaPoolPreview from "../preview/MediaPoolPreview.svelte";
-  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import Button from "../util/Button.svelte";
 
   export let selected: string[] = [];
@@ -99,22 +97,8 @@
     </label>
   </div>
   <div class="w-full flex flex-wrap gap-3">
-    {#each $media.unresolved as { uuid, media }}
-      {#await media}
-        <!-- TODO: implement loading card -->
-        <p class="text-blue-200">unresolved</p>
-      {:then resolved}
-        <MediaPoolPreview media={resolved} bind:selected>
-          {#if resolved.type === "video" || resolved.type === "image"}
-            <MediaVideoPreview mediaUUID={resolved.uuid} />
-          {:else if resolved.type === "audio"}
-            <MediaAudioPreview mediaUUID={resolved.uuid} metadata={{ start: 0, end: 0 }} />
-          {/if}
-        </MediaPoolPreview>
-      {:catch error}
-        <!-- TODO: implement error card -->
-        <p class="text-red-300">{error}</p>
-      {/await}
+    {#each $media.unresolved as { uuid, name, media }}
+      <MediaPoolPreview {uuid} {name} unresolved={media} bind:selected />
     {/each}
     <div class="absolute bottom-12 right-16">
       {#each mows as mow (mow)}
