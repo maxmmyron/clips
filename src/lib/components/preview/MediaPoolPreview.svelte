@@ -46,8 +46,8 @@
 
 <div class="rounded-lg p-1 transition-colors" class:bg-gray-800={isSelected}>
   {#await unresolved}
-    <div class="w-48 aspect-video rounded-md overflow-clip mb-2 bg-black">
-      <p class="text-white">Loading...</p>
+    <div class="w-48 aspect-video rounded-md overflow-clip mb-2 bg-black flex justify-center items-center">
+      <LoadIcon />
     </div>
   {:then resolved}
     <button
@@ -74,7 +74,7 @@
         : 'neutral-900'} after:to-transparent"
     >
       {#await unresolved}
-        <LoadIcon />
+        <LoadIcon width={16} height={16} />
       {:then { type }}
         <Icon src="/icons/{type}.svg" />
       {/await}
