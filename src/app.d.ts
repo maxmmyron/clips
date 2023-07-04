@@ -124,7 +124,7 @@ declare global {
 
 			type draggable = Writable<{
 				media: App.Media | null;
-				event: "start" | "drag" | "end" | null;
+				event: "start" | "drag" | null;
 				origin: {
 					pos: {x: number, y: number};
 					region: "timeline" | "media_pool";

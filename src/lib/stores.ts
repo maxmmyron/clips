@@ -31,7 +31,7 @@ export const media: App.stores.media = writable({
   unresolved: [],
   resolved: [],
 });
-export const buffers = writable(new Map<string, { source: HTMLVideoElement | HTMLImageElement, type: App.MediaTypes}>());
+export const buffers = writable(new Map<string, { source: HTMLVideoElement | HTMLImageElement, type: Exclude<App.MediaTypes, "audio">}>());
 export const audioContext: App.stores.audioContext = writable();
 export const toasts = writable(new Array<App.Toast>());
 
