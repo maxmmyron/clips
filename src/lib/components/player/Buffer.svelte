@@ -2,14 +2,13 @@
   import { buffers, media, player, timeline, audioContext } from "$lib/stores";
   import { onMount } from "svelte";
 
-  export let audioContext: AudioContext;
   export let node: App.Node;
 
   let buffer: HTMLVideoElement | HTMLImageElement;
 
   let audioNode: AudioBufferSourceNode;
   let hasAudioNodeStarted = false;
-  
+
   onMount(() => node.type !== "audio" && $buffers.set(node.uuid, { source: buffer, type: node.type }));
 
   // FIXME: this runs every frame due to $timeline.current === node check. not sure why?
