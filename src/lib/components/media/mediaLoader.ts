@@ -5,7 +5,7 @@ import { parseMIME } from "./mimeParser";
 import { assertBrowserSupportsContainer } from "./browserParser";
 import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
-export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, media: Promise<App.MediaObjects<T>>}> => {
+export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, name: string, media: Promise<App.MediaObjects<T>>}> => {
 
   const MIME = await parseMIME(file);
   if (MIME === "file/unknown") throw new Error("MIME type could not be parsed.");
@@ -21,6 +21,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
     case "video":
       return {
         uuid,
+        name,
         media: new Promise(async (resolve, reject) => {
           let duration = await loadMediaDuration(src, "video").catch(e => reject(e));
           let audio = await loadAudioBuffer(src).catch(e => reject(e));
@@ -43,6 +44,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
     case "audio":
       return {
         uuid,
+        name,
         media: new Promise(async (resolve, reject) => {
           let duration = await loadMediaDuration(src, "video").catch(e => reject(e));
           let audio = await loadAudioBuffer(src).catch(e => reject(e));
@@ -63,6 +65,7 @@ export const createMedia = async <T extends App.MediaTypes>(type: T, name: strin
     case "image":
       return {
         uuid,
+        name,
         media: new Promise(async (resolve, reject) => {
           resolve({
             uuid,

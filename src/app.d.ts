@@ -118,7 +118,7 @@ declare global {
 			type audioContext = Writable<AudioContext>;
 
 			type media = Writable<{
-				unresolved: Array<{uuid: string, media: Promise<App.Media>}>;
+				unresolved: Array<{uuid: string, name: string, media: Promise<App.Media>}>;
 				resolved: App.Media[];
 			}>
 
