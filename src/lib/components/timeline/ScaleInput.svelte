@@ -6,7 +6,7 @@
 </script>
 
 <div class="flex gap-2 items-center">
-  <button on:click={() => ($timeline.zoomScale = Math.max(5, $timeline.zoomScale - 5))} class="transition-transform hover:scale-105 active:scale-95">
+  <button on:click={() => ($timeline.zoomScale = Math.max(1, $timeline.zoomScale - 1))} class="transition-transform hover:scale-105 active:scale-95">
     <Icon src="icons/zoom_out.svg" />
   </button>
   <div class="flex items-center" bind:clientWidth={rangeWidth}>

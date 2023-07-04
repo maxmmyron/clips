@@ -21,12 +21,12 @@
       addToast("error", "FFmpeg failed to load. Please refresh the page.");
       throw new Error("ffmpeg.wasm did not load on editor startup. Please refresh the page.");
     }
-    const nodes = $timeline.timeline.toArray();
+    const nodes = $timeline.clips.toArray();
     for (const { uuid, src, type } of nodes) {
       ffmpegInstance.FS("writeFile", `${uuid}.${baseExtensionMap.get(type)}`, await fetchFile(src));
       ffmpegInstance.FS("writeFile", `${uuid}_trimmed.mp4`, "");
     }
-    ffmpegInstance.FS("writeFile", `${$studio.exportName}.mp4`, "");
+    ffmpegInstance.FS("writeFile", `${$studio.name}.mp4`, "");
 
     // ****************
     // 1. Trim offsets
@@ -60,17 +60,17 @@
     await ffmpegInstance.run(
       ...nodes.map(({ uuid }) => ["-i", `${uuid}_trimmed.mp4`]).flat(),
       ...filters,
-      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `${$studio.exportName}.mp4`]
+      ...[`-map`, `[v]`, `-map`, `[a]`, `-c:v`, `libx264`, `-c:a`, `aac`, `${$studio.name}.mp4`]
     );
 
     // ****************
     // 3. Export
     // ****************
     progressText = "export complete";
-    const exportData = ffmpegInstance.FS("readFile", `${$studio.exportName}.mp4`);
+    const exportData = ffmpegInstance.FS("readFile", `${$studio.name}.mp4`);
 
     const link = document.createElement("a");
-    link.download = `${$studio.exportName}.mp4`;
+    link.download = `${$studio.name}.mp4`;
     link.href = URL.createObjectURL(new Blob([exportData.buffer], { type: "video/mp4" }));
     document.body.appendChild(link);
     link.dispatchEvent(new MouseEvent("click"));
@@ -80,4 +80,4 @@
   };
 </script>
 
-<Button onClick={exportTimeline} disabled={$timeline.timeline.length === 0}>Export</Button>
+<Button onClick={exportTimeline} disabled={$timeline.clips.length === 0}>Export</Button>

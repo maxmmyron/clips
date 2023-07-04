@@ -1,4 +1,7 @@
 declare interface Window {
-  mediaPool: App.Media[];
+  media: {
+    unresolved: {uuid:string, media:Promise<App.Media>}[],
+    resolved: App.Media[]
+  }
   timeline: App.Timeline;
 }

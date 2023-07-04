@@ -10,7 +10,7 @@
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
-  import { mediaPool, studio, timeline, toasts } from "$lib/stores";
+  import { studio, draggable, toasts, audioContext } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
   import { crossfade } from "svelte/transition";
@@ -29,15 +29,18 @@
 
   let editorWidth: number, editorHeight: number;
 
-  $: ghostPos = $studio.draggable.ghost.pos;
-  $: ghostSize = $studio.draggable.ghost.size;
+  let selectedMedia: string[] = [];
+  let dragIndex: number = -1;
+
+  $: ghostPos = $draggable.ghost.pos;
+  $: ghostSize = $draggable.ghost.size;
 
   let isStudioLoaded = false;
   let preloadMessage = "loading...";
 
   onMount(async () => {
     preloadMessage = "Loading audio context instance...";
-    $studio.audioContext = new AudioContext();
+    $audioContext = new AudioContext();
 
     preloadMessage = "Checking media queries...";
 
@@ -75,36 +78,36 @@
   const handleDrag = (e: MouseEvent) => {
     $studio.mouse = { x: e.clientX, y: e.clientY };
 
-    if (!$studio.draggable.origin?.pos) return;
+    if (!$draggable.origin?.pos) return;
 
-    if ($studio.draggable.event === "start") {
-      const dist = { x: e.clientX - $studio.draggable.origin.pos.x, y: e.clientY - $studio.draggable.origin.pos.y };
+    if ($draggable.event === "start") {
+      const dist = { x: e.clientX - $draggable.origin.pos.x, y: e.clientY - $draggable.origin.pos.y };
       if (Math.abs(dist.x) < 30 && Math.abs(dist.y) < 30) return;
 
-      $studio.draggable.event = "drag";
+      $draggable.event = "drag";
     }
 
-    if ($studio.draggable.current.region !== null) return;
+    if ($draggable.region !== null) return;
 
     ghostPos.set({ x: $studio.mouse.x, y: $studio.mouse.y });
     ghostSize.set({ width: 80, height: 45 });
   };
 
   const handleDrop = () => {
-    if (!$studio.draggable.mediaUUID) return;
+    if (!$draggable.media) return;
 
-    $studio.draggable = {
-      mediaUUID: null,
+    $draggable = {
+      media: null,
       origin: null,
       event: null,
-      current: { region: null },
+      region: null,
       ghost: {
         pos: spring({ x: 0, y: 0 }),
         size: spring({ width: 0, height: 0 }),
       },
     };
 
-    $timeline.dragIndex = -1;
+    dragIndex = -1;
   };
 </script>
 
@@ -127,7 +130,7 @@
     <!-- Export Settings -->
     <Region class="col-span-2" innerClass="flex justify-between items-center p-4">
       <div class="flex">
-        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName} />
+        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.name} />
         <p class="text-neutral-200 font-mono">.mp4</p>
       </div>
       <Export />
@@ -135,7 +138,7 @@
 
     <!-- Media Pool -->
     <Region innerClass="p-4">
-      <MediaPool />
+      <MediaPool bind:selected={selectedMedia} />
     </Region>
 
     <!-- Player -->
@@ -146,10 +149,10 @@
     </div>
 
     <!-- Inspector -->
-    {#if $mediaPool.selected.length}
+    {#if selectedMedia.length}
       <div class="relative z-10 row-start-2 col-start-3" transition:fly={{ x: "100%" }}>
         <Region>
-          <InspectorWrapper />
+          <InspectorWrapper selected={selectedMedia} />
         </Region>
       </div>
     {/if}
@@ -179,7 +182,7 @@
       <Region />
       <!-- Timeline Container -->
       <Region class="col-span-2" innerClass="p-4">
-        <Timeline />
+        <Timeline bind:dragIndex />
       </Region>
     </div>
   </main>
