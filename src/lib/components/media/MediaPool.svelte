@@ -44,7 +44,7 @@
   };
 
   const handleKey = (e: KeyboardEvent) => {
-    if (e.key !== "Delete") return;
+    if (e.key !== "Delete" || selected.length === 0) return;
 
     const timelineConfirm = `Deleting these files will remove their references from the timeline. Do you want to continue?`;
 
