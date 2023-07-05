@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { player, studio, timeline, draggable, media } from "$lib/stores";
+  import { player, studio, timeline, draggable, media, secondWidth } from "$lib/stores";
 
   export let node: App.Node;
-  export let timelineSecondWidth: number;
   export let selected: string[];
   export let dragIndex: number;
 
@@ -18,10 +17,7 @@
 
   $: isSelected = selected.includes(node.uuid);
 
-  // n such that 2^n = duration of a 20% segment of the timeline.
-  $: secondScale = 2 ** (5 - $timeline.zoomScale);
-
-  $: width = ((duration - metadata.start - metadata.end) / secondScale) * timelineSecondWidth;
+  $: width = (duration - metadata.start - metadata.end) * $secondWidth;
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {

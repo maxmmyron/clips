@@ -1,5 +1,5 @@
 import {spring} from "svelte/motion";
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 import TimelineLinkedList from "./components/timeline/TimelineLinkedList";
 
 export const studio = writable({
@@ -39,3 +39,5 @@ export const player: App.stores.player = writable({
   source: null,
   isPaused: true,
 });
+
+export const secondWidth = derived(timeline, $timeline => 2 ** $timeline.zoomScale);
