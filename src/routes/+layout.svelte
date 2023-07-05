@@ -48,14 +48,8 @@
     $audioContext = new AudioContext();
 
     preloadMessage = "Checking media queries...";
-
-    preloadMessage = "Checking media queries...";
     sizeQuery = matchMedia("(max-width: 768px), (max-height: 768px)").matches ? 0 : 1;
     touchModeQuery = matchMedia("(hover: none) and (pointer: coarse)").matches ? 0 : 1;
-
-    preloadMessage = "Loading FFmpeg...";
-    await loadFFmpeg();
-    isStudioLoaded = true;
 
     preloadMessage = "Loading FFmpeg...";
     await loadFFmpeg();
