@@ -3,6 +3,8 @@
 
   export let scrollX: number;
 
+  const timingRules: ((arg0: number) => number)[] = [(runtime) => runtime / 3600, (runtime) => (runtime % 3600) / 60, (runtime) => runtime % 60];
+
   let width: number;
   let canCalcRuntime = false,
     previousPauseState = false;
@@ -28,7 +30,7 @@
 </script>
 
 <div
-  class="min-w-full h-12 flex select-none transition-none"
+  class="min-w-full h-8 flex select-none transition-none"
   style="width: {numSections * secondWidth}px; transform: translateX({-scrollX % (width / numSections)}px);"
   bind:clientWidth={width}
   on:mousemove={calcRuntime}
@@ -36,8 +38,33 @@
   on:mouseup={handleMouseUp}
 >
   {#each { length: numSections + 1 } as _, i}
-    <div class="relative rounded-md h-full transition-none" style="width: {secondWidth}px; min-width: calc(100% / {numSections});">
-      <p class="absolute font-mono text-white">{Math.floor((i + offset) * Math.max(1, width / numSections / secondWidth) * 100) / 100}</p>
+    <div
+      class="border-l-[2px] border-neutral-500 relative h-full transition-none flex before:absolute before:w-full before:h-1 to-neutral-700
+      before:bg-[repeating-linear-gradient(90deg,transparent,transparent_3px,var(--tw-gradient-to)_3px,var(--tw-gradient-to)_4px)]"
+      style="width: {secondWidth}px; min-width: calc(100% / {numSections});"
+    >
+      <div class="absolute left-1 flex bottom-0">
+        {#each timingRules as r}
+          <p class="text-neutral-400 font-mono text-xs">
+            {Math.floor(r((i + offset) * Math.max(1, width / numSections / secondWidth)))
+              .toString()
+              .padStart(2, "0")}:
+          </p>
+        {/each}
+        <p class="text-neutral-400 font-mono text-xs">
+          {Math.round((((i + offset) * Math.max(1, width / numSections / secondWidth)) % 1) * 1000)
+            .toString()
+            .padStart(3, "0")
+            .slice(0, 3)}
+        </p>
+      </div>
+      {#each [1, 1, 2, 1, 1, 1] as tickHeight, tickIdx}
+        {#if tickIdx === 5}
+          <div class="w-full" />
+        {:else}
+          <div class="w-full relative border-r-[2px] border-r-neutral-600" style="height: {tickHeight * 8}px" />
+        {/if}
+      {/each}
     </div>
   {/each}
 </div>
