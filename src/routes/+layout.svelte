@@ -20,6 +20,8 @@
   import { loadFFmpeg } from "$lib/util/FFmpegManager";
   import { fly } from "svelte/transition";
   import "../app.css";
+  import TimelineTicks from "$lib/components/timeline/TimelineTicks.svelte";
+  import Scrubber from "$lib/components/timeline/Scrubber.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -30,6 +32,8 @@
 
   let selectedMedia: string[] = [];
   let dragIndex: number = -1;
+  let canCalcRuntime = false;
+  let timelineScroll = 0;
 
   $: ghostPos = $draggable.ghost.pos;
   $: ghostSize = $draggable.ghost.size;
@@ -107,6 +111,7 @@
     };
 
     dragIndex = -1;
+    canCalcRuntime = false;
   };
 </script>
 
@@ -188,7 +193,11 @@
     <!-- Timeline Container -->
     <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
       <Region class="col-span-full" innerClass="p-4">
-        <Timeline bind:dragIndex />
+        <section class="relative w-full h-full flex flex-col overflow-x-hidden">
+          <TimelineTicks scrollX={timelineScroll} bind:canCalcRuntime />
+          <Timeline bind:dragIndex bind:scrollX={timelineScroll} />
+          <Scrubber scrollX={timelineScroll} />
+        </section>
       </Region>
     </div>
   </main>

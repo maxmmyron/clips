@@ -2,12 +2,12 @@
   import { player, timeline } from "$lib/stores";
 
   export let scrollX: number;
+  export let canCalcRuntime: boolean = false;
 
   const timingRules: ((arg0: number) => number)[] = [(runtime) => runtime / 3600, (runtime) => (runtime % 3600) / 60, (runtime) => runtime % 60];
 
   let width: number;
-  let canCalcRuntime = false,
-    previousPauseState = false;
+  let previousPauseState = false;
 
   $: secondWidth = 2 ** $timeline.zoomScale;
   $: offset = Math.floor(scrollX / (width / numSections));
@@ -23,10 +23,7 @@
     calcRuntime(e);
   };
 
-  const handleMouseUp = (e: MouseEvent) => {
-    $player.isPaused = previousPauseState;
-    canCalcRuntime = false;
-  };
+  $: if (!canCalcRuntime) $player.isPaused = previousPauseState;
 </script>
 
 <div
@@ -35,7 +32,6 @@
   bind:clientWidth={width}
   on:mousemove={calcRuntime}
   on:mousedown={handleMouseDown}
-  on:mouseup={handleMouseUp}
 >
   {#each { length: numSections + 1 } as _, i}
     <div
