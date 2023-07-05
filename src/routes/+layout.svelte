@@ -176,10 +176,7 @@
       introduced with the repeated column.-->
     <!-- Timeline Container -->
     <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
-      <!-- Timeline Track List -->
-      <Region />
-      <!-- Timeline Container -->
-      <Region class="col-span-2" innerClass="p-4">
+      <Region class="col-span-full" innerClass="p-4">
         <Timeline bind:dragIndex />
       </Region>
     </div>
