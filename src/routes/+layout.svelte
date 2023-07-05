@@ -4,13 +4,12 @@
   import Timeline from "$lib/components/timeline/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
   import Controls from "$lib/components/player/Controls.svelte";
-  import Runtime from "$lib/components/player/Runtime.svelte";
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
   import Ghost from "$lib/components/util/Ghost.svelte";
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
-  import { studio, draggable, toasts, audioContext } from "$lib/stores";
+  import { studio, draggable, toasts, audioContext, timeline } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
   import { crossfade } from "svelte/transition";
@@ -37,6 +36,8 @@
 
   let isStudioLoaded = false;
   let preloadMessage = "loading...";
+
+  export const timingRules: ((arg0: number) => number)[] = [(runtime) => runtime / 3600, (runtime) => (runtime % 3600) / 60, (runtime) => runtime % 60];
 
   onMount(async () => {
     preloadMessage = "Loading audio context instance...";
@@ -167,7 +168,17 @@
       </div>
 
       <div class="flex justify-end items-center">
-        <Runtime />
+        {#each timingRules as r, i}
+          <p class="text-neutral-200 font-mono">
+            {Math.floor(r($timeline.runtime)).toString().padStart(2, "0")}:
+          </p>
+        {/each}
+        <p class="text-neutral-200 font-mono">
+          {Math.round(($timeline.runtime % 1) * 1000)
+            .toString()
+            .padStart(3, "0")
+            .slice(0, 3)}
+        </p>
       </div>
     </Region>
 
