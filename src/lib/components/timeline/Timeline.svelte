@@ -2,6 +2,8 @@
   import { draggable, secondWidth, timeline } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
   import TimelinePreview from "../preview/TimelinePreview.svelte";
+  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
+  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
 
   export let dragIndex: number;
   export let scrollX: number = 0;
@@ -72,6 +74,25 @@
   on:mouseleave={() => ($draggable.region = null)}
 >
   {#each $timeline.clips.toArray() as node, idx (node.uuid)}
-    <TimelinePreview bind:dragIndex {node} bind:selected />
+    <TimelinePreview bind:dragIndex {node} bind:selected>
+      {#if node.type === "video"}
+        <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
+        {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+          <MediaAudioPreview
+            mediaUUID={node.mediaUUID}
+            metadata={{
+              start: node.metadata.start,
+              end: node.metadata.end,
+            }}
+          />
+        {/key}
+      {:else if node.type === "audio"}
+        {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+          <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
+        {/key}
+      {:else if node.type === "image"}
+        <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
+      {/if}
+    </TimelinePreview>
   {/each}
 </div>

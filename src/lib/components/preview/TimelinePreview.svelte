@@ -1,5 +1,6 @@
 <script lang="ts">
   import { player, studio, timeline, draggable, media, secondWidth } from "$lib/stores";
+  import Marquee from "../util/Marquee.svelte";
 
   export let node: App.Node;
   export let selected: string[];
@@ -68,7 +69,7 @@
   bind:this={mediaPreview}
   style="width: {width}px;"
   on:click|capture|stopPropagation={handleClick}
-  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48 bg-black group"
+  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-24 group"
   class:outline={isSelected}
   on:mousedown|stopPropagation={handleReorder}
 >
@@ -80,7 +81,12 @@
       initialOffset = metadata.start;
     }}
   />
-  <slot {width} />
+  <div class="flex flex-col w-full h-full">
+    <slot {width} />
+    <div class="absolute bottom-0 backdrop-blur-md w-full bg-neutral-700/80">
+      <Marquee>{metadata.title}</Marquee>
+    </div>
+  </div>
   <button
     class="z-10 absolute h-full right-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
     on:mousedown|stopPropagation={(e) => {

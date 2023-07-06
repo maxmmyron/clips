@@ -64,6 +64,6 @@
   });
 </script>
 
-<div class="h-1/2 flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={width} bind:clientHeight={height}>
+<div class="h-full flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={width} bind:clientHeight={height}>
   <canvas class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height} bind:this={canvas} />
 </div>
