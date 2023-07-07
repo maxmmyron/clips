@@ -123,8 +123,8 @@ declare global {
 					video: Array<App.VideoClip | App.ImageClip>;
 					audio: App.AudioClip[];
 				};
-				current: Node | null;
-				currentNodeRuntime: number;
+				current: App.Clip | null;
+				clipRuntime: number;
 				duration: number;
 				runtime: number;
 				zoomScale: number;
