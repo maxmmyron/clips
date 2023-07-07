@@ -4,6 +4,7 @@
   import TimelinePreview from "../preview/TimelinePreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
+  import Clip from "../preview/Clip.svelte";
 
   export let dragIndex: number;
   export let scrollX: number = 0;
@@ -32,20 +33,76 @@
     else {
       if (!$draggable.media) return;
       const media = $draggable.media;
-      $timeline.clips.add({
-        uuid: uuidv4(),
-        mediaUUID: media.uuid,
-        metadata: {
-          duration: media.type !== "image" ? media.metadata.duration : 5,
-          start: 0,
-          end: 0,
-          title: media.metadata.title,
-        },
-        next: null,
-        prev: null,
-        src: media.src,
-        type: media.type,
-      });
+      if (media.type === "video") {
+        $timeline.clips.audio = [
+          ...$timeline.clips.audio,
+          {
+            uuid: uuidv4(),
+            mediaUUID: media.uuid,
+            metadata: {
+              duration: media.metadata.duration,
+              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
+              start: 0,
+              end: 0,
+              title: media.metadata.title,
+            },
+            src: media.src,
+            type: "audio",
+          },
+        ];
+        $timeline.clips.video = [
+          ...$timeline.clips.video,
+          {
+            uuid: uuidv4(),
+            mediaUUID: media.uuid,
+            metadata: {
+              duration: media.metadata.duration,
+              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
+              start: 0,
+              end: 0,
+              title: media.metadata.title,
+            },
+            src: media.src,
+            type: "video",
+          },
+        ];
+      }
+      if (media.type === "audio") {
+        $timeline.clips.audio = [
+          ...$timeline.clips.audio,
+          {
+            uuid: uuidv4(),
+            mediaUUID: media.uuid,
+            metadata: {
+              duration: media.metadata.duration,
+              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
+              start: 0,
+              end: 0,
+              title: media.metadata.title,
+            },
+            src: media.src,
+            type: "audio",
+          },
+        ];
+      }
+      if (media.type === "image") {
+        $timeline.clips.video = [
+          ...$timeline.clips.video,
+          {
+            uuid: uuidv4(),
+            mediaUUID: media.uuid,
+            metadata: {
+              duration: 5,
+              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
+              start: 0,
+              end: 0,
+              title: media.metadata.title,
+            },
+            src: media.src,
+            type: "video",
+          },
+        ];
+      }
     }
     $timeline.clips = $timeline.clips;
   };
@@ -56,7 +113,8 @@
 
   const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.key !== "Delete" || selected.length === 0) return;
-    selected.forEach((uuid) => $timeline.clips.remove(uuid));
+    selected.forEach((uuid) => ($timeline.clips.audio = $timeline.clips.audio.filter((clip) => clip.uuid !== uuid)));
+    selected.forEach((uuid) => ($timeline.clips.video = $timeline.clips.video.filter((clip) => clip.uuid !== uuid)));
     $timeline.clips = $timeline.clips;
     selected = [];
   };
@@ -65,7 +123,7 @@
 <svelte:window on:click={() => (selected = [])} on:keydown={handleKey} />
 
 <div
-  class="overflow-x-auto flex-grow h-full flex"
+  class="overflow-x-auto h-full"
   on:scroll={(e) => (scrollX = e.currentTarget.scrollLeft)}
   on:mousedown={setupDrag}
   on:mousemove={handleDrag}
@@ -73,8 +131,9 @@
   on:mouseenter={() => ($draggable.region = "timeline")}
   on:mouseleave={() => ($draggable.region = null)}
 >
-  {#each $timeline.clips.toArray() as node, idx (node.uuid)}
-    <TimelinePreview bind:dragIndex {node} bind:selected>
+  {#each $timeline.clips.video as clip, idx (clip.uuid)}
+    <Clip {clip} />
+    <!-- <TimelinePreview bind:dragIndex {node} bind:selected>
       {#if node.type === "video"}
         <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
         {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
@@ -93,6 +152,6 @@
       {:else if node.type === "image"}
         <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
       {/if}
-    </TimelinePreview>
+    </TimelinePreview> -->
   {/each}
 </div>
