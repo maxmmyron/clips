@@ -6,64 +6,46 @@ declare global {
 	namespace App {
 		enum Location { PLAYER = 0, TIMELINE = 1 };
 
-		interface Timeline {
-			head: Node | null;
-			tail: Node | null;
+		type Clip = VideoClip | AudioClip | ImageClip;
+		type ClipTypes = "video" | "audio" | "image";
+		type ClipObjects<T> = T extends "video" ? VideoClip : T extends "audio" ? AudioClip : T extends "image" ? ImageClip : never;
 
-			add(node: Node, index?: number): void;
-			remove(uuid: string): Node | null;
-			indexOf(uuid: string): number;
-
-			getByUUID(uuid: string): Node | null;
-			getByIndex(index: number): Node | null;
-
-			toArray(): Node[];
-			get length(): number;
-		}
-
-		type Node = VideoNode | AudioNode | ImageNode;
-		type NodeTypes = "video" | "audio" | "image";
-		type NodeObjects<T> = T extends "video" ? VideoNode : T extends "audio" ? AudioNode : T extends "image" ? ImageNode : never;
-
-		interface VideoNode {
-			next: Node | null;
-			prev: Node | null;
+		interface VideoClip {
 			uuid: string;
 			mediaUUID: string;
 			type: "video";
 			src: string;
 			metadata: {
 				title: string;
+				timelineStart: number;
 				duration: number;
 				start: number;
 				end: number;
 			}
 		}
 
-		interface AudioNode {
-			next: Node | null;
-			prev: Node | null;
+		interface AudioClip {
 			uuid: string;
 			mediaUUID: string;
 			type: "audio";
 			src: string;
 			metadata: {
 				title: string;
+				timelineStart: number;
 				duration: number;
 				start: number
 				end: number;
 			}
 		}
 
-		interface ImageNode {
-			next: Node | null;
-			prev: Node | null;
+		interface ImageClip {
 			uuid: string;
 			mediaUUID: string;
 			type: "image";
 			src: string;
 			metadata: {
 				title: string;
+				timelineStart: number;
 				duration: number;
 				start: number;
 				end: number;
@@ -137,7 +119,10 @@ declare global {
 			}>;
 
 			type timeline = Writable<{
-				clips: Timeline;
+				clips: {
+					video: Array<App.VideoClip | App.ImageClip>;
+					audio: App.AudioClip[];
+				};
 				current: Node | null;
 				currentNodeRuntime: number;
 				duration: number;

@@ -1,6 +1,5 @@
 import {spring} from "svelte/motion";
 import { derived, writable } from "svelte/store";
-import TimelineLinkedList from "./components/timeline/TimelineLinkedList";
 
 export const studio = writable({
   mouse: { x: 0, y: 0 },
@@ -19,7 +18,7 @@ export const draggable: App.stores.draggable = writable({
 });
 
 export const timeline: App.stores.timeline = writable({
-  clips: new TimelineLinkedList(),
+  clips: { video: [], audio: [], },
   current: null,
   currentNodeRuntime: 0,
   duration: 0,
