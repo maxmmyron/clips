@@ -146,26 +146,29 @@
   on:mouseleave={() => ($draggable.region = null)}
 >
   <!-- video tracks -->
-  <div class="overflow-y-auto flex flex-col w-full h-1/2">
+  <div class="overflow-y-auto flex flex-col justify-end w-full h-1/2">
     {#each $timeline.clips.video as clips, idx}
-      <div on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
+      <div class="w-full h-24 border-t-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
         currTrackIdx = idx;
         currTrackType = "video";
       }}>
+        <p class="text-neutral-400 absolute">v{idx}</p>
         {#each clips as clip, idx (clip.uuid)}
           <Clip {clip} />
         {/each}
       </div>
+      
     {/each}
   </div>
   <hr class="border-2 border-white">
   <!-- audio tracks -->
   <div class="overflow-y-auto flex flex-col w-full h-1/2">
     {#each $timeline.clips.audio as clips, idx}
-      <div on:mousedown={(e) => setupDrag(e, idx, "audio")} on:mouseenter={() => {
+      <div class="w-full h-24 border-b-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "audio")} on:mouseenter={() => {
         currTrackIdx = idx;
         currTrackType = "audio";
       }}>
+        <p class="text-neutral-400 absolute">a{idx}</p>
         {#each clips as clip, idx (clip.uuid)}
           <Clip {clip} />
         {/each}

@@ -18,7 +18,7 @@ export const draggable: App.stores.draggable = writable({
 });
 
 export const timeline: App.stores.timeline = writable({
-  clips: {video: [], audio: []} as {video: (App.VideoClip | App.ImageClip)[][], audio: App.AudioClip[][]},
+  clips: {video: [[], []], audio: [[], []]} as {video: (App.VideoClip | App.ImageClip)[][], audio: App.AudioClip[][]},
   current: {video: null, audio: [] as App.AudioClip[]},
   duration: 0,
   runtime: 0,
