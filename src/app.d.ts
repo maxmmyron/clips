@@ -16,11 +16,15 @@ declare global {
 			type: "video";
 			src: string;
 			metadata: {
-				title: string;
-				timelineStart: number;
+				// total duration of the clip
 				duration: number;
+				// timeline offset
+				offset: number;
+				// duration start offset
 				start: number;
-				end: number;
+				// runing duration (duration - start - end)
+				runtime: number;
+				title: string;
 			}
 		}
 
@@ -30,11 +34,11 @@ declare global {
 			type: "audio";
 			src: string;
 			metadata: {
-				title: string;
-				timelineStart: number;
 				duration: number;
-				start: number
-				end: number;
+				offset: number;
+				start: number;
+				runtime: number;
+				title: string;
 			}
 		}
 
@@ -44,11 +48,11 @@ declare global {
 			type: "image";
 			src: string;
 			metadata: {
-				title: string;
-				timelineStart: number;
 				duration: number;
+				offset: number;
 				start: number;
-				end: number;
+				runtime: number;
+				title: string;
 			}
 		}
 
