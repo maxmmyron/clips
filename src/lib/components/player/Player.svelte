@@ -13,14 +13,14 @@
 
   let sourceDim: [number, number], mediaDim: [number, number], mediaPos: [number, number];
 
-  $: if (src) {
-    if (src.type === "video") sourceDim = [(src.source as HTMLVideoElement).videoWidth, (src.source as HTMLVideoElement).videoHeight];
-    else sourceDim = [src.source.width, src.source.height];
+  // $: if (src) {
+  //   if (src.type === "video") sourceDim = [(src.source as HTMLVideoElement).videoWidth, (src.source as HTMLVideoElement).videoHeight];
+  //   else sourceDim = [src.source.width, src.source.height];
 
-    mediaDim = [sourceDim[0] * Math.min(width / sourceDim[0], height / sourceDim[1]), sourceDim[1] * Math.min(width / sourceDim[0], height / sourceDim[1])];
+  //   mediaDim = [sourceDim[0] * Math.min(width / sourceDim[0], height / sourceDim[1]), sourceDim[1] * Math.min(width / sourceDim[0], height / sourceDim[1])];
 
-    mediaPos = [Math.max(0, (width - mediaDim[0]) / 2), Math.max(0, (height - mediaDim[1]) / 2)];
-  }
+  //   mediaPos = [Math.max(0, (width - mediaDim[0]) / 2), Math.max(0, (height - mediaDim[1]) / 2)];
+  // }
 
   let render: Render;
   $: render = ({ context, width, height }) => {
