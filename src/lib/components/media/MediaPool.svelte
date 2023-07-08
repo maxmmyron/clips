@@ -50,14 +50,14 @@
 
     // check if selected files are in timeline; show confirmation if so
     const tlHasClips =
-      $timeline.clips.video.some(({ mediaUUID }) => selected.includes(mediaUUID)) ||
-      $timeline.clips.audio.some(({ mediaUUID }) => selected.includes(mediaUUID));
+      $timeline.clips.video.flat().some(({ mediaUUID }) => selected.includes(mediaUUID)) ||
+      $timeline.clips.audio.flat().some(({ mediaUUID }) => selected.includes(mediaUUID));
 
     if (tlHasClips && confirm(timelineConfirm) === false) return;
 
     // delete files from timeline and media pool, clear selection arr
-    $timeline.clips.audio = $timeline.clips.audio.filter(({ mediaUUID }) => !selected.includes(mediaUUID));
-    $timeline.clips.video = $timeline.clips.video.filter(({ mediaUUID }) => !selected.includes(mediaUUID));
+    $timeline.clips.video = $timeline.clips.video.map((track) => track.filter(({ mediaUUID }) => !selected.includes(mediaUUID)));
+    $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter(({ mediaUUID }) => !selected.includes(mediaUUID)));
     $media.unresolved = $media.unresolved.filter(({ uuid }) => !selected.includes(uuid));
     $media.resolved = $media.resolved.filter(({ uuid }) => !selected.includes(uuid));
 
