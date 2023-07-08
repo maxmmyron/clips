@@ -8,7 +8,8 @@
 
   export let width: number, height: number;
 
-  $: src = $timeline.current && $buffers.get($timeline.current.uuid);
+  // TODO: fixme
+  // $: src = $timeline.current && $buffers.get($timeline.current.uuid);
 
   let sourceDim: [number, number], mediaDim: [number, number], mediaPos: [number, number];
 
@@ -23,20 +24,23 @@
 
   let render: Render;
   $: render = ({ context, width, height }) => {
-    $t;
-    if (!$timeline.current || $timeline.current.type === "audio") {
-      context.fillStyle = "black";
-      context.fillRect(0, 0, width, height);
-      return;
-    }
+    // TODO: Fix me
+    // $t;
+    // if (!$timeline.current || $timeline.current.type === "audio") {
+    //   context.fillStyle = "black";
+    //   context.fillRect(0, 0, width, height);
+    //   return;
+    // }
 
-    if (!src) return;
-    context.drawImage(src.source, 0, 0, ...sourceDim, ...mediaPos, ...mediaDim);
+    // if (!src) return;
+    // context.drawImage(src.source, 0, 0, ...sourceDim, ...mediaPos, ...mediaDim);
   };
 </script>
 
-{#each $timeline.clips.toArray() as node}
-  <Buffer {node} />
+{#each [...$timeline.clips.video, ...$timeline.clips.audio] as clips}
+  {#each clips as clip}
+    <Buffer {clip} />
+  {/each}
 {/each}
 
 <Canvas {width} {height}>
