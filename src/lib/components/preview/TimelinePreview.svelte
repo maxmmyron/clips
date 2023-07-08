@@ -2,11 +2,10 @@
   import { player, studio, timeline, draggable, media, secondWidth } from "$lib/stores";
   import Marquee from "../util/Marquee.svelte";
 
-  export let node: App.Node;
+  export let clip: App.Clip;
   export let selected: string[];
-  export let dragIndex: number;
 
-  const metadata = node.metadata;
+  const metadata = clip.metadata;
 
   let duration = metadata.duration;
   let isAdjustingOffsets = false;
@@ -16,7 +15,7 @@
   let initialPosition = 0;
   let initialOffset = 0;
 
-  $: isSelected = selected.includes(node.uuid);
+  $: isSelected = selected.includes(clip.uuid);
 
   $: width = (duration - metadata.start - metadata.end) * $secondWidth;
 
@@ -25,15 +24,15 @@
       isAdjustingOffsets = false;
       return;
     }
-    if (e.detail == 2) $player.source = node.src;
-    else if (e.shiftKey) selected = [...selected, node.uuid];
-    else selected = [node.uuid];
+    if (e.detail == 2) $player.source = clip.src;
+    else if (e.shiftKey) selected = [...selected, clip.uuid];
+    else selected = [clip.uuid];
   };
 
-  const handleReorder = (e: MouseEvent) => {
+  const handleMove = (e: MouseEvent) => {
     $draggable = {
       ...$draggable,
-      media: <App.Media>$media.resolved.find((m) => m.uuid == node.uuid),
+      media: <App.Media>$media.resolved.find((m) => m.uuid == clip.uuid),
       origin: {
         pos: { x: e.clientX, y: e.clientY },
         region: "timeline",
@@ -45,7 +44,7 @@
     $draggable.ghost.pos.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
     $draggable.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
 
-    dragIndex = $timeline.clips.indexOf(node.uuid);
+    // dragIndex = $timeline.clips.indexOf(clip.uuid);
   };
 
   const handleOffsets = (e: MouseEvent) => {
@@ -71,7 +70,7 @@
   on:click|capture|stopPropagation={handleClick}
   class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-24 group"
   class:outline={isSelected}
-  on:mousedown|stopPropagation={handleReorder}
+  on:mousedown|stopPropagation={handleMove}
 >
   <button
     class="z-10 absolute h-full left-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
