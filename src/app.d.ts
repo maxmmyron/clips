@@ -120,10 +120,13 @@ declare global {
 
 			type timeline = Writable<{
 				clips: {
-					video: Array<App.VideoClip | App.ImageClip>;
+					video: (App.VideoClip | App.ImageClip)[][];
+					audio: App.AudioClip[][];
+				};
+				current: {
+					video: (App.VideoClip | App.ImageClip)[];
 					audio: App.AudioClip[];
 				};
-				current: App.Clip | null;
 				clipRuntime: number;
 				duration: number;
 				runtime: number;
