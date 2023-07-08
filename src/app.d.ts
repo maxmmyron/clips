@@ -124,8 +124,8 @@ declare global {
 					audio: App.AudioClip[][];
 				};
 				current: {
-					video: (App.VideoClip | App.ImageClip)[];
-					audio: App.AudioClip[];
+					video: App.VideoClip | App.ImageClip | null;
+					audio: App.AudioClip | null;
 				};
 				clipRuntime: number;
 				duration: number;
