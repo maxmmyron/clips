@@ -9,17 +9,31 @@
   export let dragIndex: number;
   export let scrollX: number = 0;
 
+  let startTrackIdx = -1, currTrackIdx = -1;
+  let startTrackType: "video" | "audio" = "video", currTrackType: "video" | "audio" = "video";
+
   /**
    * uuids of selected timeline clips
    */
   let selected: string[] = [];
 
-  const setupDrag = (e: MouseEvent) => {
+  /**
+   * Sets up the drag event for the current track
+   */
+  const setupDrag = (e: MouseEvent, trackIdx: number, trackType: "video" | "audio") => {
     if (e.button !== 0) return;
+    startTrackIdx = currTrackIdx = trackIdx;
+    startTrackType = currTrackType = trackType;
     $draggable.event = "start";
     $draggable.origin = { pos: { x: e.clientX, y: e.clientY }, region: "timeline" };
   };
 
+  // TODO: implement moving a clip across a track boundary
+  /**
+   * Handles the continued element drag around the timeline. 
+   * this is bound to the general timeline container so the mouse can move outside a single track while moving the element.
+   *
+  */
   const handleDrag = (e: MouseEvent) => {
     if ($draggable.event !== "start" || !$draggable.origin) return;
     if (Math.sqrt(Math.pow(e.clientX - $draggable.origin.pos.x, 2) + Math.pow(e.clientY - $draggable.origin.pos.y, 2)) < 15) return;
@@ -31,11 +45,12 @@
     if ($draggable.event !== "drag" || !$draggable.origin) return;
     if ($draggable.origin.region === "timeline") calculateReorder();
     else {
+      // TODO: bro this shit SUCKS
       if (!$draggable.media) return;
       const media = $draggable.media;
       if (media.type === "video") {
-        $timeline.clips.audio = [
-          ...$timeline.clips.audio,
+        $timeline.clips.audio[currTrackIdx] = [
+          ...$timeline.clips.audio[currTrackIdx],
           {
             uuid: uuidv4(),
             mediaUUID: media.uuid,
@@ -50,8 +65,8 @@
             type: "audio",
           },
         ];
-        $timeline.clips.video = [
-          ...$timeline.clips.video,
+        $timeline.clips.video[currTrackIdx] = [
+          ...$timeline.clips.video[currTrackIdx],
           {
             uuid: uuidv4(),
             mediaUUID: media.uuid,
@@ -68,8 +83,8 @@
         ];
       }
       if (media.type === "audio") {
-        $timeline.clips.audio = [
-          ...$timeline.clips.audio,
+        $timeline.clips.audio[currTrackIdx] = [
+          ...$timeline.clips.audio[currTrackIdx],
           {
             uuid: uuidv4(),
             mediaUUID: media.uuid,
@@ -86,8 +101,8 @@
         ];
       }
       if (media.type === "image") {
-        $timeline.clips.video = [
-          ...$timeline.clips.video,
+        $timeline.clips.video[currTrackIdx] = [
+          ...$timeline.clips.video[currTrackIdx],
           {
             uuid: uuidv4(),
             mediaUUID: media.uuid,
@@ -108,13 +123,13 @@
   };
 
   const calculateReorder = () => {
-    console.log("reorder");
+    console.log("a reorder is in order lol");
   };
 
   const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.key !== "Delete" || selected.length === 0) return;
-    selected.forEach((uuid) => ($timeline.clips.audio = $timeline.clips.audio.filter((clip) => clip.uuid !== uuid)));
-    selected.forEach((uuid) => ($timeline.clips.video = $timeline.clips.video.filter((clip) => clip.uuid !== uuid)));
+    selected.forEach((uuid) => $timeline.clips.video = $timeline.clips.video.map((track) => track.filter((clip) => clip.uuid !== uuid)));
+    selected.forEach((uuid) => $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter((clip) => clip.uuid !== uuid)));
     $timeline.clips = $timeline.clips;
     selected = [];
   };
@@ -125,33 +140,57 @@
 <div
   class="overflow-x-auto h-full"
   on:scroll={(e) => (scrollX = e.currentTarget.scrollLeft)}
-  on:mousedown={setupDrag}
   on:mousemove={handleDrag}
   on:mouseup={endDrag}
   on:mouseenter={() => ($draggable.region = "timeline")}
   on:mouseleave={() => ($draggable.region = null)}
 >
-  {#each $timeline.clips.video as clip, idx (clip.uuid)}
-    <Clip {clip} />
-    <!-- <TimelinePreview bind:dragIndex {node} bind:selected>
-      {#if node.type === "video"}
-        <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
-        {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-          <MediaAudioPreview
-            mediaUUID={node.mediaUUID}
-            metadata={{
-              start: node.metadata.start,
-              end: node.metadata.end,
-            }}
-          />
-        {/key}
-      {:else if node.type === "audio"}
-        {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-          <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
-        {/key}
-      {:else if node.type === "image"}
-        <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
-      {/if}
-    </TimelinePreview> -->
-  {/each}
+  <!-- video tracks -->
+  <div class="overflow-y-auto flex flex-col w-full h-1/2">
+    {#each $timeline.clips.video as clips, idx}
+      <div on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
+        currTrackIdx = idx;
+        currTrackType = "video";
+      }}>
+        {#each clips as clip, idx (clip.uuid)}
+          <Clip {clip} />
+        {/each}
+      </div>
+    {/each}
+  </div>
+  <hr class="border-2 border-white">
+  <!-- audio tracks -->
+  <div class="overflow-y-auto flex flex-col w-full h-1/2">
+    {#each $timeline.clips.audio as clips, idx}
+      <div on:mousedown={(e) => setupDrag(e, idx, "audio")} on:mouseenter={() => {
+        currTrackIdx = idx;
+        currTrackType = "audio";
+      }}>
+        {#each clips as clip, idx (clip.uuid)}
+          <Clip {clip} />
+        {/each}
+      </div>
+    {/each}
+  </div>
+
+  <!-- <TimelinePreview bind:dragIndex {node} bind:selected>
+    {#if node.type === "video"}
+      <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
+      {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+        <MediaAudioPreview
+          mediaUUID={node.mediaUUID}
+          metadata={{
+            start: node.metadata.start,
+            end: node.metadata.end,
+          }}
+        />
+      {/key}
+    {:else if node.type === "audio"}
+      {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+        <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
+      {/key}
+    {:else if node.type === "image"}
+      <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
+    {/if}
+  </TimelinePreview> -->
 </div>
