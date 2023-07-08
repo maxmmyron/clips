@@ -7,7 +7,6 @@
 
   const metadata = clip.metadata;
 
-  let duration = metadata.duration;
   let isAdjustingOffsets = false;
   let mediaPreview: HTMLButtonElement;
 
@@ -17,7 +16,7 @@
 
   $: isSelected = selected.includes(clip.uuid);
 
-  $: width = (duration - metadata.start - metadata.end) * $secondWidth;
+  $: width = (metadata.runtime - metadata.start) * $secondWidth;
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
@@ -57,7 +56,7 @@
       metadata.start = Math.max(0, offset);
     } else {
       offset = initialOffset + (initialPosition - e.clientX) / $secondWidth;
-      metadata.end = Math.max(0, offset);
+      metadata.runtime = Math.max(0, offset);
     }
   };
 </script>
@@ -91,7 +90,7 @@
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 1;
       initialPosition = mediaPreview.getBoundingClientRect().right;
-      initialOffset = metadata.end;
+      initialOffset = metadata.duration - metadata.runtime - metadata.start;
     }}
   />
 </button>

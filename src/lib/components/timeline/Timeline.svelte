@@ -46,6 +46,7 @@
     if ($draggable.origin.region === "timeline") calculateReorder();
     else {
       // TODO: bro this shit SUCKS
+      // TODO: also remove magic number
       if (!$draggable.media) return;
       const media = $draggable.media;
       if (media.type === "video") {
@@ -56,9 +57,9 @@
             mediaUUID: media.uuid,
             metadata: {
               duration: media.metadata.duration,
-              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
+              runtime: media.metadata.duration,
+              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
               start: 0,
-              end: 0,
               title: media.metadata.title,
             },
             src: media.src,
@@ -72,9 +73,9 @@
             mediaUUID: media.uuid,
             metadata: {
               duration: media.metadata.duration,
-              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
+              runtime: media.metadata.duration,
+              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
               start: 0,
-              end: 0,
               title: media.metadata.title,
             },
             src: media.src,
@@ -90,9 +91,9 @@
             mediaUUID: media.uuid,
             metadata: {
               duration: media.metadata.duration,
-              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
+              runtime: media.metadata.duration,
+              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
               start: 0,
-              end: 0,
               title: media.metadata.title,
             },
             src: media.src,
@@ -107,10 +108,10 @@
             uuid: uuidv4(),
             mediaUUID: media.uuid,
             metadata: {
-              duration: 5,
-              timelineStart: e.clientX / $secondWidth + scrollX / $secondWidth,
-              start: 0,
-              end: 0,
+              duration: 60,
+              runtime: 5,
+              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+              start: 27.5,
               title: media.metadata.title,
             },
             src: media.src,
@@ -146,7 +147,7 @@
   on:mouseleave={() => ($draggable.region = null)}
 >
   <!-- video tracks -->
-  <div class="overflow-y-auto flex flex-col justify-end w-full h-1/2">
+  <div class="overflow-y-auto flex flex-col-reverse justify-end w-full h-1/2">
     {#each $timeline.clips.video as clips, idx}
       <div class="w-full h-24 border-t-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
         currTrackIdx = idx;

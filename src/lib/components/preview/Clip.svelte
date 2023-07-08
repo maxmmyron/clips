@@ -6,5 +6,5 @@
 
 <div
   class="absolute h-12 bg-orange-200 rounded-lg"
-  style="width: {clip.metadata.duration * $secondWidth}px; transform: translateX({clip.metadata.timelineStart * $secondWidth}px);"
+  style="width: {clip.metadata.runtime * $secondWidth}px; transform: translateX({clip.metadata.offset * $secondWidth}px);"
 />
