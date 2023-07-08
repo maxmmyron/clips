@@ -12,43 +12,41 @@
   onMount(() => clip.type !== "audio" && $buffers.set(clip.uuid, { source: buffer, type: clip.type }));
 
   // FIXME: this runs every frame due to $timeline.current === node check. not sure why?
-  $: if (buffer && $timeline.current === clip) {
-    if (clip.type === "video") {
-      buffer = buffer as HTMLVideoElement;
-      if (!$player.isPaused && buffer.paused) {
-        audioNode = $audioContext.createBufferSource();
-        audioNode.buffer = ($media.resolved.find((media) => media.uuid === clip.mediaUUID) as App.Video).metadata.audio;
-        audioNode.connect($audioContext.destination);
-        const playTime = $timeline.clipRuntime + $timeline.current.metadata.start;
-        const endTime = $timeline.current.metadata.duration - $timeline.current.metadata.start - $timeline.current.metadata.end;
+  $: if ((clip.type === "video" || clip.type === "image") && $timeline.current.video === clip) {
+    buffer = buffer as HTMLVideoElement;
+    if (!$player.isPaused && buffer.paused) {
+      audioNode = $audioContext.createBufferSource();
+      audioNode.buffer = ($media.resolved.find((media) => media.uuid === clip.mediaUUID) as App.Video).metadata.audio;
+      audioNode.connect($audioContext.destination);
+      const playTime = $timeline.clipRuntime + $timeline.current.video.metadata.start;
+      const endTime = $timeline.current.video.metadata.duration - $timeline.current.video.metadata.start - $timeline.current.video.metadata.end;
 
-        buffer.currentTime = playTime;
-        buffer.play();
-        audioNode.start(0, playTime, endTime);
-      } else if ($player.isPaused && !buffer.paused) {
-        buffer.pause();
-        if (audioNode) {
-          audioNode.stop();
-          audioNode.disconnect();
-        }
-      }
-    }
-
-    if (clip.type === "audio") {
-      if (!$player.isPaused && !hasAudioNodeStarted) {
-        audioNode = $audioContext.createBufferSource();
-        audioNode.buffer = ($media.resolved.find((media) => media.uuid === clip.mediaUUID) as App.Audio).metadata.audio;
-        audioNode.connect($audioContext.destination);
-        const playTime = $timeline.clipRuntime + $timeline.current.metadata.start;
-        const endTime = $timeline.current.metadata.duration - $timeline.current.metadata.start - $timeline.current.metadata.end;
-
-        audioNode.start(0, playTime, endTime);
-        hasAudioNodeStarted = true;
-      } else if ($player.isPaused && hasAudioNodeStarted) {
+      buffer.currentTime = playTime;
+      buffer.play();
+      audioNode.start(0, playTime, endTime);
+    } else if ($player.isPaused && !buffer.paused) {
+      buffer.pause();
+      if (audioNode) {
         audioNode.stop();
         audioNode.disconnect();
-        hasAudioNodeStarted = false;
       }
+    }
+  }
+
+  $: if(clip.type === "audio" && $timeline.current.audio === clip) {
+    if (!$player.isPaused && !hasAudioNodeStarted) {
+      audioNode = $audioContext.createBufferSource();
+      audioNode.buffer = ($media.resolved.find((media) => media.uuid === clip.mediaUUID) as App.Audio).metadata.audio;
+      audioNode.connect($audioContext.destination);
+      const playTime = $timeline.clipRuntime + $timeline.current.audio.metadata.start;
+      const endTime = $timeline.current.audio.metadata.duration - $timeline.current.audio.metadata.start - $timeline.current.audio.metadata.end;
+
+      audioNode.start(0, playTime, endTime);
+      hasAudioNodeStarted = true;
+    } else if ($player.isPaused && hasAudioNodeStarted) {
+      audioNode.stop();
+      audioNode.disconnect();
+      hasAudioNodeStarted = false;
     }
   }
 </script>
