@@ -43,7 +43,6 @@
   const endDrag = (e: MouseEvent) => {
     console.log("end drag");
     if ($draggable.event !== "drag" || !$draggable.origin) return;
-    if ($draggable.origin.region === "timeline") calculateReorder();
     else {
       // TODO: bro this shit SUCKS
       // TODO: also remove magic number
@@ -121,10 +120,6 @@
       }
     }
     $timeline.clips = $timeline.clips;
-  };
-
-  const calculateReorder = () => {
-    console.log("a reorder is in order lol");
   };
 
   const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
