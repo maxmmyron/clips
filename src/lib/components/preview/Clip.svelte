@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { media, secondWidth, studio } from "$lib/stores";
+  import { secondWidth } from "$lib/stores";
 
   export let clip: App.Clip;
   export let selected: string[];
@@ -18,25 +18,14 @@
 
   const handleMove = (e: MouseEvent) => {
     if(isMove) {
-      clip.metadata.offset = ($studio.mouse.x - initialX) / $secondWidth;
+      clip.metadata.offset = (e.clientX - initialX) / $secondWidth;
       return
     }
 
     if(isResize) {  
       let offset;
-      // if left, resize based on mouse position between 0 and metadata.runtime
-      if(resizeDirection == "left") {
-        offset = initialOffset + (e.clientX - initialResizePosition) / $secondWidth;
-        clip.metadata.start = Math.max(0, offset);
-        return;
-      }
-
-      // if right, resize based on mouse position between metadata.start and metadata.duration
-      if(resizeDirection == "right") {
-        offset = initialOffset - (initialResizePosition - e.clientX) / $secondWidth;
-        clip.metadata.runtime = Math.min(offset, clip.metadata.duration);
-        return;
-      }
+      if(resizeDirection == "left")  clip.metadata.start = Math.max(0, initialOffset + (e.clientX - initialResizePosition) / $secondWidth);
+      else clip.metadata.runtime = Math.min(initialOffset - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration);
     }
   }
 
@@ -46,21 +35,20 @@
   };
 
   const setupMove = (e: MouseEvent) => {
+    initialOffset = clip.metadata.runtime;
+    initialX = e.clientX;
+
     if(e.clientX - mediaPreview.getBoundingClientRect().x < 12) {
       isResize = true;
       initialResizePosition = mediaPreview.getBoundingClientRect().left;
-      initialOffset = clip.metadata.start;
       resizeDirection = "left";
-      initialX = e.clientX;
       return;
     }
-
+    
     if(mediaPreview.getBoundingClientRect().right - e.clientX < 12) {
       isResize = true;
       initialResizePosition = mediaPreview.getBoundingClientRect().right;
-      initialOffset = clip.metadata.runtime;
       resizeDirection = "right";
-      initialX = e.clientX;
       return;
     }
     
