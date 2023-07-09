@@ -155,7 +155,7 @@
       }}>
         <p class="text-neutral-400 absolute">v{idx}</p>
         {#each clips as clip, idx (clip.uuid)}
-          <Clip {clip} />
+          <Clip {clip} bind:selected />
         {/each}
       </div>
       
@@ -171,7 +171,7 @@
       }}>
         <p class="text-neutral-400 absolute">a{idx}</p>
         {#each clips as clip, idx (clip.uuid)}
-          <Clip {clip} />
+          <Clip {clip} bind:selected />
         {/each}
       </div>
     {/each}
