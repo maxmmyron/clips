@@ -107,10 +107,10 @@
             uuid: uuidv4(),
             mediaUUID: media.uuid,
             metadata: {
-              duration: 60,
+              duration: 5,
               runtime: 5,
               offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
-              start: 27.5,
+              start: 0,
               title: media.metadata.title,
             },
             src: media.src,
