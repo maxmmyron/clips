@@ -15,6 +15,7 @@ declare global {
 			mediaUUID: string;
 			type: "video";
 			src: string;
+			link: Clip | null;
 			metadata: {
 				// total duration of the clip
 				duration: number;
@@ -33,6 +34,7 @@ declare global {
 			mediaUUID: string;
 			type: "audio";
 			src: string;
+			link: Clip | null;
 			metadata: {
 				duration: number;
 				offset: number;
@@ -47,6 +49,7 @@ declare global {
 			mediaUUID: string;
 			type: "image";
 			src: string;
+			link: Clip | null;
 			metadata: {
 				duration: number;
 				offset: number;

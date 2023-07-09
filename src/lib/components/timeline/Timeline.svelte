@@ -49,37 +49,46 @@
       if (!$draggable.media) return;
       const media = $draggable.media;
       if (media.type === "video") {
+        const audioClip = {
+          uuid: uuidv4(),
+          mediaUUID: media.uuid,
+          link: null,
+          metadata: {
+            duration: media.metadata.duration,
+            runtime: media.metadata.duration,
+            offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+            start: 0,
+            title: media.metadata.title,
+          },
+          src: media.src,
+          type: "audio",
+        };
+
+        const videoClip = {
+          uuid: uuidv4(),
+          mediaUUID: media.uuid,
+          link: null,
+          metadata: {
+            duration: media.metadata.duration,
+            runtime: media.metadata.duration,
+            offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+            start: 0,
+            title: media.metadata.title,
+          },
+          src: media.src,
+          type: "video",
+        }; 
+
+        audioClip.link = videoClip;
+        videoClip.link = audioClip;
+
         $timeline.clips.audio[currTrackIdx] = [
           ...$timeline.clips.audio[currTrackIdx],
-          {
-            uuid: uuidv4(),
-            mediaUUID: media.uuid,
-            metadata: {
-              duration: media.metadata.duration,
-              runtime: media.metadata.duration,
-              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
-              start: 0,
-              title: media.metadata.title,
-            },
-            src: media.src,
-            type: "audio",
-          },
+          audioClip
         ];
         $timeline.clips.video[currTrackIdx] = [
           ...$timeline.clips.video[currTrackIdx],
-          {
-            uuid: uuidv4(),
-            mediaUUID: media.uuid,
-            metadata: {
-              duration: media.metadata.duration,
-              runtime: media.metadata.duration,
-              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
-              start: 0,
-              title: media.metadata.title,
-            },
-            src: media.src,
-            type: "video",
-          },
+          videoClip
         ];
       }
       if (media.type === "audio") {
@@ -88,6 +97,7 @@
           {
             uuid: uuidv4(),
             mediaUUID: media.uuid,
+            link: null,
             metadata: {
               duration: media.metadata.duration,
               runtime: media.metadata.duration,
@@ -106,6 +116,7 @@
           {
             uuid: uuidv4(),
             mediaUUID: media.uuid,
+            link: null,
             metadata: {
               duration: 5,
               runtime: 5,
