@@ -135,6 +135,10 @@
 
   const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.key !== "Delete" || selected.length === 0) return;
+    const links = selected.map((uuid) => $timeline.clips.video.flat().find((clip) => clip.uuid === uuid)?.link?.uuid);
+    // TODO: check runtime; fix if too slow.
+    links.forEach((uuid) => $timeline.clips.video = $timeline.clips.video.map((track) => track.filter((clip) => clip.uuid !== uuid)));
+    links.forEach((uuid) => $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter((clip) => clip.uuid !== uuid)));
     selected.forEach((uuid) => $timeline.clips.video = $timeline.clips.video.map((track) => track.filter((clip) => clip.uuid !== uuid)));
     selected.forEach((uuid) => $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter((clip) => clip.uuid !== uuid)));
     $timeline.clips = $timeline.clips;
