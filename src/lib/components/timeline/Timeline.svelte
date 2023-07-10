@@ -1,225 +1,210 @@
 <script lang="ts">
-  import { timeline, studio, player, mediaPool } from "$lib/stores";
+  import { draggable, secondWidth, timeline } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
-  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
-  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import TimelinePreview from "../preview/TimelinePreview.svelte";
-  import { onMount } from "svelte";
-  import Scrubber from "./Scrubber.svelte";
-  import Ticks from "./Ticks.svelte";
+  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
+  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
+  import Clip from "../preview/Clip.svelte";
 
-  let timelineElementContainer: HTMLDivElement, timelineContainer: HTMLDivElement;
-  let canMoveScrubber = false;
-  let scrollX = 0;
+  export let dragIndex: number;
+  export let scrollX: number = 0;
 
-  let dropIndex: number = -1;
+  let startTrackIdx = -1, currTrackIdx = -1;
+  let startTrackType: "video" | "audio" = "video", currTrackType: "video" | "audio" = "video";
 
-  $: $timeline.duration = $timeline.timeline.toArray().reduce((acc, { metadata }) => acc + (metadata.duration - metadata.start - metadata.end), 0);
-  $: secondWidth = (timelineContainer?.clientWidth ?? 0) / 5;
+  /**
+   * uuids of selected timeline clips
+   */
+  let selected: string[] = [];
 
-  let lastTimestamp = 0;
-  const renderTimeline = (timestamp: number) => {
-    let curr = $timeline.timeline.head;
-    // find the currently rendering node given the runtime
-    let previousNodeOffset = 0;
-    while (curr && previousNodeOffset + (curr.metadata.duration - curr.metadata.start - curr.metadata.end) < $timeline.runtime) {
-      previousNodeOffset += curr.metadata.duration - curr.metadata.start - curr.metadata.end;
-      curr = curr.next;
-    }
-    $timeline.currentNodeRuntime = curr !== null ? $timeline.runtime - previousNodeOffset : 0;
-    if ($timeline.current !== curr) $timeline.current = curr;
-
-    if ($player.isPaused) {
-      lastTimestamp = timestamp;
-      requestAnimationFrame(renderTimeline);
-      return;
-    }
-
-    const delta = timestamp - lastTimestamp;
-    lastTimestamp = timestamp;
-
-    $timeline.runtime += delta / 1000;
-
-    requestAnimationFrame(renderTimeline);
+  /**
+   * Sets up the drag event for the current track
+   */
+  const setupDrag = (e: MouseEvent, trackIdx: number, trackType: "video" | "audio") => {
+    if (e.button !== 0) return;
+    startTrackIdx = currTrackIdx = trackIdx;
+    startTrackType = currTrackType = trackType;
+    $draggable.event = "start";
+    $draggable.origin = { pos: { x: e.clientX, y: e.clientY }, region: "timeline" };
   };
 
-  onMount(() => requestAnimationFrame(renderTimeline));
-
+  // TODO: implement moving a clip across a track boundary
+  /**
+   * Handles the continued element drag around the timeline. 
+   * this is bound to the general timeline container so the mouse can move outside a single track while moving the element.
+   *
+  */
   const handleDrag = (e: MouseEvent) => {
-    if ($studio.draggable.event !== "drag" || $studio.draggable.current.region !== "timeline") return;
+    if ($draggable.event !== "start" || !$draggable.origin) return;
+    if (Math.sqrt(Math.pow(e.clientX - $draggable.origin.pos.x, 2) + Math.pow(e.clientY - $draggable.origin.pos.y, 2)) < 15) return;
+    $draggable.event = "drag";
+  };
 
-    // get the element to place our element before
-    const afterElement = [...timelineElementContainer.querySelectorAll(".draggable:not(.dragging)")].reduce(
-      (accumulator, currChild) => {
-        const childBounds = currChild.getBoundingClientRect();
-        const offset = e.clientX - childBounds.left - childBounds.width / 2;
-        if (offset < 0 && offset > accumulator.offset) {
-          return { offset, el: currChild };
-        } else {
-          return { offset: accumulator.offset, el: accumulator.el };
-        }
-      },
-      { el: null as Element | null, offset: Number.NEGATIVE_INFINITY }
-    ).el;
+  const endDrag = (e: MouseEvent) => {
+    console.log("end drag");
+    if ($draggable.event !== "drag" || !$draggable.origin) return;
+    else {
+      // TODO: bro this shit SUCKS
+      // TODO: also remove magic number
+      if (!$draggable.media) return;
+      const media = $draggable.media;
+      if (media.type === "video") {
+        const audioClip: App.AudioClip = {
+          uuid: uuidv4(),
+          mediaUUID: media.uuid,
+          link: null,
+          metadata: {
+            duration: media.metadata.duration,
+            runtime: media.metadata.duration,
+            offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+            start: 0,
+            title: media.metadata.title,
+          },
+          src: media.src,
+          type: "audio",
+        };
 
-    // get nearest spot to position ghost
-    let dropXPosition = 0;
-    if (afterElement == null) {
-      dropIndex = -1;
-      if (timelineElementContainer.children.length > 0)
-        dropXPosition = timelineElementContainer.children[timelineElementContainer.children.length - 1].getBoundingClientRect().right;
-      else dropXPosition = timelineElementContainer.getBoundingClientRect().left;
-    } else {
-      dropIndex = [...timelineElementContainer.querySelectorAll(".draggable:not(.dragging)")].indexOf(afterElement);
-      dropXPosition = afterElement.getBoundingClientRect().left;
-    }
+        const videoClip: App.VideoClip = {
+          uuid: uuidv4(),
+          mediaUUID: media.uuid,
+          link: null,
+          metadata: {
+            duration: media.metadata.duration,
+            runtime: media.metadata.duration,
+            offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+            start: 0,
+            title: media.metadata.title,
+          },
+          src: media.src,
+          type: "video",
+        }; 
 
-    let width = 12;
-    if ($studio.draggable.origin?.region === "media_pool") {
-      if ($studio.draggable.mediaUUID) {
-        let duration = 3;
-        const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
-        if (!draggable) return;
+        audioClip.link = videoClip;
+        videoClip.link = audioClip;
 
-        if (draggable.type === "video" || draggable.type === "audio") {
-          duration = draggable.metadata.duration;
-        }
-
-        width = duration * $timeline.zoomScale;
-      } else if ($timeline.dragIndex !== -1) {
-        const clip = $timeline.timeline.getByIndex($timeline.dragIndex) as App.Node;
-        width = clip.metadata.duration * $timeline.zoomScale;
+        $timeline.clips.audio[currTrackIdx] = [
+          ...$timeline.clips.audio[currTrackIdx],
+          audioClip
+        ];
+        $timeline.clips.video[currTrackIdx] = [
+          ...$timeline.clips.video[currTrackIdx],
+          videoClip
+        ];
+      }
+      if (media.type === "audio") {
+        $timeline.clips.audio[currTrackIdx] = [
+          ...$timeline.clips.audio[currTrackIdx],
+          {
+            uuid: uuidv4(),
+            mediaUUID: media.uuid,
+            link: null,
+            metadata: {
+              duration: media.metadata.duration,
+              runtime: media.metadata.duration,
+              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+              start: 0,
+              title: media.metadata.title,
+            },
+            src: media.src,
+            type: "audio",
+          },
+        ];
+      }
+      if (media.type === "image") {
+        $timeline.clips.video[currTrackIdx] = [
+          ...$timeline.clips.video[currTrackIdx],
+          {
+            uuid: uuidv4(),
+            mediaUUID: media.uuid,
+            link: null,
+            metadata: {
+              duration: 5,
+              runtime: 5,
+              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+              start: 0,
+              title: media.metadata.title,
+            },
+            src: media.src,
+            type: "video",
+          },
+        ];
       }
     }
-
-    // update ghost position and size
-    $studio.draggable.ghost.pos.set({
-      x: dropXPosition,
-      y: timelineElementContainer.getBoundingClientRect().top,
-    });
-    $studio.draggable.ghost.size.set({ width, height: timelineElementContainer.getBoundingClientRect().height });
+    $timeline.clips = $timeline.clips;
   };
 
-  const handleDragEnd = () => {
-    if ($studio.draggable.event === "start") return;
-    if ($studio.draggable.origin?.region === "timeline") {
-      if ($timeline.dragIndex === -1) return;
-
-      let clip = $timeline.timeline.getByIndex($timeline.dragIndex) as App.Node;
-      $timeline.timeline.remove(clip.uuid);
-
-      if (dropIndex === -1) $timeline.timeline.add(clip);
-      else $timeline.timeline.add(clip, dropIndex);
-
-      $timeline.dragIndex = -1;
-      return;
-    }
-    // handle dragging new media into timeline
-
-    if (!$studio.draggable.mediaUUID) return;
-    const draggable = $mediaPool.media.find((media) => media.uuid === $studio.draggable.mediaUUID);
-    if (!draggable) return;
-
-    let duration = 3;
-    if (draggable.type === "video" || draggable.type === "audio") {
-      duration = draggable.metadata.duration;
-    }
-
-    $timeline.timeline.add({
-      uuid: uuidv4(),
-      mediaUUID: draggable.uuid,
-      type: draggable.type,
-      src: draggable.src,
-      metadata: {
-        title: draggable.metadata.title,
-        duration: duration,
-        start: 0,
-        end: 0,
-      },
-      next: null,
-      prev: null,
-    });
-  };
-
-  const handleKey = (e: KeyboardEvent) => {
-    if (e.key !== "Delete") return;
-
-    $timeline.selected.forEach((uuid) => $timeline.timeline.remove(uuid));
-
-    $timeline.selected = [];
-  };
-
-  const startUserScrubberMove = (e: MouseEvent) => {
-    $player.lastPauseState = $player.isPaused;
-    $player.isPaused = true;
-    if ($timeline.selected.length > 0) return;
-    canMoveScrubber = true;
-    moveUserScrubber(e);
-  };
-
-  const moveUserScrubber = (e: MouseEvent) => {
-    if (!canMoveScrubber) return;
-    $timeline.runtime = Math.max(0, (e.clientX - timelineElementContainer.getBoundingClientRect().left) / (secondWidth / 2 ** (5 - $timeline.zoomScale)));
-  };
-
-  const endUserScrubberMove = (e: MouseEvent) => {
-    $player.isPaused = $player.lastPauseState;
-    canMoveScrubber = false;
+  const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
+    if (e.key !== "Delete" || selected.length === 0) return;
+    const links = selected.map((uuid) => $timeline.clips.video.flat().find((clip) => clip.uuid === uuid)?.link?.uuid);
+    // TODO: check runtime; fix if too slow.
+    links.forEach((uuid) => $timeline.clips.video = $timeline.clips.video.map((track) => track.filter((clip) => clip.uuid !== uuid)));
+    links.forEach((uuid) => $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter((clip) => clip.uuid !== uuid)));
+    selected.forEach((uuid) => $timeline.clips.video = $timeline.clips.video.map((track) => track.filter((clip) => clip.uuid !== uuid)));
+    selected.forEach((uuid) => $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter((clip) => clip.uuid !== uuid)));
+    $timeline.clips = $timeline.clips;
+    selected = [];
   };
 </script>
 
-<svelte:window on:keydown={handleKey} on:click={() => ($timeline.selected = [])} />
+<svelte:window on:click={() => (selected = [])} on:keydown={handleKey} />
 
-<div class="relative w-full h-full">
-  <Ticks {scrollX} />
-  <div
-    class="relative w-full h-full overflow-x-auto"
-    on:mousemove={handleDrag}
-    on:mousedown={startUserScrubberMove}
-    on:mousemove={moveUserScrubber}
-    on:mouseup={endUserScrubberMove}
-    bind:this={timelineContainer}
-    on:scroll={(e) => (scrollX = timelineContainer.scrollLeft)}
-  >
-    <div
-      class="w-full h-full flex items-center"
-      on:mouseup={handleDragEnd}
-      on:mouseenter={() => ($studio.draggable.current.region = "timeline")}
-      on:mouseleave={() => ($studio.draggable.current.region = null)}
-    >
-      <div class="relative flex h-fit min-h-[50%]" bind:this={timelineElementContainer}>
-        {#each $timeline.timeline.toArray() as node, idx (node.uuid)}
-          <div
-            class="draggable overflow-clip"
-            class:dragging={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
-            class:w-0={idx === $timeline.dragIndex && $studio.draggable.event === "drag"}
-          >
-            <TimelinePreview {node} timelineSecondWidth={secondWidth}>
-              {#if node.type === "video"}
-                <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
-                {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-                  <MediaAudioPreview
-                    mediaUUID={node.mediaUUID}
-                    metadata={{
-                      start: node.metadata.start,
-                      end: node.metadata.end,
-                    }}
-                  />
-                {/key}
-              {:else if node.type === "audio"}
-                <div class="h-1/2" />
-                {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-                  <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
-                {/key}
-              {:else if node.type === "image"}
-                <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement={true} />
-                <div class="h-1/2" />
-              {/if}
-            </TimelinePreview>
-          </div>
+<div
+  class="overflow-x-auto h-full"
+  on:scroll={(e) => (scrollX = e.currentTarget.scrollLeft)}
+  on:mousemove={handleDrag}
+  on:mouseup={endDrag}
+  on:mouseenter={() => ($draggable.region = "timeline")}
+  on:mouseleave={() => ($draggable.region = null)}
+>
+  <!-- video tracks -->
+  <div class="overflow-y-auto flex flex-col-reverse justify-end w-full h-1/2">
+    {#each $timeline.clips.video as clips, idx}
+      <div class="w-full h-24 border-t-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
+        currTrackIdx = idx;
+        currTrackType = "video";
+      }}>
+        <p class="text-neutral-400 absolute">v{idx}</p>
+        {#each clips as clip, idx (clip.uuid)}
+          <Clip {clip} bind:selected />
         {/each}
       </div>
-    </div>
+      
+    {/each}
   </div>
-  <Scrubber {scrollX} timelineSecondWidth={secondWidth} />
+  <hr class="border-2 border-white">
+  <!-- audio tracks -->
+  <div class="overflow-y-auto flex flex-col w-full h-1/2">
+    {#each $timeline.clips.audio as clips, idx}
+      <div class="w-full h-24 border-b-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "audio")} on:mouseenter={() => {
+        currTrackIdx = idx;
+        currTrackType = "audio";
+      }}>
+        <p class="text-neutral-400 absolute">a{idx}</p>
+        {#each clips as clip, idx (clip.uuid)}
+          <Clip {clip} bind:selected />
+        {/each}
+      </div>
+    {/each}
+  </div>
+
+  <!-- <TimelinePreview bind:dragIndex {node} bind:selected>
+    {#if node.type === "video"}
+      <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
+      {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+        <MediaAudioPreview
+          mediaUUID={node.mediaUUID}
+          metadata={{
+            start: node.metadata.start,
+            end: node.metadata.end,
+          }}
+        />
+      {/key}
+    {:else if node.type === "audio"}
+      {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
+        <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
+      {/key}
+    {:else if node.type === "image"}
+      <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
+    {/if}
+  </TimelinePreview> -->
 </div>

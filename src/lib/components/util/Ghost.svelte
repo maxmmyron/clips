@@ -1,16 +1,15 @@
 <script lang="ts">
-  import { mediaPool, studio } from "$lib/stores";
+  import { draggable, media } from "$lib/stores";
   import { fade } from "svelte/transition";
   import Marquee from "./Marquee.svelte";
   import Icon from "./Icon.svelte";
 
-  $: media = $mediaPool.media.find((m) => m.uuid === $studio.draggable.mediaUUID);
-  $: pos = $studio.draggable.ghost.pos;
-  $: size = $studio.draggable.ghost.size;
-  $: region = $studio.draggable.current.region;
+  $: pos = $draggable.ghost.pos;
+  $: size = $draggable.ghost.size;
+  $: region = $draggable.region;
 </script>
 
-{#if media && $studio.draggable.event !== "start"}
+{#if $draggable.media && $draggable.event !== "start"}
   <div
     class="absolute z-10 {region === null && 'max-w-[12rem]'} py-1 px-3 bg-neutral-800 border-2 border-neutral-700 {region === 'timeline'
       ? 'rounded-md'
@@ -20,9 +19,9 @@
     transition:fade={{ duration: 150 }}
   >
     {#if region === null}
-      <Icon src="/icons/{media.type}.svg" />
+      <Icon src="/icons/{$draggable.media.type}.svg" />
       <div class="overflow-clip flex-1" style="width: calc(100% - 3rem);">
-        <Marquee primaryColor={"neutral-800"}>{media.metadata.title}</Marquee>
+        <Marquee primaryColor={"neutral-800"}>{$draggable.media.metadata.title}</Marquee>
       </div>
     {/if}
   </div>

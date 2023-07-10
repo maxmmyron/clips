@@ -6,67 +6,56 @@ declare global {
 	namespace App {
 		enum Location { PLAYER = 0, TIMELINE = 1 };
 
-		interface Timeline {
-			head: Node | null;
-			tail: Node | null;
+		type Clip = VideoClip | AudioClip | ImageClip;
+		type ClipTypes = "video" | "audio" | "image";
+		type ClipObjects<T> = T extends "video" ? VideoClip : T extends "audio" ? AudioClip : T extends "image" ? ImageClip : never;
 
-			add(node: Node, index?: number): void;
-			remove(uuid: string): Node | null;
-			indexOf(uuid: string): number;
-
-			getByUUID(uuid: string): Node | null;
-			getByIndex(index: number): Node | null;
-
-			toArray(): Node[];
-			get length(): number;
-		}
-
-		type Node = VideoNode | AudioNode | ImageNode;
-		type NodeTypes = "video" | "audio" | "image";
-		type NodeObjects<T> = T extends "video" ? VideoNode : T extends "audio" ? AudioNode : T extends "image" ? ImageNode : never;
-
-		interface VideoNode {
-			next: Node | null;
-			prev: Node | null;
+		interface VideoClip {
 			uuid: string;
 			mediaUUID: string;
 			type: "video";
 			src: string;
+			link: Clip | null;
 			metadata: {
-				title: string;
+				// total duration of the clip
 				duration: number;
+				// timeline offset
+				offset: number;
+				// duration start offset
 				start: number;
-				end: number;
+				// runing duration (duration - start - end)
+				runtime: number;
+				title: string;
 			}
 		}
 
-		interface AudioNode {
-			next: Node | null;
-			prev: Node | null;
+		interface AudioClip {
 			uuid: string;
 			mediaUUID: string;
 			type: "audio";
 			src: string;
+			link: Clip | null;
 			metadata: {
-				title: string;
 				duration: number;
+				offset: number;
 				start: number;
-				end: number;
+				runtime: number;
+				title: string;
 			}
 		}
 
-		interface ImageNode {
-			next: Node | null;
-			prev: Node | null;
+		interface ImageClip {
 			uuid: string;
 			mediaUUID: string;
 			type: "image";
 			src: string;
+			link: Clip | null;
 			metadata: {
-				title: string;
 				duration: number;
+				offset: number;
 				start: number;
-				end: number;
+				runtime: number;
+				title: string;
 			}
 		}
 
@@ -107,63 +96,54 @@ declare global {
 			}
 		}
 
-		namespace stores {
-			type WritableStudio = Writable<{
-				resize: "row" | "media_col" | "timeline_col" | null;
-				exportName: string;
-				audioContext: AudioContext | null;
-				mouse: {x: number, y: number};
-				draggable: {
-					// Resolves to the UUID of a Media object.
-					mediaUUID: string | null;
-					origin: {
-						pos: {x: number, y: number};
-						region: "timeline" | "media_pool";
-					} | null;
-					event: "start" | "drag" | "end" | null;
-					current: {
-						region: "timeline" | "media_pool" | "player" | null;
-					};
-					ghost: {
-						pos: Spring<{x: number, y: number}>;
-						size: Spring<{width: number, height: number}>;
-					};
-				};
-			}>;
-
-			type WritableMediaPool = Writable<{
-				selected: string[];
-				media: Media[];
-			}>;
-
-			type WritableTimeline = Writable<{
-				runtime: number;
-				duration: number;
-				selected: string[];
-				timeline: Timeline;
-				current: Node | null;
-				sources: Map<string, {
-					source: HTMLVideoElement | HTMLImageElement;
-					type: "video" | "image";
-				}>;
-				zoomScale: number;
-				dragIndex: number;
-				currentNodeRuntime: number;
-			}>;
-
-			type WritablePlayer = Writable<{
-				source: string | null;
-				isSinglePreview: boolean;
-				isPaused: boolean;
-				lastPauseState: boolean;
-			}>;
-		}
-
 		type Toast = {
 			uuid: string;
 			message: string;
 			level: "info" | "warning" | "error";
 			timeoutID: number;
+		}
+
+		namespace stores {
+			type audioContext = Writable<AudioContext>;
+
+			type media = Writable<{
+				unresolved: Array<{uuid: string, name: string, media: Promise<App.Media>}>;
+				resolved: App.Media[];
+			}>
+
+			type draggable = Writable<{
+				media: App.Media | null;
+				event: "start" | "drag" | null;
+				origin: {
+					pos: {x: number, y: number};
+					region: "timeline" | "media_pool";
+				} | null;
+				region: "timeline" | "media_pool" | null;
+				ghost: {
+					pos: Spring<{x: number, y: number}>;
+					size: Spring<{width: number, height: number}>;
+				}
+			}>;
+
+			type timeline = Writable<{
+				clips: {
+					video: (App.VideoClip | App.ImageClip)[][];
+					audio: App.AudioClip[][];
+				};
+				current: {
+					video: App.VideoClip | App.ImageClip | null;
+					audio: App.AudioClip[];
+				};
+				clipRuntime: number;
+				duration: number;
+				runtime: number;
+				zoomScale: number;
+			}>;
+
+			type player = Writable<{
+				source: string | null;
+				isPaused: boolean;
+			}>;
 		}
 	}
 }

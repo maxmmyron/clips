@@ -6,7 +6,6 @@
     $player.isPaused = true;
 
     $timeline.runtime = front ? 0 : $timeline.duration;
-    $timeline.current = front ? $timeline.timeline.head : $timeline.timeline.tail;
   }
 </script>
 
