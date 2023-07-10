@@ -19,6 +19,12 @@
   const handleMove = (e: MouseEvent) => {
     if(isMove) {
       clip.metadata.offset = (e.clientX - initialX) / $secondWidth;
+
+      if(clip.link) {
+        clip.link.metadata.offset = clip.metadata.offset;
+        clip.link = clip.link;
+      }
+
       return
     }
 
@@ -26,6 +32,12 @@
       let offset;
       if(resizeDirection == "left")  clip.metadata.start = Math.max(0, initialOffset + (e.clientX - initialResizePosition) / $secondWidth);
       else clip.metadata.runtime = Math.min(initialOffset - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration);
+
+      if(clip.link) {
+        clip.link.metadata.start = clip.metadata.start;
+        clip.link.metadata.runtime = clip.metadata.runtime;
+        clip.link = clip.link;
+      }
     }
   }
 
