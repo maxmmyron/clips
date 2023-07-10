@@ -49,7 +49,7 @@
       if (!$draggable.media) return;
       const media = $draggable.media;
       if (media.type === "video") {
-        const audioClip = {
+        const audioClip: App.AudioClip = {
           uuid: uuidv4(),
           mediaUUID: media.uuid,
           link: null,
@@ -64,7 +64,7 @@
           type: "audio",
         };
 
-        const videoClip = {
+        const videoClip: App.VideoClip = {
           uuid: uuidv4(),
           mediaUUID: media.uuid,
           link: null,
