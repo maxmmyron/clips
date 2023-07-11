@@ -15,7 +15,7 @@ declare global {
 			mediaUUID: string;
 			type: "video";
 			src: string;
-			link: Clip | null;
+			linkUUID: string | null;
 			metadata: {
 				// total duration of the clip
 				duration: number;
@@ -26,6 +26,8 @@ declare global {
 				// runing duration (duration - start - end)
 				runtime: number;
 				title: string;
+				// current track index
+				trackIdx: number;
 			}
 		}
 
@@ -34,13 +36,14 @@ declare global {
 			mediaUUID: string;
 			type: "audio";
 			src: string;
-			link: Clip | null;
+			linkUUID: string | null;
 			metadata: {
 				duration: number;
 				offset: number;
 				start: number;
 				runtime: number;
 				title: string;
+				trackIdx: number;
 			}
 		}
 
@@ -49,13 +52,14 @@ declare global {
 			mediaUUID: string;
 			type: "image";
 			src: string;
-			link: Clip | null;
+			linkUUID: string | null;
 			metadata: {
 				duration: number;
 				offset: number;
 				start: number;
 				runtime: number;
 				title: string;
+				trackIdx: number;
 			}
 		}
 
