@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { draggable, secondWidth, timeline } from "$lib/stores";
+  import { draggable, player, secondWidth, timeline } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
   import TimelinePreview from "../preview/TimelinePreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import Clip from "../preview/Clip.svelte";
-    import { browser } from "$app/environment";
-    import { base } from "$service-worker";
+  import { browser } from "$app/environment";
+  import { onMount } from "svelte";
 
   export let dragIndex: number;
   export let scrollX: number = 0;
@@ -20,6 +20,24 @@
    * uuids of selected timeline clips
    */
   let selected: string[] = [];
+
+  let lastTimestamp = 0;
+  const render = (timestamp: number) => {
+    if ($player.isPaused) {
+      lastTimestamp = timestamp;
+      requestAnimationFrame(render);
+      return;
+    }
+
+    const delta = timestamp - lastTimestamp;
+    lastTimestamp = timestamp;
+
+    $timeline.runtime += delta / 1000;
+
+    requestAnimationFrame(render);
+  };
+
+  onMount(() => requestAnimationFrame(render));
 
   /**
    * Sets up the drag event for the current track
