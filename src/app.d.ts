@@ -127,10 +127,11 @@ declare global {
 
 			type timeline = Writable<{
 				clips: {
-					video: (App.VideoClip | App.ImageClip)[][];
-					audio: App.AudioClip[][];
-				};
+					video: Map<string, App.VideoClip | App.ImageClip>[];
+					audio: Map<string, App.AudioClip>[];
+				},
 				current: {
+					// TODO: video should also be an array in future
 					video: App.VideoClip | App.ImageClip | null;
 					audio: App.AudioClip[];
 				};

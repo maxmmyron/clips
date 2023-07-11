@@ -38,7 +38,7 @@
 </script>
 
 {#each [...$timeline.clips.video, ...$timeline.clips.audio] as clips}
-  {#each clips as clip}
+  {#each [...clips.values()] as clip}
     <Buffer {clip} />
   {/each}
 {/each}

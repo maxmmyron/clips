@@ -18,12 +18,11 @@
       audioNode = $audioContext.createBufferSource();
       audioNode.buffer = ($media.resolved.find((media) => media.uuid === clip.mediaUUID) as App.Video).metadata.audio;
       audioNode.connect($audioContext.destination);
-      const playTime = $timeline.clipRuntime + $timeline.current.video.metadata.start;
-      const endTime = $timeline.current.video.metadata.duration - $timeline.current.video.metadata.start - $timeline.current.video.metadata.end;
+      const startTime = $timeline.clipRuntime + $timeline.current.video.metadata.start
+      buffer.currentTime = startTime;
 
-      buffer.currentTime = playTime;
       buffer.play();
-      audioNode.start(0, playTime, endTime);
+      audioNode.start(0, startTime, clip.metadata.runtime - $timeline.clipRuntime);
     } else if ($player.isPaused && !buffer.paused) {
       buffer.pause();
       if (audioNode) {
@@ -33,15 +32,14 @@
     }
   }
 
-  $: if(clip.type === "audio" && $timeline.current.audio === clip) {
+  $: if(clip.type === "audio" && $timeline.current.audio.includes(clip)) {
     if (!$player.isPaused && !hasAudioNodeStarted) {
       audioNode = $audioContext.createBufferSource();
       audioNode.buffer = ($media.resolved.find((media) => media.uuid === clip.mediaUUID) as App.Audio).metadata.audio;
       audioNode.connect($audioContext.destination);
-      const playTime = $timeline.clipRuntime + $timeline.current.audio.metadata.start;
-      const endTime = $timeline.current.audio.metadata.duration - $timeline.current.audio.metadata.start - $timeline.current.audio.metadata.end;
 
-      audioNode.start(0, playTime, endTime);
+      // TODO: db check if duration (third param) can be removed here
+      audioNode.start(0, $timeline.clipRuntime + clip.metadata.start);
       hasAudioNodeStarted = true;
     } else if ($player.isPaused && hasAudioNodeStarted) {
       audioNode.stop();

@@ -5,9 +5,12 @@
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import Clip from "../preview/Clip.svelte";
+    import { browser } from "$app/environment";
 
   export let dragIndex: number;
   export let scrollX: number = 0;
+
+  $: browser && (window.timeline = $timeline.clips);
 
   let startTrackIdx = -1, currTrackIdx = -1;
   let startTrackType: "video" | "audio" = "video", currTrackType: "video" | "audio" = "video";
@@ -82,21 +85,15 @@
         audioClip.link = videoClip;
         videoClip.link = audioClip;
 
-        $timeline.clips.audio[currTrackIdx] = [
-          ...$timeline.clips.audio[currTrackIdx],
-          audioClip
-        ];
-        $timeline.clips.video[currTrackIdx] = [
-          ...$timeline.clips.video[currTrackIdx],
-          videoClip
-        ];
+        $timeline.clips.audio[currTrackIdx] = $timeline.clips.audio[currTrackIdx].set(audioClip.uuid, audioClip);
+        $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(videoClip.uuid, videoClip);
       }
       if (media.type === "audio") {
-        $timeline.clips.audio[currTrackIdx] = [
-          ...$timeline.clips.audio[currTrackIdx],
-          {
-            uuid: uuidv4(),
-            mediaUUID: media.uuid,
+        const uuid = uuidv4();
+
+        $timeline.clips.audio[currTrackIdx] = $timeline.clips.audio[currTrackIdx].set(uuid, {
+          uuid,
+          mediaUUID: media.uuid,
             link: null,
             metadata: {
               duration: media.metadata.duration,
@@ -107,15 +104,14 @@
             },
             src: media.src,
             type: "audio",
-          },
-        ];
+        });
       }
       if (media.type === "image") {
-        $timeline.clips.video[currTrackIdx] = [
-          ...$timeline.clips.video[currTrackIdx],
-          {
-            uuid: uuidv4(),
-            mediaUUID: media.uuid,
+        const uuid = uuidv4();
+
+        $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(uuid, {
+          uuid, 
+          mediaUUID: media.uuid,
             link: null,
             metadata: {
               duration: 5,
@@ -126,8 +122,7 @@
             },
             src: media.src,
             type: "video",
-          },
-        ];
+        });
       }
     }
     $timeline.clips = $timeline.clips;
@@ -135,12 +130,15 @@
 
   const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.key !== "Delete" || selected.length === 0) return;
-    const links = selected.map((uuid) => $timeline.clips.video.flat().find((clip) => clip.uuid === uuid)?.link?.uuid);
-    // TODO: check runtime; fix if too slow.
-    links.forEach((uuid) => $timeline.clips.video = $timeline.clips.video.map((track) => track.filter((clip) => clip.uuid !== uuid)));
-    links.forEach((uuid) => $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter((clip) => clip.uuid !== uuid)));
-    selected.forEach((uuid) => $timeline.clips.video = $timeline.clips.video.map((track) => track.filter((clip) => clip.uuid !== uuid)));
-    selected.forEach((uuid) => $timeline.clips.audio = $timeline.clips.audio.map((track) => track.filter((clip) => clip.uuid !== uuid)));
+    const flattenedTracks = [...$timeline.clips.video.map(map => Array.from(map.values())).flat(), ...$timeline.clips.audio.map(map => Array.from(map.values())).flat()];
+    const links = selected.map((uuid) => flattenedTracks.find((clip) => clip.uuid === uuid)?.link?.uuid).filter((uuid) => uuid !== undefined) as string[];
+
+    links.forEach(uuid => $timeline.clips.video.forEach((track) => track.delete(uuid)));
+    links.forEach(uuid => $timeline.clips.audio.forEach((track) => track.delete(uuid)));
+
+    selected.forEach(uuid => $timeline.clips.video.forEach((track) => track.delete(uuid)));
+    selected.forEach(uuid => $timeline.clips.audio.forEach((track) => track.delete(uuid)));
+
     $timeline.clips = $timeline.clips;
     selected = [];
   };
@@ -162,9 +160,10 @@
       <div class="w-full h-24 border-t-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
         currTrackIdx = idx;
         currTrackType = "video";
+        console.log("start drag", currTrackIdx, currTrackType);
       }}>
         <p class="text-neutral-400 absolute">v{idx}</p>
-        {#each clips as clip, idx (clip.uuid)}
+        {#each [...clips.values()] as clip, idx (clip.uuid)}
           <Clip {clip} bind:selected />
         {/each}
       </div>
@@ -180,7 +179,7 @@
         currTrackType = "audio";
       }}>
         <p class="text-neutral-400 absolute">a{idx}</p>
-        {#each clips as clip, idx (clip.uuid)}
+        {#each [...clips.values()] as clip, idx (clip.uuid)}
           <Clip {clip} bind:selected />
         {/each}
       </div>
