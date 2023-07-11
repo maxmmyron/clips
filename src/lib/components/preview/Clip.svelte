@@ -28,6 +28,8 @@
         if (clip.type === "video") {
           (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.offset = clip.metadata.offset;
         }
+
+        $timeline.clips = $timeline.clips;
       }
 
       return
@@ -47,6 +49,8 @@
           (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.start = clip.metadata.start;
           (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.runtime = clip.metadata.runtime;
         }
+
+        $timeline.clips = $timeline.clips;
       }
     }
   }
