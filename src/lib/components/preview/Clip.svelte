@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { secondWidth } from "$lib/stores";
+  import { secondWidth, timeline } from "$lib/stores";
 
   export let clip: App.Clip;
   export let selected: string[];
@@ -20,23 +20,33 @@
     if(isMove) {
       clip.metadata.offset = (e.clientX - initialX) / $secondWidth;
 
-      if(clip.link) {
-        clip.link.metadata.offset = clip.metadata.offset;
-        clip.link = clip.link;
+      if(clip.linkUUID) {
+        if(clip.type === "audio") {
+          (<App.Clip>$timeline.clips.video[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.offset = clip.metadata.offset;
+        }
+
+        if (clip.type === "video") {
+          (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.offset = clip.metadata.offset;
+        }
       }
 
       return
     }
 
     if(isResize) {  
-      let offset;
+      // let offset;
       if(resizeDirection == "left")  clip.metadata.start = Math.max(0, initialOffset + (e.clientX - initialResizePosition) / $secondWidth);
       else clip.metadata.runtime = Math.min(initialOffset - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration);
 
-      if(clip.link) {
-        clip.link.metadata.start = clip.metadata.start;
-        clip.link.metadata.runtime = clip.metadata.runtime;
-        clip.link = clip.link;
+      if(clip.linkUUID) {
+        if (clip.type === "audio") {
+          (<App.Clip>$timeline.clips.video[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.start = clip.metadata.start;
+          (<App.Clip>$timeline.clips.video[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.runtime = clip.metadata.runtime;
+        }
+        if (clip.type === "video") {
+          (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.start = clip.metadata.start;
+          (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.runtime = clip.metadata.runtime;
+        }
       }
     }
   }

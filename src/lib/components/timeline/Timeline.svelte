@@ -6,6 +6,7 @@
   import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import Clip from "../preview/Clip.svelte";
     import { browser } from "$app/environment";
+    import { base } from "$service-worker";
 
   export let dragIndex: number;
   export let scrollX: number = 0;
@@ -51,78 +52,68 @@
       // TODO: also remove magic number
       if (!$draggable.media) return;
       const media = $draggable.media;
+
+      let baseClip = {
+        mediaUUID: media.uuid,
+        linkUUID: null,
+        metadata: {
+          duration: 5,
+          runtime: 5,
+          offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
+          start: 0,
+          trackIdx: currTrackIdx,
+          title: "",
+        },
+        src: media.src,
+      } as Omit<App.Clip, "uuid" | "type">;
+
       if (media.type === "video") {
+        baseClip.metadata.duration = media.metadata.duration;
+        baseClip.metadata.runtime = media.metadata.duration;
+        baseClip.metadata.title = media.metadata.title;
+
         const audioClip: App.AudioClip = {
+          ...baseClip,
           uuid: uuidv4(),
-          mediaUUID: media.uuid,
-          link: null,
-          metadata: {
-            duration: media.metadata.duration,
-            runtime: media.metadata.duration,
-            offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
-            start: 0,
-            title: media.metadata.title,
-          },
-          src: media.src,
           type: "audio",
         };
 
         const videoClip: App.VideoClip = {
+          ...baseClip,
           uuid: uuidv4(),
-          mediaUUID: media.uuid,
-          link: null,
-          metadata: {
-            duration: media.metadata.duration,
-            runtime: media.metadata.duration,
-            offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
-            start: 0,
-            title: media.metadata.title,
-          },
-          src: media.src,
           type: "video",
-        }; 
+        };
 
-        audioClip.link = videoClip;
-        videoClip.link = audioClip;
+        audioClip.linkUUID = videoClip.uuid;
+        videoClip.linkUUID = audioClip.uuid;
 
         $timeline.clips.audio[currTrackIdx] = $timeline.clips.audio[currTrackIdx].set(audioClip.uuid, audioClip);
         $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(videoClip.uuid, videoClip);
       }
-      if (media.type === "audio") {
-        const uuid = uuidv4();
 
-        $timeline.clips.audio[currTrackIdx] = $timeline.clips.audio[currTrackIdx].set(uuid, {
-          uuid,
-          mediaUUID: media.uuid,
-            link: null,
-            metadata: {
-              duration: media.metadata.duration,
-              runtime: media.metadata.duration,
-              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
-              start: 0,
-              title: media.metadata.title,
-            },
-            src: media.src,
-            type: "audio",
-        });
+      if (media.type === "audio") {
+        baseClip.metadata.duration = media.metadata.duration;
+        baseClip.metadata.runtime = media.metadata.duration;
+        baseClip.metadata.title = media.metadata.title;
+
+        const audioClip: App.AudioClip = {
+          ...baseClip,
+          uuid: uuidv4(),
+          type: "audio",
+        };
+
+        $timeline.clips.audio[currTrackIdx] = $timeline.clips.audio[currTrackIdx].set(audioClip.uuid, audioClip);
       }
       if (media.type === "image") {
-        const uuid = uuidv4();
+        baseClip.metadata.title = media.metadata.title;
 
-        $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(uuid, {
-          uuid, 
-          mediaUUID: media.uuid,
-            link: null,
-            metadata: {
-              duration: 5,
-              runtime: 5,
-              offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
-              start: 0,
-              title: media.metadata.title,
-            },
-            src: media.src,
-            type: "video",
-        });
+        const imageClip: App.ImageClip = {
+          ...baseClip,
+          uuid: uuidv4(),
+          type: "image",
+        };
+
+        $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(imageClip.uuid, imageClip);
       }
     }
     $timeline.clips = $timeline.clips;
@@ -131,7 +122,7 @@
   const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.key !== "Delete" || selected.length === 0) return;
     const flattenedTracks = [...$timeline.clips.video.map(map => Array.from(map.values())).flat(), ...$timeline.clips.audio.map(map => Array.from(map.values())).flat()];
-    const links = selected.map((uuid) => flattenedTracks.find((clip) => clip.uuid === uuid)?.link?.uuid).filter((uuid) => uuid !== undefined) as string[];
+    const links = selected.map((uuid) => flattenedTracks.find((clip) => clip.uuid === uuid)?.linkUUID).filter((uuid) => uuid !== undefined) as string[];
 
     links.forEach(uuid => $timeline.clips.video.forEach((track) => track.delete(uuid)));
     links.forEach(uuid => $timeline.clips.audio.forEach((track) => track.delete(uuid)));
