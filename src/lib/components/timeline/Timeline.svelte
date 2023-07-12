@@ -74,7 +74,6 @@
   };
 
   const endDrag = (e: MouseEvent) => {
-    console.log("end drag");
     if ($draggable.event !== "drag" || !$draggable.origin) return;
     else {
       // TODO: bro this shit SUCKS
@@ -181,7 +180,6 @@
       <div class="w-full h-24 border-t-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
         currTrackIdx = idx;
         currTrackType = "video";
-        console.log("start drag", currTrackIdx, currTrackType);
       }}>
         <p class="text-neutral-400 absolute">v{idx}</p>
         {#each [...clips.values()] as clip, idx (clip.uuid)}
