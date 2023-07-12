@@ -11,8 +11,6 @@
   export let dragIndex: number;
   export let scrollX: number = 0;
 
-  $: browser && (window.timeline = $timeline.clips);
-
   let startTrackIdx = -1, currTrackIdx = -1;
   let startTrackType: "video" | "audio" = "video", currTrackType: "video" | "audio" = "video";
 
@@ -20,6 +18,8 @@
    * uuids of selected timeline clips
    */
   let selected: string[] = [];
+
+  let z = 0;
 
   let lastTimestamp = 0;
   const render = (timestamp: number) => {
@@ -38,6 +38,17 @@
   };
 
   onMount(() => requestAnimationFrame(render));
+
+  $: browser && (window.timeline = $timeline.clips);
+
+  $: getCurrentTrackClip = (track: Map<string, App.Clip>) => {
+    let validClips = [];
+    for (const [uuid, clip] of [...track]) {
+      if (clip.metadata.offset < $timeline.runtime && clip.metadata.offset + clip.metadata.duration > $timeline.runtime) validClips.push(clip);
+      if (clip.metadata.offset > $timeline.runtime) break;
+    }
+    return validClips.sort((a, b) => b.metadata.z - a.metadata.z)[0];
+  }
 
   /**
    * Sets up the drag event for the current track
@@ -81,6 +92,7 @@
           start: 0,
           trackIdx: currTrackIdx,
           title: "",
+          z: z++,
         },
         src: media.src,
       } as Omit<App.Clip, "uuid" | "type">;
