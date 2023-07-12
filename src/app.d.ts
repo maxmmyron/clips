@@ -10,25 +10,23 @@ declare global {
 		type ClipTypes = "video" | "audio" | "image";
 		type ClipObjects<T> = T extends "video" ? VideoClip : T extends "audio" ? AudioClip : T extends "image" ? ImageClip : never;
 
+		interface ClipMetadata {
+			title: string;
+			duration: number;
+			offset: number;
+			start: number;
+			runtime: number;
+			trackIdx: number;
+			z: number;
+		}
+
 		interface VideoClip {
 			uuid: string;
 			mediaUUID: string;
 			type: "video";
 			src: string;
 			linkUUID: string | null;
-			metadata: {
-				// total duration of the clip
-				duration: number;
-				// timeline offset
-				offset: number;
-				// duration start offset
-				start: number;
-				// runing duration (duration - start - end)
-				runtime: number;
-				title: string;
-				// current track index
-				trackIdx: number;
-			}
+			metadata: ClipMetadata;
 		}
 
 		interface AudioClip {
@@ -37,14 +35,7 @@ declare global {
 			type: "audio";
 			src: string;
 			linkUUID: string | null;
-			metadata: {
-				duration: number;
-				offset: number;
-				start: number;
-				runtime: number;
-				title: string;
-				trackIdx: number;
-			}
+			metadata: ClipMetadata;
 		}
 
 		interface ImageClip {
@@ -53,14 +44,7 @@ declare global {
 			type: "image";
 			src: string;
 			linkUUID: string | null;
-			metadata: {
-				duration: number;
-				offset: number;
-				start: number;
-				runtime: number;
-				title: string;
-				trackIdx: number;
-			}
+			metadata: ClipMetadata;
 		}
 
 		type Media = Video | Audio | Image;
