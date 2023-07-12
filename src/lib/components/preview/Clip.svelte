@@ -57,7 +57,11 @@
 
   const handleClick = (e: MouseEvent) => {
     if (e.shiftKey) selected = [...selected, clip.uuid];
-    else selected = [clip.uuid];
+    else {
+      selected = [clip.uuid];
+      let track = clip.type === "audio" ? $timeline.clips.audio[clip.metadata.trackIdx] : $timeline.clips.video[clip.metadata.trackIdx];
+      clip.metadata.z = Math.max(...[...track.values()].map(clip => clip.metadata.z)) + 1;
+    }
   };
 
   const setupMove = (e: MouseEvent) => {
@@ -94,7 +98,7 @@
   class="absolute h-12 bg-neutral-800 rounded-lg {isSelected ? "border-neutral-600" : "border-neutral-700/50"} border-2 transition-colors 
   before:absolute before:w-4 before:h-full before:-left-1 before:top-0 before:hover:cursor-ew-resize
   after:absolute after:w-4 after:h-full after:-right-1 after:top-0 after:hover:cursor-ew-resize"
-  style="width: {(clip.metadata.runtime - clip.metadata.start) * $secondWidth}px; transform: translateX({(clip.metadata.offset + clip.metadata.start) * $secondWidth}px);"
+  style="width: {(clip.metadata.runtime - clip.metadata.start) * $secondWidth}px; transform: translateX({(clip.metadata.offset + clip.metadata.start) * $secondWidth}px); z-index:{clip.metadata.z};"
   on:click|capture|stopPropagation={handleClick}
   on:mousedown={setupMove}
   bind:this={mediaPreview}
