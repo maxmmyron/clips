@@ -76,8 +76,7 @@
   const endDrag = (e: MouseEvent) => {
     if ($draggable.event !== "drag" || !$draggable.origin) return;
     else {
-      // TODO: bro this shit SUCKS
-      // TODO: also remove magic number
+      // TODO: remove magic padding number
       if (!$draggable.media) return;
       const media = $draggable.media;
 
@@ -85,22 +84,18 @@
         mediaUUID: media.uuid,
         linkUUID: null,
         metadata: {
-          duration: 5,
-          runtime: 5,
+          duration: media.type === "image" ? 5 : media.metadata.duration,
+          runtime: media.type === "image" ? 5 : media.metadata.duration,
           offset: (e.clientX - 22) / $secondWidth + scrollX / $secondWidth,
           start: 0,
           trackIdx: currTrackIdx,
-          title: "",
+          title: media.metadata.title,
           z: z++,
         },
         src: media.src,
       } as Omit<App.Clip, "uuid" | "type">;
 
       if (media.type === "video") {
-        baseClip.metadata.duration = media.metadata.duration;
-        baseClip.metadata.runtime = media.metadata.duration;
-        baseClip.metadata.title = media.metadata.title;
-
         const audioClip: App.AudioClip = {
           ...baseClip,
           uuid: uuidv4(),
@@ -121,28 +116,20 @@
       }
 
       if (media.type === "audio") {
-        baseClip.metadata.duration = media.metadata.duration;
-        baseClip.metadata.runtime = media.metadata.duration;
-        baseClip.metadata.title = media.metadata.title;
-
-        const audioClip: App.AudioClip = {
+        const uuid = uuidv4();
+        $timeline.clips.audio[currTrackIdx] = $timeline.clips.audio[currTrackIdx].set(uuid, {
           ...baseClip,
-          uuid: uuidv4(),
+          uuid,
           type: "audio",
-        };
-
-        $timeline.clips.audio[currTrackIdx] = $timeline.clips.audio[currTrackIdx].set(audioClip.uuid, audioClip);
+        });
       }
       if (media.type === "image") {
-        baseClip.metadata.title = media.metadata.title;
-
-        const imageClip: App.ImageClip = {
+        const uuid = uuidv4();
+        $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(uuid, {
           ...baseClip,
-          uuid: uuidv4(),
+          uuid, 
           type: "image",
-        };
-
-        $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(imageClip.uuid, imageClip);
+        });
       }
     }
     $timeline.clips = $timeline.clips;
