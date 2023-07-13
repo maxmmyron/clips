@@ -26,6 +26,7 @@ declare global {
 			type: "video";
 			src: string;
 			linkUUID: string | null;
+			buffer: HTMLVideoElement | null;
 			metadata: ClipMetadata;
 		}
 
@@ -44,6 +45,7 @@ declare global {
 			type: "image";
 			src: string;
 			linkUUID: string | null;
+			buffer: HTMLImageElement | null;
 			metadata: ClipMetadata;
 		}
 
@@ -118,11 +120,6 @@ declare global {
 					video: Map<string, App.VideoClip | App.ImageClip>[];
 					audio: Map<string, App.AudioClip>[];
 				},
-				current: {
-					// TODO: video should also be an array in future
-					video: App.VideoClip | App.ImageClip | null;
-					audio: App.AudioClip[];
-				};
 				clipRuntime: number;
 				duration: number;
 				runtime: number;
@@ -132,6 +129,12 @@ declare global {
 			type player = Writable<{
 				source: string | null;
 				isPaused: boolean;
+			}>;
+
+			type current = Writable<{
+				// TODO: video should also be an array in future
+				video: (App.VideoClip | App.ImageClip)[];
+				audio: App.AudioClip[];
 			}>;
 		}
 	}
