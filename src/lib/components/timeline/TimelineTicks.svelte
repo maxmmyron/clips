@@ -7,7 +7,7 @@
   const timingRules: ((arg0: number) => number)[] = [(runtime) => runtime / 3600, (runtime) => (runtime % 3600) / 60, (runtime) => runtime % 60];
 
   let width: number;
-  let previousPauseState = false;
+  let previousPauseState = true;
 
   $: offset = Math.floor(scrollX / (width / numSections));
   $: numSections = Math.ceil(Math.max(3, Math.min(15, width / $secondWidth)));
