@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { player, timeline, current } from "$lib/stores";
+  import { player, timeline } from "$lib/stores";
   import Button from "../util/Button.svelte";
 
   function setPlayerTime(front: boolean = true): any {
