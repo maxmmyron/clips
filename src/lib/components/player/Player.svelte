@@ -1,7 +1,7 @@
 <script lang="ts">
   import { timeline, buffers } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
-  import Buffer from "./Buffer.svelte";
+  // import Buffer from "./Buffer.svelte";
   import { browser } from "$app/environment";
 
   $: browser && (window.buffers = $buffers);
@@ -37,11 +37,11 @@
   };
 </script>
 
-{#each [...$timeline.clips.video, ...$timeline.clips.audio] as clips}
+<!-- {#each [...$timeline.clips.video, ...$timeline.clips.audio] as clips}
   {#each [...clips.values()] as clip}
     <Buffer {clip} />
   {/each}
-{/each}
+{/each} -->
 
 <Canvas {width} {height}>
   <Layer {render} />
