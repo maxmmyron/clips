@@ -1,8 +1,11 @@
 <script lang="ts">
-  import { secondWidth, timeline } from "$lib/stores";
+  import { player, secondWidth, timeline, current } from "$lib/stores";
+    import { onMount } from "svelte";
 
   export let clip: App.Clip;
   export let selected: string[];
+
+  let buffer: HTMLVideoElement | HTMLImageElement;
 
   let mediaPreview: HTMLButtonElement;
   let isMove = false, isResize = false;
@@ -15,6 +18,12 @@
   let initialX = 0;
 
   $: isSelected = selected.includes(clip.uuid);
+
+  onMount(() => clip.type !== "audio" && (clip.buffer = buffer));
+
+  $: console.log($player.isPaused);
+  $: console.log(`video: ${$current.video}`);
+  $: console.log(`audio: ${$current.audio}`);
 
   const handleMove = (e: MouseEvent) => {
     if(isMove) {
@@ -103,3 +112,9 @@
   on:mousedown={setupMove}
   bind:this={mediaPreview}
 />
+
+{#if clip.type === "video"}
+  <video muted class="pointer-events-none opacity-[0.000000001]" src={clip.src} bind:this={buffer} />
+{:else if clip.type === "image"}
+  <img class="pointer-events-none opacity-[0.000000001]" src={clip.src} bind:this={buffer} alt="" />
+{/if}
