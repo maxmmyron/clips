@@ -2,9 +2,9 @@
   import { buffers, media, player, timeline, audioContext } from "$lib/stores";
   import { onMount } from "svelte";
 
-  export let clip: App.Clip;
+  // export let clip: App.Clip;
 
-  let buffer: HTMLVideoElement | HTMLImageElement;
+  // let buffer: HTMLVideoElement | HTMLImageElement;
 
   let audioNode: AudioBufferSourceNode;
   let hasAudioNodeStarted = false;
@@ -49,8 +49,4 @@
   }
 </script>
 
-{#if clip.type === "video"}
-  <video muted class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0" src={clip.src} bind:this={buffer} />
-{:else if clip.type === "image"}
-  <img class="pointer-events-none opacity-[0.000000001] fixed top-0 left-0" src={clip.src} bind:this={buffer} alt="" />
-{/if}
+
