@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { draggable, player, secondWidth, timeline } from "$lib/stores";
+  import { current, draggable, player, secondWidth, timeline } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
   import TimelinePreview from "../preview/TimelinePreview.svelte";
   import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
@@ -23,6 +23,19 @@
 
   let lastTimestamp = 0;
   const render = (timestamp: number) => {
+    for (let i = 0; i < $timeline.clips.video.length; i++) {
+      const curr = getCurrentTrackClip($timeline.clips.video[i]);
+      if (curr && $current.video[i] !== curr) $current.video[i] = curr;
+    }
+
+    for (let i = 0; i < $timeline.clips.audio.length; i++) {
+      const curr = getCurrentTrackClip($timeline.clips.audio[i]);
+      if (curr && $current.audio[i] !== curr) $current.audio[i] = curr;
+    }
+
+    // TODO: implement $timeline.clipRuntime
+
+
     if ($player.isPaused) {
       lastTimestamp = timestamp;
       requestAnimationFrame(render);
@@ -41,8 +54,8 @@
 
   $: browser && (window.timeline = $timeline.clips);
 
-  $: getCurrentTrackClip = (track: Map<string, App.Clip>) => {
-    let validClips = [];
+  const getCurrentTrackClip = <T extends (App.VideoClip | App.ImageClip) | App.AudioClip>(track: Map<string, T>) => {
+    let validClips: T[] = [];
     for (const [uuid, clip] of [...track]) {
       if (clip.metadata.offset < $timeline.runtime && clip.metadata.offset + clip.metadata.duration > $timeline.runtime) validClips.push(clip);
       if (clip.metadata.offset > $timeline.runtime) break;
@@ -104,6 +117,7 @@
 
         const videoClip: App.VideoClip = {
           ...baseClip,
+          buffer: null,
           uuid: uuidv4(),
           type: "video",
         };
@@ -127,6 +141,7 @@
         const uuid = uuidv4();
         $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(uuid, {
           ...baseClip,
+          buffer: null,
           uuid, 
           type: "image",
         });
@@ -170,7 +185,7 @@
       }}>
         <p class="text-neutral-400 absolute">v{idx}</p>
         {#each [...clips.values()] as clip, idx (clip.uuid)}
-          <Clip {clip} bind:selected />
+          <Clip bind:clip bind:selected />
         {/each}
       </div>
       
@@ -186,7 +201,7 @@
       }}>
         <p class="text-neutral-400 absolute">a{idx}</p>
         {#each [...clips.values()] as clip, idx (clip.uuid)}
-          <Clip {clip} bind:selected />
+          <Clip bind:clip bind:selected />
         {/each}
       </div>
     {/each}
