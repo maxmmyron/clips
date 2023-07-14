@@ -132,9 +132,8 @@ declare global {
 			}>;
 
 			type current = Writable<{
-				// TODO: video should also be an array in future
-				video: (App.VideoClip | App.ImageClip)[];
-				audio: App.AudioClip[];
+				video: string[];
+				audio: string[];
 			}>;
 		}
 	}

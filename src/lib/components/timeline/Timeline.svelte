@@ -11,8 +11,10 @@
   export let dragIndex: number;
   export let scrollX: number = 0;
 
-  let startTrackIdx = -1, currTrackIdx = -1;
-  let startTrackType: "video" | "audio" = "video", currTrackType: "video" | "audio" = "video";
+  let startTrackIdx = -1,
+    currTrackIdx = -1;
+  let startTrackType: "video" | "audio" = "video",
+    currTrackType: "video" | "audio" = "video";
 
   /**
    * uuids of selected timeline clips
@@ -25,16 +27,19 @@
   const render = (timestamp: number) => {
     for (let i = 0; i < $timeline.clips.video.length; i++) {
       const curr = getCurrentTrackClip($timeline.clips.video[i]);
-      if (curr && $current.video[i] !== curr) $current.video[i] = curr;
+      if (curr) {
+        if ($current.video[i] !== curr.uuid) $current.video[i] = curr.uuid;
+      } else $current.video = $current.video.splice(i, 1);
     }
 
     for (let i = 0; i < $timeline.clips.audio.length; i++) {
       const curr = getCurrentTrackClip($timeline.clips.audio[i]);
-      if (curr && $current.audio[i] !== curr) $current.audio[i] = curr;
+      if (curr) {
+        if ($current.audio[i] !== curr.uuid) $current.audio[i] = curr.uuid;
+      } else $current.audio = $current.audio.splice(i, 1);
     }
 
     // TODO: implement $timeline.clipRuntime
-
 
     if ($player.isPaused) {
       lastTimestamp = timestamp;
@@ -60,8 +65,9 @@
       if (clip.metadata.offset < $timeline.runtime && clip.metadata.offset + clip.metadata.duration > $timeline.runtime) validClips.push(clip);
       if (clip.metadata.offset > $timeline.runtime) break;
     }
+    if (validClips.length === 0) return null;
     return validClips.sort((a, b) => b.metadata.z - a.metadata.z)[0];
-  }
+  };
 
   /**
    * Sets up the drag event for the current track
@@ -76,10 +82,10 @@
 
   // TODO: implement moving a clip across a track boundary
   /**
-   * Handles the continued element drag around the timeline. 
+   * Handles the continued element drag around the timeline.
    * this is bound to the general timeline container so the mouse can move outside a single track while moving the element.
    *
-  */
+   */
   const handleDrag = (e: MouseEvent) => {
     if ($draggable.event !== "start" || !$draggable.origin) return;
     if (Math.sqrt(Math.pow(e.clientX - $draggable.origin.pos.x, 2) + Math.pow(e.clientY - $draggable.origin.pos.y, 2)) < 15) return;
@@ -142,7 +148,7 @@
         $timeline.clips.video[currTrackIdx] = $timeline.clips.video[currTrackIdx].set(uuid, {
           ...baseClip,
           buffer: null,
-          uuid, 
+          uuid,
           type: "image",
         });
       }
@@ -152,14 +158,17 @@
 
   const handleKey = (e: KeyboardEvent & { currentTarget: EventTarget & Window }) => {
     if (e.key !== "Delete" || selected.length === 0) return;
-    const flattenedTracks = [...$timeline.clips.video.map(map => Array.from(map.values())).flat(), ...$timeline.clips.audio.map(map => Array.from(map.values())).flat()];
+    const flattenedTracks = [
+      ...$timeline.clips.video.map((map) => Array.from(map.values())).flat(),
+      ...$timeline.clips.audio.map((map) => Array.from(map.values())).flat(),
+    ];
     const links = selected.map((uuid) => flattenedTracks.find((clip) => clip.uuid === uuid)?.linkUUID).filter((uuid) => uuid !== undefined) as string[];
 
-    links.forEach(uuid => $timeline.clips.video.forEach((track) => track.delete(uuid)));
-    links.forEach(uuid => $timeline.clips.audio.forEach((track) => track.delete(uuid)));
+    links.forEach((uuid) => $timeline.clips.video.forEach((track) => track.delete(uuid)));
+    links.forEach((uuid) => $timeline.clips.audio.forEach((track) => track.delete(uuid)));
 
-    selected.forEach(uuid => $timeline.clips.video.forEach((track) => track.delete(uuid)));
-    selected.forEach(uuid => $timeline.clips.audio.forEach((track) => track.delete(uuid)));
+    selected.forEach((uuid) => $timeline.clips.video.forEach((track) => track.delete(uuid)));
+    selected.forEach((uuid) => $timeline.clips.audio.forEach((track) => track.delete(uuid)));
 
     $timeline.clips = $timeline.clips;
     selected = [];
@@ -179,26 +188,33 @@
   <!-- video tracks -->
   <div class="overflow-y-auto flex flex-col-reverse justify-end w-full h-1/2">
     {#each $timeline.clips.video as clips, idx}
-      <div class="w-full h-24 border-t-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "video")} on:mouseenter={() => {
-        currTrackIdx = idx;
-        currTrackType = "video";
-      }}>
+      <div
+        class="w-full h-24 border-t-[1px] border-neutral-600"
+        on:mousedown={(e) => setupDrag(e, idx, "video")}
+        on:mouseenter={() => {
+          currTrackIdx = idx;
+          currTrackType = "video";
+        }}
+      >
         <p class="text-neutral-400 absolute">v{idx}</p>
         {#each [...clips.values()] as clip, idx (clip.uuid)}
           <Clip bind:clip bind:selected />
         {/each}
       </div>
-      
     {/each}
   </div>
-  <hr class="border-2 border-white">
+  <hr class="border-2 border-white" />
   <!-- audio tracks -->
   <div class="overflow-y-auto flex flex-col w-full h-1/2">
     {#each $timeline.clips.audio as clips, idx}
-      <div class="w-full h-24 border-b-[1px] border-neutral-600" on:mousedown={(e) => setupDrag(e, idx, "audio")} on:mouseenter={() => {
-        currTrackIdx = idx;
-        currTrackType = "audio";
-      }}>
+      <div
+        class="w-full h-24 border-b-[1px] border-neutral-600"
+        on:mousedown={(e) => setupDrag(e, idx, "audio")}
+        on:mouseenter={() => {
+          currTrackIdx = idx;
+          currTrackType = "audio";
+        }}
+      >
         <p class="text-neutral-400 absolute">a{idx}</p>
         {#each [...clips.values()] as clip, idx (clip.uuid)}
           <Clip bind:clip bind:selected />
