@@ -22,7 +22,6 @@
 
   let render: Render;
   $: render = ({ context, width, height }) => {
-    console.log($current.video);
     if (!$current.video || $current.video.length === 0) {
       context.fillStyle = "black";
       context.fillRect(0, 0, width, height);
@@ -35,10 +34,7 @@
       const clip = $timeline.clips.video[i].get(currentUUID);
       if (!clip || !clip.buffer) continue;
 
-      console.log(clip.buffer);
-
       const { sourceDim, mediaDim, mediaPos } = calcDimensions(clip.type, clip.buffer);
-      console.log(sourceDim, mediaDim, mediaPos);
       context.drawImage(clip.buffer, 0, 0, ...sourceDim, ...mediaPos, ...mediaDim);
     }
   };
