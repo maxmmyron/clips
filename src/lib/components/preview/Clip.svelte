@@ -66,7 +66,7 @@
 
   const handleMove = (e: MouseEvent) => {
     if (isMove) {
-      clip.metadata.offset = (e.clientX - initialX) / $secondWidth;
+      clip.metadata.offset = Math.max(0, (e.clientX - initialX) / $secondWidth);
 
       if (clip.linkUUID) {
         if (clip.type === "audio") {
