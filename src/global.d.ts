@@ -4,6 +4,5 @@ declare interface Window {
     resolved: App.Media[]
   }
   timeline: App.Timeline;
-  buffers: Map<string, { source: HTMLVideoElement | HTMLImageElement, type: Exclude<App.MediaTypes, "audio">}>;
-  current: { video: string[]; audio: string[]; }
+  current: { video: (string | null)[]; audio: (string | null)[]; }
 }

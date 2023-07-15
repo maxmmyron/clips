@@ -132,8 +132,8 @@ declare global {
 			}>;
 
 			type current = Writable<{
-				video: string[];
-				audio: string[];
+				video: (string | null)[];
+				audio: (string | null)[];
 			}>;
 		}
 	}
