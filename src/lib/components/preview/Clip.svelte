@@ -28,16 +28,19 @@
 
   onMount(() => clip.type !== "audio" && (clip.buffer = buffer));
 
+  // TODO:
   $: if (clip.type === "video" && $current.video.includes(clip.uuid)) {
     buffer = buffer as HTMLVideoElement;
     if (!$player.isPaused && buffer.paused) {
-      const start = $timeline.clipRuntime + clip.metadata.start;
-      buffer.currentTime = start;
+      buffer.currentTime = $timeline.runtime - clip.metadata.offset - clip.metadata.start;
 
       buffer.play();
     } else if ($player.isPaused && !buffer.paused) {
       buffer.pause();
     }
+  } else if (buffer && clip.type === "video" && !$current.video.includes(clip.uuid)) {
+    buffer = buffer as HTMLVideoElement;
+    buffer.pause();
   }
 
   $: if (clip.type === "audio" && $current.audio.includes(clip.uuid)) {
@@ -46,9 +49,15 @@
       audioNode.buffer = ($media.resolved.find((media) => media.uuid === clip.mediaUUID) as App.Audio | App.Video).metadata.audio;
       audioNode.connect($audioContext.destination);
 
-      audioNode.start(0, $timeline.clipRuntime + clip.metadata.start);
+      audioNode.start(0, $timeline.runtime - clip.metadata.offset - clip.metadata.start);
       hasAudioNodeStarted = true;
     } else if ($player.isPaused && hasAudioNodeStarted) {
+      audioNode.stop();
+      audioNode.disconnect();
+      hasAudioNodeStarted = false;
+    }
+  } else if (clip.type === "audio" && !$current.audio.includes(clip.uuid)) {
+    if (hasAudioNodeStarted) {
       audioNode.stop();
       audioNode.disconnect();
       hasAudioNodeStarted = false;

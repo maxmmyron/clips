@@ -23,42 +23,6 @@
 
   let z = 0;
 
-  let lastTimestamp = 0;
-  const render = (timestamp: number) => {
-    for (let i = 0; i < $timeline.clips.video.length; i++) {
-      const curr = getCurrentTrackClip($timeline.clips.video[i]);
-      if (curr) {
-        if ($current.video[i] !== curr.uuid) $current.video[i] = curr.uuid;
-      } else $current.video = $current.video.splice(i, 1);
-    }
-
-    for (let i = 0; i < $timeline.clips.audio.length; i++) {
-      const curr = getCurrentTrackClip($timeline.clips.audio[i]);
-      if (curr) {
-        if ($current.audio[i] !== curr.uuid) $current.audio[i] = curr.uuid;
-      } else $current.audio = $current.audio.splice(i, 1);
-    }
-
-    // TODO: implement $timeline.clipRuntime
-
-    if ($player.isPaused) {
-      lastTimestamp = timestamp;
-      requestAnimationFrame(render);
-      return;
-    }
-
-    const delta = timestamp - lastTimestamp;
-    lastTimestamp = timestamp;
-
-    $timeline.runtime += delta / 1000;
-
-    requestAnimationFrame(render);
-  };
-
-  onMount(() => requestAnimationFrame(render));
-
-  $: browser && (window.timeline = $timeline.clips);
-
   const getCurrentTrackClip = <T extends (App.VideoClip | App.ImageClip) | App.AudioClip>(track: Map<string, T>) => {
     let validClips: T[] = [];
     for (const [uuid, clip] of [...track]) {
@@ -68,6 +32,40 @@
     if (validClips.length === 0) return null;
     return validClips.sort((a, b) => b.metadata.z - a.metadata.z)[0];
   };
+
+  let lastTimestamp = 0;
+  const calcTimeline = (timestamp: number) => {
+    for (let i = 0; i < $timeline.clips.video.length; i++) {
+      const curr = getCurrentTrackClip($timeline.clips.video[i]);
+      if (curr) {
+        if ($current.video[i] !== curr.uuid) $current.video[i] = curr.uuid;
+      } else $current.video[i] = null;
+    }
+
+    for (let i = 0; i < $timeline.clips.audio.length; i++) {
+      const curr = getCurrentTrackClip($timeline.clips.audio[i]);
+      if (curr) {
+        if ($current.audio[i] !== curr.uuid) $current.audio[i] = curr.uuid;
+      } else $current.audio[i] = null;
+    }
+
+    if ($player.isPaused) {
+      lastTimestamp = timestamp;
+      requestAnimationFrame(calcTimeline);
+      return;
+    }
+
+    const delta = timestamp - lastTimestamp;
+    lastTimestamp = timestamp;
+
+    $timeline.runtime += delta / 1000;
+
+    requestAnimationFrame(calcTimeline);
+  };
+
+  onMount(() => requestAnimationFrame(calcTimeline));
+
+  $: browser && (window.timeline = $timeline.clips);
 
   /**
    * Sets up the drag event for the current track
