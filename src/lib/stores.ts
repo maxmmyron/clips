@@ -22,13 +22,12 @@ export const timeline: App.stores.timeline = writable({
   duration: 0,
   runtime: 0,
   zoomScale: 5,
-  clipRuntime: 0,
 })
 
 export const current: App.stores.current = writable({
-  video: [] as (App.VideoClip | App.ImageClip)[], 
-  audio: [] as App.AudioClip[]
-}); 
+  video: [] as (string | null)[],
+  audio: [] as (string | null)[]
+});
 
 export const media: App.stores.media = writable({
   unresolved: [],

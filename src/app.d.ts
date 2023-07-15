@@ -120,7 +120,6 @@ declare global {
 					video: Map<string, App.VideoClip | App.ImageClip>[];
 					audio: Map<string, App.AudioClip>[];
 				},
-				clipRuntime: number;
 				duration: number;
 				runtime: number;
 				zoomScale: number;
