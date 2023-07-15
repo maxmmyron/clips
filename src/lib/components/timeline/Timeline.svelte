@@ -8,7 +8,6 @@
   import { browser } from "$app/environment";
   import { onMount } from "svelte";
 
-  export let dragIndex: number;
   export let scrollX: number = 0;
 
   let startTrackIdx = -1,
