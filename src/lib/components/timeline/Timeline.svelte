@@ -183,10 +183,10 @@
   on:mouseleave={() => ($draggable.region = null)}
 >
   <!-- video tracks -->
-  <div class="overflow-y-auto flex flex-col-reverse justify-end w-full h-1/2">
+  <div class="overflow-y-auto flex flex-col-reverse w-full h-1/2">
     {#each $timeline.clips.video as clips, idx}
       <div
-        class="w-full h-24 border-t-[1px] border-neutral-600"
+        class="relative w-full min-h-[3rem] h-16 max-h-[6rem] border-t-[1px] border-neutral-600"
         on:mousedown={(e) => setupDrag(e, idx, "video")}
         on:mouseenter={() => {
           currTrackIdx = idx;
@@ -195,7 +195,7 @@
       >
         <p class="text-neutral-400 absolute">v{idx}</p>
         {#each [...clips.values()] as clip, idx (clip.uuid)}
-          <Clip bind:clip bind:selected />
+          <Clip {clip} bind:selected />
         {/each}
       </div>
     {/each}
@@ -205,7 +205,7 @@
   <div class="overflow-y-auto flex flex-col w-full h-1/2">
     {#each $timeline.clips.audio as clips, idx}
       <div
-        class="w-full h-24 border-b-[1px] border-neutral-600"
+        class="relative w-full min-h-[3rem] h-16 max-h-[6rem] border-b-[1px] border-neutral-600"
         on:mousedown={(e) => setupDrag(e, idx, "audio")}
         on:mouseenter={() => {
           currTrackIdx = idx;
@@ -214,30 +214,9 @@
       >
         <p class="text-neutral-400 absolute">a{idx}</p>
         {#each [...clips.values()] as clip, idx (clip.uuid)}
-          <Clip bind:clip bind:selected />
+          <Clip {clip} bind:selected />
         {/each}
       </div>
     {/each}
   </div>
-
-  <!-- <TimelinePreview bind:dragIndex {node} bind:selected>
-    {#if node.type === "video"}
-      <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
-      {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-        <MediaAudioPreview
-          mediaUUID={node.mediaUUID}
-          metadata={{
-            start: node.metadata.start,
-            end: node.metadata.end,
-          }}
-        />
-      {/key}
-    {:else if node.type === "audio"}
-      {#key $timeline.zoomScale || node.metadata.start || node.metadata.end}
-        <MediaAudioPreview mediaUUID={node.mediaUUID} metadata={{ start: node.metadata.start, end: node.metadata.end }} />
-      {/key}
-    {:else if node.type === "image"}
-      <MediaVideoPreview mediaUUID={node.mediaUUID} isTimelineElement />
-    {/if}
-  </TimelinePreview> -->
 </div>

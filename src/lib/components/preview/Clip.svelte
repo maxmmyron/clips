@@ -2,6 +2,8 @@
   import { browser } from "$app/environment";
   import { player, secondWidth, timeline, current, audioContext, media } from "$lib/stores";
   import { onMount } from "svelte";
+  import MediaAudioPreview from "./MediaAudioPreview.svelte";
+  import MediaVideoPreview from "./MediaVideoPreview.svelte";
 
   export let clip: App.Clip;
   export let selected: string[];
@@ -26,9 +28,6 @@
 
   $: isSelected = selected.includes(clip.uuid);
 
-  // FIXME: known bug in svelte (https://stackoverflow.com/questions/76659578/binding-element-to-a-reactive-object-causes-an-infinite-loop-in-svelte)
-  // we are mutating the clip object by binding an element to it on mount, which causes the clip Map to react and re-render
-  // i believe this is the current issue tracked in svelte: https://github.com/sveltejs/svelte/issues/7704
   onMount(() => clip.type !== "audio" && (clip.buffer = buffer));
 
   // TODO:
@@ -146,7 +145,7 @@
 <svelte:window on:mousemove={handleMove} on:mouseup={endMove} />
 
 <button
-  class="absolute h-12 bg-neutral-800 rounded-lg {isSelected ? 'border-neutral-600' : 'border-neutral-700/50'} border-2 transition-colors
+  class="absolute top-0 h-16 bg-neutral-800 rounded-lg {isSelected ? 'border-neutral-600' : 'border-neutral-700/50'} border-2 transition-colors
   before:absolute before:w-4 before:h-full before:-left-1 before:top-0 before:hover:cursor-ew-resize
   after:absolute after:w-4 after:h-full after:-right-1 after:top-0 after:hover:cursor-ew-resize"
   style="width: {(clip.metadata.runtime - clip.metadata.start) * $secondWidth}px; transform: translateX({(clip.metadata.offset + clip.metadata.start) *
@@ -154,10 +153,18 @@
   on:click|capture|stopPropagation={handleClick}
   on:mousedown={setupMove}
   bind:this={mediaPreview}
-/>
+>
+  {#if clip.type === "audio"}
+    {#key $timeline.zoomScale || clip.metadata.runtime}
+      <MediaAudioPreview mediaUUID={clip.mediaUUID} metadata={{ start: clip.metadata.start, end: clip.metadata.runtime + clip.metadata.start }} />
+    {/key}
+  {:else}
+    <MediaVideoPreview mediaUUID={clip.mediaUUID} isTimelineElement />
+  {/if}
+</button>
 
-<!-- {#if clip.type === "video"}
+{#if clip.type === "video"}
   <video muted class="pointer-events-none opacity-[0.000000001]" src={clip.src} bind:this={buffer} />
 {:else if clip.type === "image"}
   <img class="pointer-events-none opacity-[0.000000001]" src={clip.src} bind:this={buffer} alt="" />
-{/if} -->
+{/if}
