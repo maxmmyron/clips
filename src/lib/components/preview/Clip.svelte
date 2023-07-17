@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import MediaAudioPreview from "./MediaAudioPreview.svelte";
   import MediaVideoPreview from "./MediaVideoPreview.svelte";
+  import Marquee from "../util/Marquee.svelte";
 
   export let clip: App.Clip;
   export let selected: string[];
@@ -86,7 +87,6 @@
     }
 
     if (isResize) {
-      // let offset;
       if (resizeDirection == "left") clip.metadata.start = Math.max(0, initialOffset + (e.clientX - initialResizePosition) / $secondWidth);
       else clip.metadata.runtime = Math.min(initialOffset - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration);
 
@@ -145,7 +145,9 @@
 <svelte:window on:mousemove={handleMove} on:mouseup={endMove} />
 
 <button
-  class="absolute top-0 h-16 bg-neutral-800 rounded-lg border-neutral-700/50 border-2 transition-shadow ring-blue-700 {isSelected ? 'ring-2' : 'ring-0'}
+  class="absolute top-0 h-16 bg-neutral-800 rounded-lg border-neutral-700/50 border-2 transition-shadow ring-blue-700 {isSelected
+    ? 'ring-2'
+    : 'ring-0'} overflow-hidden
   before:absolute before:w-4 before:h-full before:-left-1 before:top-0 before:hover:cursor-ew-resize
   after:absolute after:w-4 after:h-full after:-right-1 after:top-0 after:hover:cursor-ew-resize"
   style="width: {(clip.metadata.runtime - clip.metadata.start) * $secondWidth}px; transform: translateX({(clip.metadata.offset + clip.metadata.start) *
@@ -161,6 +163,9 @@
   {:else}
     <MediaVideoPreview mediaUUID={clip.mediaUUID} isTimelineElement />
   {/if}
+  <div class="absolute bottom-0 left-0 w-full p-1 bg-neutral-800/75 backdrop-blur-lg">
+    <Marquee class="text-xs">{clip.metadata.title}</Marquee>
+  </div>
 </button>
 
 {#if clip.type === "video"}
