@@ -145,7 +145,7 @@
 <svelte:window on:mousemove={handleMove} on:mouseup={endMove} />
 
 <button
-  class="absolute top-0 h-16 bg-neutral-800 rounded-lg {isSelected ? 'border-neutral-600' : 'border-neutral-700/50'} border-2 transition-colors
+  class="absolute top-0 h-16 bg-neutral-800 rounded-lg border-neutral-700/50 border-2 transition-shadow ring-blue-700 {isSelected ? 'ring-2' : 'ring-0'}
   before:absolute before:w-4 before:h-full before:-left-1 before:top-0 before:hover:cursor-ew-resize
   after:absolute after:w-4 after:h-full after:-right-1 after:top-0 after:hover:cursor-ew-resize"
   style="width: {(clip.metadata.runtime - clip.metadata.start) * $secondWidth}px; transform: translateX({(clip.metadata.offset + clip.metadata.start) *
