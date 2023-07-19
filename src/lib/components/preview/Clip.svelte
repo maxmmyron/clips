@@ -19,7 +19,7 @@
   let isMove = false,
     isResize = false;
   let initialResizePosition = 0,
-    initialOffset = 0;
+    initialRuntime = 0;
   let resizeDirection: "left" | "right" = "left";
 
   /**
@@ -87,8 +87,10 @@
     }
 
     if (isResize) {
-      if (resizeDirection == "left") clip.metadata.start = Math.max(0, initialOffset + (e.clientX - initialResizePosition) / $secondWidth);
-      else clip.metadata.runtime = Math.min(initialOffset - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration);
+      if (resizeDirection == "left") {
+        clip.metadata.start = Math.min(clip.metadata.duration - 1 / 60, Math.max(0, (e.clientX - initialX) / $secondWidth));
+      } else
+        clip.metadata.runtime = Math.min(initialRuntime - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration - clip.metadata.start);
 
       if (clip.linkUUID) {
         if (clip.type === "audio") {
@@ -115,7 +117,7 @@
   };
 
   const setupMove = (e: MouseEvent) => {
-    initialOffset = clip.metadata.runtime;
+    initialRuntime = clip.metadata.runtime;
     initialX = e.clientX;
 
     if (e.clientX - mediaPreview.getBoundingClientRect().x < 12) {
@@ -148,7 +150,7 @@
   class="absolute top-0 h-16 bg-neutral-800 rounded-lg border-neutral-700/50 border-2 transition-shadow ring-blue-700 {isSelected
     ? 'ring-2'
     : 'ring-0'} overflow-hidden
-  before:absolute before:w-4 before:h-full before:-left-1 before:top-0 before:hover:cursor-ew-resize
+  before:absolute before:w-4 before:h-full before:-left-1 before:top-0 before:hover:cursor-ew-resize before:z-10
   after:absolute after:w-4 after:h-full after:-right-1 after:top-0 after:hover:cursor-ew-resize"
   style="width: {(clip.metadata.runtime - clip.metadata.start) * $secondWidth}px; transform: translateX({(clip.metadata.offset + clip.metadata.start) *
     $secondWidth}px); z-index:{clip.metadata.z};"
