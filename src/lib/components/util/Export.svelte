@@ -80,4 +80,6 @@
   };
 </script>
 
-<Button onClick={exportTimeline} disabled={$timeline.clips.length === 0}>Export</Button>
+<!-- <Button onClick={exportTimeline} disabled={$timeline.clips.length === 0}>Export</Button> -->
+
+<Button onClick={() => addToast("info", "Exports have been temporarily disabled")}><p class="line-through">Export</p></Button>
