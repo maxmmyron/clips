@@ -1,9 +1,6 @@
 <script lang="ts">
   import { current, draggable, player, secondWidth, timeline } from "$lib/stores";
   import { v4 as uuidv4 } from "uuid";
-  import TimelinePreview from "../preview/TimelinePreview.svelte";
-  import MediaAudioPreview from "../preview/MediaAudioPreview.svelte";
-  import MediaVideoPreview from "../preview/MediaVideoPreview.svelte";
   import Clip from "../preview/Clip.svelte";
   import { browser } from "$app/environment";
   import { onMount } from "svelte";
