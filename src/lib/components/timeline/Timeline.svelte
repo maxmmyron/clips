@@ -175,7 +175,7 @@
 <svelte:window on:click={() => (selected = [])} on:keydown={handleKey} />
 
 <div
-  class="overflow-x-auto h-full"
+  class="overflow-x-scroll h-full w-full overflow-y-hidden"
   on:scroll={(e) => (scrollX = e.currentTarget.scrollLeft)}
   on:mousemove={handleDrag}
   on:mouseup={endDrag}
@@ -183,40 +183,46 @@
   on:mouseleave={() => ($draggable.region = null)}
 >
   <!-- video tracks -->
-  <div class="overflow-y-auto flex flex-col-reverse w-full h-1/2">
+  <div class="overflow-y-scroll flex flex-col-reverse min-w-full h-1/2">
     {#each $timeline.clips.video as clips, idx}
-      <div
-        class="relative w-full min-h-[3rem] h-16 max-h-[6rem] border-t-[1px] border-neutral-600"
-        on:mousedown={(e) => setupDrag(e, idx, "video")}
-        on:mouseenter={() => {
-          currTrackIdx = idx;
-          currTrackType = "video";
-        }}
-      >
-        <p class="text-neutral-400 absolute">v{idx}</p>
-        {#each [...clips.values()] as clip, idx (clip.uuid)}
-          <Clip {clip} bind:selected />
-        {/each}
-      </div>
+      <section class="relative w-full min-h-[4rem] h-20 max-h-[6rem] border-b-[1px] border-neutral-600">
+        <div class="w-48 p-2 h-full border-r-[1px] border-neutral-600 flex items-center justify-start">
+          <p class="text-neutral-400 absolute font-mono">Video ({idx})</p>
+        </div>
+        <div
+          on:mousedown={(e) => setupDrag(e, idx, "video")}
+          on:mouseenter={() => {
+            currTrackIdx = idx;
+            currTrackType = "video";
+          }}
+        >
+          {#each [...clips.values()] as clip (clip.uuid)}
+            <Clip {clip} bind:selected />
+          {/each}
+        </div>
+      </section>
     {/each}
   </div>
-  <hr class="border-2 border-white" />
+  <hr class="border-2 border-neutral-500" />
   <!-- audio tracks -->
-  <div class="overflow-y-auto flex flex-col w-full h-1/2">
+  <div class="overflow-y-scroll flex flex-col min-w-full h-1/2">
     {#each $timeline.clips.audio as clips, idx}
-      <div
-        class="relative w-full min-h-[3rem] h-16 max-h-[6rem] border-b-[1px] border-neutral-600"
-        on:mousedown={(e) => setupDrag(e, idx, "audio")}
-        on:mouseenter={() => {
-          currTrackIdx = idx;
-          currTrackType = "audio";
-        }}
-      >
-        <p class="text-neutral-400 absolute">a{idx}</p>
-        {#each [...clips.values()] as clip, idx (clip.uuid)}
-          <Clip {clip} bind:selected />
-        {/each}
-      </div>
+      <section class="relative w-full min-h-[4rem] h-20 max-h-[6rem] border-b-[1px] border-neutral-600">
+        <div class="w-48 p-2 h-full border-r-[1px] border-neutral-600 flex items-center justify-start">
+          <p class="text-neutral-400 absolute font-mono">Audio ({idx})</p>
+        </div>
+        <div
+          on:mousedown={(e) => setupDrag(e, idx, "audio")}
+          on:mouseenter={() => {
+            currTrackIdx = idx;
+            currTrackType = "audio";
+          }}
+        >
+          {#each [...clips.values()] as clip (clip.uuid)}
+            <Clip {clip} bind:selected />
+          {/each}
+        </div>
+      </section>
     {/each}
   </div>
 </div>
