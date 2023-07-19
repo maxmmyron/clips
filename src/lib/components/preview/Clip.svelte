@@ -87,10 +87,10 @@
     }
 
     if (isResize) {
-      if (resizeDirection == "left") {
-        clip.metadata.start = Math.min(clip.metadata.duration - 1 / 60, Math.max(0, (e.clientX - initialX) / $secondWidth));
-      } else
-        clip.metadata.runtime = Math.min(initialRuntime - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration - clip.metadata.start);
+      // clamp start time of clip between 0 (0 offset) and the current runtime of the clip - 1 frame (1/60 seconds)
+      if (resizeDirection == "left") clip.metadata.start = Math.min(clip.metadata.runtime - 1 / 60, Math.max(0, (e.clientX - initialX) / $secondWidth));
+      // otherwise, clamp total runtime between the current start offset and the total duration of the clip
+      else clip.metadata.runtime = Math.min(initialRuntime - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration - clip.metadata.start);
 
       if (clip.linkUUID) {
         if (clip.type === "audio") {
