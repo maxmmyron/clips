@@ -155,12 +155,12 @@
 >
   {#if clip.type === "audio"}
     {#key $timeline.zoomScale || clip.metadata.runtime}
-      <MediaAudioPreview mediaUUID={clip.mediaUUID} metadata={{ start: clip.metadata.start, end: clip.metadata.runtime + clip.metadata.start }} />
+      <MediaAudioPreview mediaUUID={clip.mediaUUID} start={clip.metadata.start} runtime={clip.metadata.runtime} />
     {/key}
   {:else}
     <MediaVideoPreview mediaUUID={clip.mediaUUID} isTimelineElement />
   {/if}
-  <div class="absolute bottom-0 left-0 w-full p-1 bg-neutral-800/75 backdrop-blur-lg">
+  <div class="absolute bottom-0 left-0 w-full py-0.5 px-1 bg-neutral-800/75 backdrop-blur-lg">
     <Marquee class="text-xs">{clip.metadata.title}</Marquee>
   </div>
 </button>

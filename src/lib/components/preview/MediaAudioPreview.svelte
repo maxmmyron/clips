@@ -4,7 +4,7 @@
   import { addToast } from "$lib/util/toastManager";
 
   export let mediaUUID: string;
-  export let metadata: { start: number; end: number };
+  export let start: number, runtime: number;
 
   let resolved = $media.resolved.find((m) => m.uuid === mediaUUID) as App.Video | App.Audio;
   let buffer = resolved.metadata.audio.getChannelData(0);
@@ -27,7 +27,6 @@
     context.fillRect(0, 0, width, height);
     context.lineWidth = 1;
     context.strokeStyle = "white";
-
     context.beginPath();
 
     // if empty, just draw a line
@@ -38,10 +37,7 @@
       return;
     }
 
-    const start = (metadata.start / resolved.metadata.duration) * buffer.length;
-    const end = ((resolved.metadata.duration - metadata.end) / resolved.metadata.duration) * buffer.length;
-
-    const offsetBuffer = buffer.slice(start, end);
+    const offsetBuffer = buffer.slice((start / resolved.metadata.duration) * buffer.length, ((runtime + start) / resolved.metadata.duration) * buffer.length);
 
     const step = Math.ceil(offsetBuffer.length / width);
 
@@ -64,6 +60,6 @@
   });
 </script>
 
-<div class="h-full flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={width} bind:clientHeight={height}>
-  <canvas class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height} bind:this={canvas} />
+<div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
+  <canvas bind:clientWidth={width} bind:clientHeight={height} bind:this={canvas} />
 </div>
