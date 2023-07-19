@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { mediaPool } from "$lib/stores";
+  import { media } from "$lib/stores";
   import { onMount } from "svelte";
   import { addToast } from "$lib/util/toastManager";
 
   export let mediaUUID: string;
-  export let metadata: { start: number; end: number };
+  export let start: number, runtime: number;
 
-  let media = $mediaPool.media.find((media) => media.uuid === mediaUUID) as App.Audio;
+  let resolved = $media.resolved.find((m) => m.uuid === mediaUUID) as App.Video | App.Audio;
+  let buffer = resolved.metadata.audio.getChannelData(0);
 
-  let buffer = media.metadata.audio.getChannelData(0);
   let width: number, height: number;
   let canvas: HTMLCanvasElement;
 
@@ -27,7 +27,6 @@
     context.fillRect(0, 0, width, height);
     context.lineWidth = 1;
     context.strokeStyle = "white";
-
     context.beginPath();
 
     // if empty, just draw a line
@@ -38,10 +37,7 @@
       return;
     }
 
-    const start = (metadata.start / media.metadata.duration) * buffer.length;
-    const end = ((media.metadata.duration - metadata.end) / media.metadata.duration) * buffer.length;
-
-    const offsetBuffer = buffer.slice(start, end);
+    const offsetBuffer = buffer.slice((start / resolved.metadata.duration) * buffer.length, ((runtime + start) / resolved.metadata.duration) * buffer.length);
 
     const step = Math.ceil(offsetBuffer.length / width);
 
@@ -64,6 +60,6 @@
   });
 </script>
 
-<div class="h-1/2 flex justify-center items-center rounded-md overflow-clip" bind:clientWidth={width} bind:clientHeight={height}>
-  <canvas class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height} bind:this={canvas} />
+<div class="w-full h-full" bind:clientWidth={width} bind:clientHeight={height}>
+  <canvas bind:clientWidth={width} bind:clientHeight={height} bind:this={canvas} />
 </div>

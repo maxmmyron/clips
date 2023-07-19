@@ -1,49 +1,85 @@
 import { get } from "svelte/store";
-import { studio } from "../../stores";
+import { audioContext } from "../../stores";
 import { v4 as uuidv4 } from "uuid";
-import { addToast } from "$lib/util/toastManager";
+import { parseMIME } from "./mimeParser";
+import { assertBrowserSupportsContainer } from "./browserParser";
+import { convertFileToSupportedContainer } from "$lib/util/FFmpegManager";
 
-export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, src: string): Promise<App.MediaObjects<T>> => {
+export const createMedia = async <T extends App.MediaTypes>(type: T, name: string, file: File): Promise<{uuid: string, name: string, media: Promise<App.MediaObjects<T>>}> => {
+
+  const MIME = await parseMIME(file);
+  if (MIME === "file/unknown") throw new Error("MIME type could not be parsed.");
+
+  let src: string = "";
+  if (!(await assertBrowserSupportsContainer(MIME))) {
+    src = await convertFileToSupportedContainer(file, MIME);
+  } else src = URL.createObjectURL(file);
+
+  const uuid: string = uuidv4();
+
   switch(type) {
     case "video":
       return {
-        uuid: uuidv4(),
-        type: "video",
-        src: src,
-        metadata: {
-          duration: await loadMediaDuration(src, "video"),
-          audio: await loadAudioBuffer(src),
-          thumbnails: await loadThumbnails(src),
-          title: name
-        }
-      } as App.MediaObjects<T>;
+        uuid,
+        name,
+        media: new Promise(async (resolve, reject) => {
+          let duration = await loadMediaDuration(src, "video").catch(e => reject(e));
+          let audio = await loadAudioBuffer(src).catch(e => reject(e));
+          let thumbnails = await loadThumbnails(src).catch(e => reject(e))
+
+          resolve({
+            uuid,
+            type: "video",
+            src: src,
+            metadata: {
+              duration,
+              audio,
+              thumbnails,
+              title: name
+            }
+          } as App.MediaObjects<T>);
+        })
+      }
 
     case "audio":
       return {
-        uuid: uuidv4(),
-        type: "audio",
-        src: src,
-        metadata: {
-          duration: await loadMediaDuration(src, "audio"),
-          audio: await loadAudioBuffer(src),
-          title: name
-        }
-      } as App.MediaObjects<T>;
+        uuid,
+        name,
+        media: new Promise(async (resolve, reject) => {
+          let duration = await loadMediaDuration(src, "video").catch(e => reject(e));
+          let audio = await loadAudioBuffer(src).catch(e => reject(e));
+
+          resolve({
+            uuid,
+            type: "audio",
+            src: src,
+            metadata: {
+              duration,
+              audio,
+              title: name
+            }
+          } as App.MediaObjects<T>);
+        })
+      }
 
     case "image":
       return {
-        uuid: uuidv4(),
-        type: "image",
-        src: src,
-        metadata: {
-          title: name
-        }
-      } as App.MediaObjects<T>;
+        uuid,
+        name,
+        media: new Promise(async (resolve, reject) => {
+          resolve({
+            uuid,
+            type: "image",
+            src: src,
+            metadata: {
+              title: name
+            }
+          } as App.MediaObjects<T>);
+        })
+      }
 
     default:
-      addToast("error", `Error loading media: ${type} is not a valid media type.`);
-      throw Error("Unsupported media type");
-
+      throw new Error("Unsupported media type.");
     };
 };
 
@@ -55,6 +91,7 @@ const loadMediaDuration = (src: string, type: string) => new Promise<number>((re
     audio.load();
 
     audio.addEventListener("loadedmetadata", () => {
+      console.log("finished loading media duration");
       resolve(audio.duration);
     });
   }
@@ -64,9 +101,7 @@ const loadMediaDuration = (src: string, type: string) => new Promise<number>((re
     video.preload = "metadata";
     video.load();
 
-    video.addEventListener("loadedmetadata", () => {
-      resolve(video.duration);
-    });
+    video.addEventListener("loadedmetadata", () => resolve(video.duration));
   }
   else reject("Unsupported media type");
 });
@@ -111,12 +146,12 @@ const loadThumbnails = (src: string) => new Promise<string[]>(async (resolve, re
 });
 
 const loadAudioBuffer = async (src: string) => new Promise<AudioBuffer>((resolve, reject) => {
-  const audioContext = get(studio).audioContext;
-  if (!audioContext) reject("No audio context");
+  const aCtx = get(audioContext);
+  if (!aCtx) reject("No audio context");
   else fetch(src).then(res => res.arrayBuffer())
     .then(buffer => {
-      audioContext.decodeAudioData(buffer)
-        .then(buffer => resolve(buffer))
+      aCtx.decodeAudioData(buffer)
+        .then(buffer =>resolve(buffer))
         .catch(err => reject(`Error decoding audio data: ${err}`));
     })
     .catch(err => reject(`Error fetching audio data: ${err}`));

@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-
   export let src: string;
 
   // TODO: add alt tag that works with screen readers

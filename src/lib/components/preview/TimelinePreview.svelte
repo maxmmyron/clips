@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { player, studio, timeline } from "$lib/stores";
+  import { player, studio, timeline, draggable, media, secondWidth } from "$lib/stores";
+  import Marquee from "../util/Marquee.svelte";
 
-  export let node: App.Node;
-  export let timelineSecondWidth: number;
+  export let clip: App.Clip;
+  export let selected: string[];
 
-  const metadata = node.metadata;
+  const metadata = clip.metadata;
 
-  let duration = metadata.duration;
   let isAdjustingOffsets = false;
   let mediaPreview: HTMLButtonElement;
 
@@ -14,44 +14,36 @@
   let initialPosition = 0;
   let initialOffset = 0;
 
-  $: isSelected = $timeline.selected.includes(node.uuid);
+  $: isSelected = selected.includes(clip.uuid);
 
-  // n such that 2^n = duration of a 20% segment of the timeline.
-  $: secondScale = 2 ** (5 - $timeline.zoomScale);
-
-  $: width = ((duration - metadata.start - metadata.end) / secondScale) * timelineSecondWidth;
+  $: width = (metadata.runtime - metadata.start) * $secondWidth;
 
   const handleClick = (e: MouseEvent) => {
     if (isAdjustingOffsets) {
       isAdjustingOffsets = false;
       return;
     }
-    if (e.detail == 2) $player.source = node.src;
-    else if (e.shiftKey) $timeline.selected = [...$timeline.selected, node.uuid];
-    else $timeline.selected = [node.uuid];
+    if (e.detail == 2) $player.source = clip.src;
+    else if (e.shiftKey) selected = [...selected, clip.uuid];
+    else selected = [clip.uuid];
   };
 
-  const handleReorder = (e: MouseEvent) => {
-    $studio.draggable = {
-      ...$studio.draggable,
-      mediaUUID: node.mediaUUID,
+  const handleMove = (e: MouseEvent) => {
+    $draggable = {
+      ...$draggable,
+      media: <App.Media>$media.resolved.find((m) => m.uuid == clip.uuid),
       origin: {
         pos: { x: e.clientX, y: e.clientY },
         region: "timeline",
       },
       event: "start",
-      current: {
-        region: "timeline",
-      },
+      region: "timeline",
     };
 
-    $studio.draggable.ghost.pos.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
-    $studio.draggable.ghost.size.set(
-      { width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height },
-      { hard: true }
-    );
+    $draggable.ghost.pos.set({ x: mediaPreview.getBoundingClientRect().x, y: mediaPreview.getBoundingClientRect().y }, { hard: true });
+    $draggable.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
 
-    $timeline.dragIndex = $timeline.timeline.indexOf(node.uuid);
+    // dragIndex = $timeline.clips.indexOf(clip.uuid);
   };
 
   const handleOffsets = (e: MouseEvent) => {
@@ -60,11 +52,11 @@
     let offset;
 
     if (offsetIndex == 0) {
-      offset = initialOffset + (e.clientX - initialPosition) / $timeline.zoomScale;
+      offset = initialOffset + (e.clientX - initialPosition) / $secondWidth;
       metadata.start = Math.max(0, offset);
     } else {
-      offset = initialOffset + (initialPosition - e.clientX) / $timeline.zoomScale;
-      metadata.end = Math.max(0, offset);
+      offset = initialOffset + (initialPosition - e.clientX) / $secondWidth;
+      metadata.runtime = Math.max(0, offset);
     }
   };
 </script>
@@ -75,9 +67,9 @@
   bind:this={mediaPreview}
   style="width: {width}px;"
   on:click|capture|stopPropagation={handleClick}
-  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-48 bg-black group"
+  class="relative flex flex-col outline-2 outline-blue-600 w-48 rounded-md overflow-clip h-24 group"
   class:outline={isSelected}
-  on:mousedown|stopPropagation={handleReorder}
+  on:mousedown|stopPropagation={handleMove}
 >
   <button
     class="z-10 absolute h-full left-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
@@ -87,13 +79,18 @@
       initialOffset = metadata.start;
     }}
   />
-  <slot {width} />
+  <div class="flex flex-col w-full h-full">
+    <slot {width} />
+    <div class="absolute bottom-0 backdrop-blur-md w-full bg-neutral-700/80">
+      <Marquee>{metadata.title}</Marquee>
+    </div>
+  </div>
   <button
     class="z-10 absolute h-full right-0 w-2 bg-emerald-950 opacity-0 cursor-col-resize group-hover:opacity-100"
     on:mousedown|stopPropagation={(e) => {
       offsetIndex = 1;
       initialPosition = mediaPreview.getBoundingClientRect().right;
-      initialOffset = metadata.end;
+      initialOffset = metadata.duration - metadata.runtime - metadata.start;
     }}
   />
 </button>

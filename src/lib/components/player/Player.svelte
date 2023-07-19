@@ -1,49 +1,44 @@
 <script lang="ts">
-  import { timeline } from "$lib/stores";
+  import { timeline, current } from "$lib/stores";
   import { Canvas, Layer, t, type Render } from "svelte-canvas";
-  import Buffer from "./Buffer.svelte";
 
   export let width: number, height: number;
 
-  let audioContext: AudioContext = new AudioContext();
+  const calcDimensions = (type: "video" | "image", buffer: HTMLVideoElement | HTMLImageElement) => {
+    let sourceDim: [number, number] = [-1, -1];
+
+    if (type === "video") sourceDim = [(buffer as HTMLVideoElement).videoWidth, (buffer as HTMLVideoElement).videoHeight];
+    else if (type === "image") sourceDim = [(buffer as HTMLImageElement).naturalWidth, (buffer as HTMLImageElement).naturalHeight];
+
+    const mediaDim: [number, number] = [
+      sourceDim[0] * Math.min(width / sourceDim[0], height / sourceDim[1]),
+      sourceDim[1] * Math.min(width / sourceDim[0], height / sourceDim[1]),
+    ];
+
+    const mediaPos: [number, number] = [Math.max(0, (width - mediaDim[0]) / 2), Math.max(0, (height - mediaDim[1]) / 2)];
+
+    return { sourceDim, mediaDim, mediaPos };
+  };
 
   let render: Render;
   $: render = ({ context, width, height }) => {
-    $t;
-    if (!$timeline.current) {
+    if (!$current.video || $current.video.length === 0) {
       context.fillStyle = "black";
       context.fillRect(0, 0, width, height);
       return;
     }
 
-    if ($timeline.current.type === "audio") {
-      context.fillStyle = "black";
-      context.fillRect(0, 0, width, height);
-      return;
+    for (let i = 0; i < $current.video.length; i++) {
+      let currentUUID = $current.video[i];
+      if (!currentUUID) continue;
+      const clip = $timeline.clips.video[i].get(currentUUID);
+      if (!clip || !clip.buffer) continue;
+
+      const { sourceDim, mediaDim, mediaPos } = calcDimensions(clip.type, clip.buffer);
+      context.drawImage(clip.buffer, 0, 0, ...sourceDim, ...mediaPos, ...mediaDim);
     }
-
-    let src = $timeline.sources.get($timeline.current.uuid);
-    if (!src) return;
-
-    const bufferWidth = src.type === "video" ? (src.source as HTMLVideoElement).videoWidth : (src.source as HTMLImageElement).width || 0;
-    const bufferHeight = src.type === "video" ? (src.source as HTMLVideoElement).videoHeight : (src.source as HTMLImageElement).height || 0;
-
-    const mediaSize = {
-      width: bufferWidth * Math.min(width / bufferWidth, height / bufferHeight),
-      height: bufferHeight * Math.min(width / bufferWidth, height / bufferHeight),
-    };
-
-    const mediaPosition: [number, number] = [Math.max(0, (width - mediaSize.width) / 2), Math.max(0, (height - mediaSize.height) / 2)];
-
-    context.drawImage(src.source, 0, 0, bufferWidth, bufferHeight, ...mediaPosition, mediaSize.width, mediaSize.height);
   };
 </script>
-
-{#each $timeline.timeline.toArray() as node}
-  {#if node.type !== "image"}
-    <Buffer nodeUUID={node.uuid} {audioContext} />
-  {/if}
-{/each}
 
 <Canvas {width} {height}>
   <Layer {render} />

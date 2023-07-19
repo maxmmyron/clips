@@ -1,74 +1,84 @@
 <script lang="ts">
-  import { player, studio, mediaPool } from "$lib/stores";
+  import { studio, player, draggable, media } from "$lib/stores";
   import Icon from "../util/Icon.svelte";
+  import LoadIcon from "../util/LoadIcon.svelte";
   import Marquee from "../util/Marquee.svelte";
+  import MediaAudioPreview from "./MediaAudioPreview.svelte";
+  import MediaVideoPreview from "./MediaVideoPreview.svelte";
 
-  export let media: App.Media | null = null;
-  export let hasResolved: boolean = true;
-  export let currentLoadState: string = "Loading...";
-  export let name = "";
+  export let unresolved: Promise<App.Media>;
+  export let uuid: string;
+  export let name: string;
+
+  export let selected: string[] = [];
 
   let mediaPreview: HTMLButtonElement;
 
-  $: isSelected = media ? $mediaPool.selected.includes(media.uuid) : false;
+  $: isSelected = selected.includes(uuid);
 
-  const handleClick = (e: MouseEvent) => {
-    if (!media) return;
+  const handleSelection = async (e: MouseEvent, media: App.Media) => {
     if (e.detail == 2) $player.source = media.src;
-    else if (e.shiftKey) $mediaPool.selected = [...$mediaPool.selected, media.uuid];
-    else $mediaPool.selected = [media.uuid];
+    else if (e.shiftKey) selected = [...selected, media.uuid];
+    else selected = [media.uuid];
   };
 
-  const handleDragStart = (e: MouseEvent) => {
-    $studio.draggable = {
-      ...$studio.draggable,
-      mediaUUID: media ? media.uuid : null,
+  const handleRemoval = (e: MouseEvent) => {
+    e.stopPropagation();
+    $media.unresolved = $media.unresolved.filter((m) => m.uuid != uuid);
+  };
+
+  const handleDragStart = (e: MouseEvent, media: App.Media) => {
+    $draggable = {
+      ...$draggable,
+      media,
       origin: {
         pos: { x: e.clientX, y: e.clientY },
         region: "media_pool",
       },
       event: "start",
-      current: {
-        region: null,
-      },
+      region: null,
     };
 
-    $studio.draggable.ghost.pos.set({ x: $studio.mouse.x, y: $studio.mouse.y }, { hard: true });
-    $studio.draggable.ghost.size.set(
-      { width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height },
-      { hard: true }
-    );
+    $draggable.ghost.pos.set({ x: $studio.mouse.x, y: $studio.mouse.y }, { hard: true });
+    $draggable.ghost.size.set({ width: mediaPreview.getBoundingClientRect().width, height: mediaPreview.getBoundingClientRect().height }, { hard: true });
   };
 </script>
 
-{#if media === null || hasResolved === false}
-  <div class="rounded-lg p-1">
-    <div class="w-48 aspect-video rounded-md bg-gray-700 animate-pulse mb-2 flex justify-center items-center">
-      <p class="text-gray-200">{currentLoadState}</p>
+<div class="rounded-lg p-1 transition-colors" class:bg-gray-800={isSelected}>
+  {#await unresolved}
+    <div class="w-48 aspect-video rounded-md overflow-clip mb-2 bg-black flex justify-center items-center">
+      <LoadIcon />
     </div>
-    <div class="w-48 overflow-clip grid grid-rows-1 grid-cols-[24px,auto] gap-1 items-center">
-      <Marquee class="col-start-2" isSecondaryColor={isSelected}>{name}</Marquee>
-    </div>
-  </div>
-{:else}
-  <div class="rounded-lg p-1 transition-colors" class:bg-gray-800={isSelected}>
+  {:then resolved}
     <button
       bind:this={mediaPreview}
-      on:click|capture|stopPropagation={handleClick}
+      on:click|capture|stopPropagation={(e) => handleSelection(e, resolved)}
       class="w-48 aspect-video rounded-md overflow-clip mb-2 bg-black"
-      on:mousedown={handleDragStart}
+      on:mousedown={(e) => handleDragStart(e, resolved)}
     >
-      <slot />
+      {#if resolved.type === "video" || resolved.type === "image"}
+        <MediaVideoPreview mediaUUID={uuid} />
+      {:else if resolved.type === "audio"}
+        <MediaAudioPreview mediaUUID={uuid} metadata={{ start: 0, end: 0 }} />
+      {/if}
     </button>
-    <div class="relative">
-      <div
-        class="w-48 overflow-clip grid grid-rows-1 grid-cols-[24px,auto] gap-1 items-center after:content-[''] after:w-5 after:h-full after:absolute after:top-0 after:right-0 after:bg-gradient-to-l after:from-{isSelected
-          ? 'gray-800'
-          : 'neutral-900'} after:to-transparent"
-      >
-        <Icon src="/icons/{media.type}.svg" />
-        <Marquee isSecondaryColor={isSelected}>{media.metadata.title}</Marquee>
-      </div>
+  {:catch error}
+    <button bind:this={mediaPreview} on:click|capture|stopPropagation={handleRemoval} class="w-48 aspect-video rounded-md overflow-clip mb-2 bg-black">
+      <p class="text-red-200">{error}</p>
+    </button>
+  {/await}
+  <div class="relative">
+    <div
+      class="w-48 overflow-clip grid grid-rows-1 grid-cols-[24px,auto] gap-1 items-center after:content-[''] after:w-5 after:h-full after:absolute after:top-0 after:right-0 after:bg-gradient-to-l after:from-{isSelected
+        ? 'gray-800'
+        : 'neutral-900'} after:to-transparent"
+    >
+      {#await unresolved}
+        <LoadIcon width={16} height={16} />
+      {:then { type }}
+        <Icon src="/icons/{type}.svg" />
+      {/await}
+      <Marquee isSecondaryColor={isSelected}>{name}</Marquee>
     </div>
   </div>
-{/if}
+</div>

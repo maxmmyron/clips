@@ -6,12 +6,12 @@
 </script>
 
 <div class="flex gap-2 items-center">
-  <button on:click={() => ($timeline.zoomScale = Math.max(5, $timeline.zoomScale - 5))} class="transition-transform hover:scale-105 active:scale-95">
+  <button on:click={() => ($timeline.zoomScale = Math.max(1, $timeline.zoomScale - 1))} class="transition-transform hover:scale-105 active:scale-95">
     <Icon src="icons/zoom_out.svg" />
   </button>
   <div class="flex items-center" bind:clientWidth={rangeWidth}>
     <div
-      class="z-10 absolute rounded-full w-[--width] h-1 bg-gradient-to-l from-neutral-400 to-neutral-700 bg-[size:var(--width)px_1px]"
+      class="z-10 absolute rounded-full w-[--width] h-1 bg-gradient-to-l from-neutral-400 to-neutral-700 bg-[size:var(--width)px_1px] pointer-events-none"
       style="--width: {rangeWidth * (($timeline.zoomScale - 1) / 9)}px"
     />
     <input type="range" min="1" max="10" bind:value={$timeline.zoomScale} />

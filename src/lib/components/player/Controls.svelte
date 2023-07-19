@@ -6,12 +6,11 @@
     $player.isPaused = true;
 
     $timeline.runtime = front ? 0 : $timeline.duration;
-    $timeline.current = front ? $timeline.timeline.head : $timeline.timeline.tail;
   }
 </script>
 
 <div class="flex justify-center gap-4">
   <Button onClick={() => setPlayerTime()} key="ArrowLeft" showKeyBind={false} useShift disabled={$timeline.runtime === 0}>⏪</Button>
   <Button onClick={() => ($player.isPaused = !$player.isPaused)} key="Space" showKeyBind={false}>{$player.isPaused ? "▶️" : "⏸️"}</Button>
-  <Button onClick={() => setPlayerTime(false)} key="ArrowRight" showKeyBind={false} useShift disabled={$timeline.current === null}>⏩</Button>
+  <Button onClick={() => setPlayerTime(false)} key="ArrowRight" showKeyBind={false} useShift>⏩</Button>
 </div>

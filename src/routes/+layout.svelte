@@ -4,13 +4,12 @@
   import Timeline from "$lib/components/timeline/Timeline.svelte";
   import Export from "$lib/components/util/Export.svelte";
   import Controls from "$lib/components/player/Controls.svelte";
-  import Runtime from "$lib/components/player/Runtime.svelte";
   import InspectorWrapper from "$lib/components/media/InspectorWrapper.svelte";
   import Ghost from "$lib/components/util/Ghost.svelte";
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
-  import { mediaPool, studio, timeline, toasts } from "$lib/stores";
+  import { studio, draggable, toasts, audioContext, timeline } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
   import { crossfade } from "svelte/transition";
@@ -21,6 +20,8 @@
   import { loadFFmpeg } from "$lib/util/FFmpegManager";
   import { fly } from "svelte/transition";
   import "../app.css";
+  import TimelineTicks from "$lib/components/timeline/TimelineTicks.svelte";
+  import Scrubber from "$lib/components/timeline/Scrubber.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -29,25 +30,26 @@
 
   let editorWidth: number, editorHeight: number;
 
-  $: ghostPos = $studio.draggable.ghost.pos;
-  $: ghostSize = $studio.draggable.ghost.size;
+  let selectedMedia: string[] = [];
+  let dragIndex: number = -1;
+  let canCalcRuntime = false;
+  let timelineScroll = 0;
+
+  $: ghostPos = $draggable.ghost.pos;
+  $: ghostSize = $draggable.ghost.size;
 
   let isStudioLoaded = false;
   let preloadMessage = "loading...";
 
+  export const timingRules: ((arg0: number) => number)[] = [(runtime) => runtime / 3600, (runtime) => (runtime % 3600) / 60, (runtime) => runtime % 60];
+
   onMount(async () => {
     preloadMessage = "Loading audio context instance...";
-    $studio.audioContext = new AudioContext();
-
-    preloadMessage = "Checking media queries...";
+    $audioContext = new AudioContext();
 
     preloadMessage = "Checking media queries...";
     sizeQuery = matchMedia("(max-width: 768px), (max-height: 768px)").matches ? 0 : 1;
     touchModeQuery = matchMedia("(hover: none) and (pointer: coarse)").matches ? 0 : 1;
-
-    preloadMessage = "Loading FFmpeg...";
-    await loadFFmpeg();
-    isStudioLoaded = true;
 
     preloadMessage = "Loading FFmpeg...";
     await loadFFmpeg();
@@ -75,36 +77,35 @@
   const handleDrag = (e: MouseEvent) => {
     $studio.mouse = { x: e.clientX, y: e.clientY };
 
-    if (!$studio.draggable.origin?.pos) return;
+    if (!$draggable.origin) return;
 
-    if ($studio.draggable.event === "start") {
-      const dist = { x: e.clientX - $studio.draggable.origin.pos.x, y: e.clientY - $studio.draggable.origin.pos.y };
+    if ($draggable.event === "start") {
+      const dist = { x: e.clientX - $draggable.origin.pos.x, y: e.clientY - $draggable.origin.pos.y };
       if (Math.abs(dist.x) < 30 && Math.abs(dist.y) < 30) return;
 
-      $studio.draggable.event = "drag";
+      $draggable.event = "drag";
     }
 
-    if ($studio.draggable.current.region !== null) return;
+    if ($draggable.region !== null) return;
 
     ghostPos.set({ x: $studio.mouse.x, y: $studio.mouse.y });
     ghostSize.set({ width: 80, height: 45 });
   };
 
   const handleDrop = () => {
-    if (!$studio.draggable.mediaUUID) return;
-
-    $studio.draggable = {
-      mediaUUID: null,
+    $draggable = {
+      media: null,
       origin: null,
       event: null,
-      current: { region: null },
+      region: null,
       ghost: {
         pos: spring({ x: 0, y: 0 }),
         size: spring({ width: 0, height: 0 }),
       },
     };
 
-    $timeline.dragIndex = -1;
+    dragIndex = -1;
+    canCalcRuntime = false;
   };
 </script>
 
@@ -127,7 +128,7 @@
     <!-- Export Settings -->
     <Region class="col-span-2" innerClass="flex justify-between items-center p-4">
       <div class="flex">
-        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.exportName} />
+        <p contenteditable class="text-neutral-200 w-min font-mono" bind:innerText={$studio.name} />
         <p class="text-neutral-200 font-mono">.mp4</p>
       </div>
       <Export />
@@ -135,7 +136,7 @@
 
     <!-- Media Pool -->
     <Region innerClass="p-4">
-      <MediaPool />
+      <MediaPool bind:selected={selectedMedia} />
     </Region>
 
     <!-- Player -->
@@ -146,10 +147,10 @@
     </div>
 
     <!-- Inspector -->
-    {#if $mediaPool.selected.length}
+    {#if selectedMedia.length}
       <div class="relative z-10 row-start-2 col-start-3" transition:fly={{ x: "100%" }}>
         <Region>
-          <InspectorWrapper />
+          <InspectorWrapper selected={selectedMedia} />
         </Region>
       </div>
     {/if}
@@ -166,7 +167,17 @@
       </div>
 
       <div class="flex justify-end items-center">
-        <Runtime />
+        {#each timingRules as r, i}
+          <p class="text-neutral-200 font-mono">
+            {Math.floor(r($timeline.runtime)).toString().padStart(2, "0")}:
+          </p>
+        {/each}
+        <p class="text-neutral-200 font-mono">
+          {Math.round(($timeline.runtime % 1) * 1000)
+            .toString()
+            .padStart(3, "0")
+            .slice(0, 3)}
+        </p>
       </div>
     </Region>
 
@@ -175,11 +186,12 @@
       introduced with the repeated column.-->
     <!-- Timeline Container -->
     <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
-      <!-- Timeline Track List -->
-      <Region />
-      <!-- Timeline Container -->
-      <Region class="col-span-2" innerClass="p-4">
-        <Timeline />
+      <Region class="col-span-full" innerClass="p-4">
+        <section class="relative w-full h-full flex flex-col overflow-x-hidden">
+          <TimelineTicks scrollX={timelineScroll} bind:canCalcRuntime />
+          <Timeline bind:dragIndex bind:scrollX={timelineScroll} />
+          <Scrubber scrollX={timelineScroll} />
+        </section>
       </Region>
     </div>
   </main>
