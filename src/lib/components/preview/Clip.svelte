@@ -31,7 +31,6 @@
 
   onMount(() => clip.type !== "audio" && (clip.buffer = buffer));
 
-  // TODO:
   $: if (clip.type === "video" && $current.video.includes(clip.uuid)) {
     buffer = buffer as HTMLVideoElement;
     if (!$player.isPaused && buffer.paused) {
@@ -69,19 +68,14 @@
 
   const handleMove = (e: MouseEvent) => {
     if (isMove) {
+      // update timeline offset based on mouse position and clamp above 0
       clip.metadata.offset = Math.max(0, (e.clientX - initialX) / $secondWidth);
 
-      if (clip.linkUUID) {
-        if (clip.type === "audio") {
-          (<App.Clip>$timeline.clips.video[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.offset = clip.metadata.offset;
-        }
-
-        if (clip.type === "video") {
-          (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.offset = clip.metadata.offset;
-        }
-
-        $timeline.clips = $timeline.clips;
-      }
+      // get linked clip and update relevant properties
+      if (!clip.linkUUID) return;
+      const linkedClip = <App.Clip>$timeline.clips[clip.type === "audio" ? "video" : "audio"][clip.metadata.trackIdx].get(clip.linkUUID);
+      linkedClip.metadata.offset = clip.metadata.offset;
+      $timeline.clips = $timeline.clips;
 
       return;
     }
@@ -92,18 +86,12 @@
       // otherwise, clamp total runtime between the current start offset and the total duration of the clip
       else clip.metadata.runtime = Math.min(initialRuntime - (initialResizePosition - e.clientX) / $secondWidth, clip.metadata.duration - clip.metadata.start);
 
-      if (clip.linkUUID) {
-        if (clip.type === "audio") {
-          (<App.Clip>$timeline.clips.video[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.start = clip.metadata.start;
-          (<App.Clip>$timeline.clips.video[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.runtime = clip.metadata.runtime;
-        }
-        if (clip.type === "video") {
-          (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.start = clip.metadata.start;
-          (<App.Clip>$timeline.clips.audio[clip.metadata.trackIdx].get(clip.linkUUID)).metadata.runtime = clip.metadata.runtime;
-        }
-
-        $timeline.clips = $timeline.clips;
-      }
+      // get linked clip and update relevant properties
+      if (!clip.linkUUID) return;
+      const linkedClip = <App.Clip>$timeline.clips[clip.type === "audio" ? "video" : "audio"][clip.metadata.trackIdx].get(clip.linkUUID);
+      linkedClip.metadata.start = clip.metadata.start;
+      linkedClip.metadata.runtime = clip.metadata.runtime;
+      $timeline.clips = $timeline.clips;
     }
   };
 
@@ -113,6 +101,13 @@
       selected = [clip.uuid];
       let track = clip.type === "audio" ? $timeline.clips.audio[clip.metadata.trackIdx] : $timeline.clips.video[clip.metadata.trackIdx];
       clip.metadata.z = Math.max(...[...track.values()].map((clip) => clip.metadata.z)) + 1;
+
+      // get linked Clip and its corresponding track, and update z based on track
+      if (!clip.linkUUID) return;
+      track = clip.type === "audio" ? $timeline.clips.video[clip.metadata.trackIdx] : $timeline.clips.audio[clip.metadata.trackIdx];
+      const linkedClip = <App.Clip>$timeline.clips[clip.type === "audio" ? "video" : "audio"][clip.metadata.trackIdx].get(clip.linkUUID);
+      linkedClip.metadata.z = Math.max(...[...track.values()].map((clip) => clip.metadata.z)) + 1;
+      $timeline.clips = $timeline.clips;
     }
   };
 
