@@ -190,7 +190,7 @@
           <div
             style="left: {$timeline.runtime * $secondWidth - timelineScroll}px"
             class="absolute w-0.5 h-full top-1/2 transform -translate-y-1/2 bg-neutral-300 rounded-full pointer-events-none
-            before:absolute before:-top-2 before:left-1 before:w-3 before:h-3 before:rounded-full before:bg-neutral-300"
+            before:absolute before:-top-2 before:-left-[5px] before:w-3 before:h-3 before:rounded-full before:bg-neutral-300"
           />
         </section>
       </Region>
