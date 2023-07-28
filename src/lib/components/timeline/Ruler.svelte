@@ -2,10 +2,10 @@
   import { player, timeline, secondWidth } from "$lib/stores";
 
   export let scrollX: number;
-  export let canCalcRuntime: boolean = false;
 
   const timingRules: ((arg0: number) => number)[] = [(runtime) => runtime / 3600, (runtime) => (runtime % 3600) / 60, (runtime) => runtime % 60];
 
+  let canCalcRuntime: boolean = false;
   let width: number;
   let previousPauseState = true;
 
@@ -25,11 +25,12 @@
   $: if (!canCalcRuntime) $player.isPaused = previousPauseState;
 </script>
 
+<svelte:window on:mousemove={calcRuntime} on:mouseup={() => (canCalcRuntime = false)} />
+
 <div
   class="min-w-full h-8 flex select-none transition-none"
   style="width: {numSections * $secondWidth}px; transform: translateX({-scrollX % (width / numSections)}px);"
   bind:clientWidth={width}
-  on:mousemove={calcRuntime}
   on:mousedown={handleMouseDown}
 >
   {#each { length: numSections + 1 } as _, i}
