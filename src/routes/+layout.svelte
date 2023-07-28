@@ -30,7 +30,6 @@
   let editorWidth: number, editorHeight: number;
 
   let selectedMedia: string[] = [];
-  let canCalcRuntime = false;
   let timelineScroll = 0;
 
   $: ghostPos = $draggable.ghost.pos;
@@ -101,8 +100,6 @@
         size: spring({ width: 0, height: 0 }),
       },
     };
-
-    canCalcRuntime = false;
   };
 </script>
 
@@ -185,7 +182,7 @@
     <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
       <Region class="col-span-full" innerClass="p-4">
         <section class="relative w-full h-full flex flex-col overflow-x-hidden">
-          <TimelineTicks scrollX={timelineScroll} bind:canCalcRuntime />
+          <TimelineTicks scrollX={timelineScroll} />
           <Timeline bind:scrollX={timelineScroll} />
           <div
             style="left: {$timeline.runtime * $secondWidth - timelineScroll}px"
