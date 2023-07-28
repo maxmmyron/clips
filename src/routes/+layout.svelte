@@ -9,6 +9,7 @@
   import Region from "$lib/components/util/Region.svelte";
   import ScaleInput from "$lib/components/timeline/ScaleInput.svelte";
   import Toast from "$lib/components/util/Toast.svelte";
+  import Ruler from "$lib/components/timeline/Ruler.svelte";
   import { studio, draggable, toasts, audioContext, timeline, secondWidth } from "$lib/stores";
   import { spring } from "svelte/motion";
   import { flip } from "svelte/animate";
@@ -20,7 +21,6 @@
   import { loadFFmpeg } from "$lib/util/FFmpegManager";
   import { fly } from "svelte/transition";
   import "../app.css";
-  import TimelineTicks from "$lib/components/timeline/TimelineTicks.svelte";
 
   inject({ mode: dev ? "development" : "production" });
 
@@ -182,7 +182,7 @@
     <div class="grid grid-rows-1 grid-cols-[repeat(2,0.4975fr),1.618fr] gap-1 col-span-full row-start-4">
       <Region class="col-span-full" innerClass="p-4">
         <section class="relative w-full h-full flex flex-col overflow-x-hidden">
-          <TimelineTicks scrollX={timelineScroll} />
+          <Ruler scrollX={timelineScroll} />
           <Timeline bind:scrollX={timelineScroll} />
           <div
             style="left: {$timeline.runtime * $secondWidth - timelineScroll}px"
