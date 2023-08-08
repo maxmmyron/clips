@@ -36,7 +36,9 @@ declare global {
 			type: "audio";
 			src: string;
 			linkUUID: string | null;
-			metadata: ClipMetadata;
+			metadata: ClipMetadata & {
+				volume: number;
+			};
 		}
 
 		interface ImageClip {
