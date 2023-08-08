@@ -138,6 +138,10 @@
       if (media.type === "video") {
         const audioClip: App.AudioClip = {
           ...baseClip,
+          metadata: {
+            ...baseClip.metadata,
+            volume: 1,
+          },
           uuid: uuidv4(),
           type: "audio",
         };
@@ -166,6 +170,10 @@
           currTrackIdx
         ].set(uuid, {
           ...baseClip,
+          metadata: {
+            ...baseClip.metadata,
+            volume: 1,
+          },
           uuid,
           type: "audio",
         });
