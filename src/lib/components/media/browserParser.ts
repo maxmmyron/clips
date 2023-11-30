@@ -1,6 +1,6 @@
 export async function assertBrowserSupportsContainer(mimeType: string): Promise<boolean> {
     if(mimeType.includes("video") || mimeType.includes("audio")) return assertMediaContainerSupport(mimeType);
-    if(mimeType.includes("image")) return mimeType.includes("avif") ? await assertAVIFSupport(mimeType) : true;
+    if(mimeType.includes("image")) return mimeType.includes("avif") ? await assertImageContainerSupport(mimeType) : true;
     return false;
 }
 
